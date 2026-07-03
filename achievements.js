@@ -51,6 +51,10 @@ function checkAndUnlockAchievements() {
         const target = ach.reqValue;
 
         switch (ach.reqType) {
+            case "level_reach":
+                // Menyemak jika level semasa pemain di dalam localPlayerData mencukupi target
+                if ((Number(localPlayerData.level) || 0) >= target) conditionMet = true;
+                break;
             case "total_score":
                 if ((Number(localPlayerData.totalScore) || 0) >= target) conditionMet = true;
                 break;
