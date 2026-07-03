@@ -493,6 +493,9 @@ function checkMedalRequirement(reqType, reqValue) {
         case "hidden_secret":
             if (localPlayerData.foundSecret) conditionMet = true;
             break;
+        case "level_reach":
+            if ((Number(localPlayerData.level) || 0) >= target) conditionMet = true;
+            break;
         default:
             conditionMet = false;
     }
