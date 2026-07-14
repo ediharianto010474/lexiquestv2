@@ -3680,10 +3680,16 @@ function endGame() {
     // 3. Kira peratus markah
     const percentage = Math.round((score / totalQuestions) * 100);
 
-// ==========================================
-    // LOGIK SIMPAN MARKAH, XP & KOIN 💰 (TERKEMASKINI LTE BOOST)
-    // ==========================================
-    
+// =========================================================================
+// LOGIK SIMPAN MARKAH, XP & KOIN 💰 (VERSI STABIL - CEGAH RESET DATA)
+// =========================================================================
+
+// 🚫 SISTEM PENGHALANG (SAFEGUARD): Sekat simpanan jika data murid belum sedia/kosong
+if (typeof localPlayerData === 'undefined' || !localPlayerData.name) {
+    console.error("⚠️ RALAT KRITIKAL: Data pemain belum dimuatkan sepenuhnya! Rekod permainan TIDAK disimpan bagi mengelakkan data ter-reset.");
+    // Sila paparkan amaran kepada pengguna atau cuba muatkan semula data di sini
+} else {
+
     // 1. TAMBAHKAN PAI & BA KE DALAM ARRAY KESUKARAN
     const allMedium = [
         ...(typeof mathCategoryDifficulty !== 'undefined' ? mathCategoryDifficulty.medium : []),
@@ -3696,8 +3702,8 @@ function endGame() {
         ...(typeof moralCategoryDifficulty !== 'undefined' ? moralCategoryDifficulty.medium : []),
         ...(typeof psvCategoryDifficulty !== 'undefined' ? psvCategoryDifficulty.medium : []),
         ...(typeof rbtCategoryDifficulty !== 'undefined' ? rbtCategoryDifficulty.medium : []),
-        ...(typeof paiCategoryDifficulty !== 'undefined' ? paiCategoryDifficulty.medium : []), // TAMBAHAN PAI
-        ...(typeof baCategoryDifficulty !== 'undefined' ? baCategoryDifficulty.medium : [])  // TAMBAHAN BA
+        ...(typeof paiCategoryDifficulty !== 'undefined' ? paiCategoryDifficulty.medium : []), 
+        ...(typeof baCategoryDifficulty !== 'undefined' ? baCategoryDifficulty.medium : [])  
     ];
 
     const allHard = [
@@ -3711,8 +3717,8 @@ function endGame() {
         ...(typeof moralCategoryDifficulty !== 'undefined' ? moralCategoryDifficulty.hard : []),
         ...(typeof psvCategoryDifficulty !== 'undefined' ? psvCategoryDifficulty.hard : []),
         ...(typeof rbtCategoryDifficulty !== 'undefined' ? rbtCategoryDifficulty.hard : []),
-        ...(typeof paiCategoryDifficulty !== 'undefined' ? paiCategoryDifficulty.hard : []), // TAMBAHAN PAI
-        ...(typeof baCategoryDifficulty !== 'undefined' ? baCategoryDifficulty.hard : [])  // TAMBAHAN BA
+        ...(typeof paiCategoryDifficulty !== 'undefined' ? paiCategoryDifficulty.hard : []), 
+        ...(typeof baCategoryDifficulty !== 'undefined' ? baCategoryDifficulty.hard : [])  
     ];
 
     // Tentukan pengganda (multiplier) kesukaran
@@ -3748,7 +3754,7 @@ function endGame() {
         }
         
         // HALUAN B: Ganjaran Jenis Kumpul Hari (Login & Play)
-        if (currentActiveEvent.requiredAction === "login_and_play" && typeof localPlayerData !== 'undefined') {
+        if (currentActiveEvent.requiredAction === "login_and_play") {
             if (!localPlayerData.lte_attendance) localPlayerData.lte_attendance = {};
             if (!localPlayerData.lte_attendance[currentActiveEvent.name]) {
                 localPlayerData.lte_attendance[currentActiveEvent.name] = {};
@@ -3824,17 +3830,27 @@ function endGame() {
     // =======================================================
 
     // Kemas kini ke dalam akaun tempatan (Dompet Murid)
-    if (typeof localPlayerData !== 'undefined') {
-        localPlayerData.totalScore = (parseInt(localPlayerData.totalScore) || 0) + pointsEarned;
-        localPlayerData.xp = (parseInt(localPlayerData.xp) || 0) + pointsEarned; 
-        localPlayerData.coins = (parseInt(localPlayerData.coins) || 0) + coinsEarned;
+    localPlayerData.totalScore = (parseInt(localPlayerData.totalScore) || 0) + pointsEarned;
+    localPlayerData.xp = (parseInt(localPlayerData.xp) || 0) + pointsEarned; 
+    localPlayerData.coins = (parseInt(localPlayerData.coins) || 0) + coinsEarned;
+    
+    // 🔥 PEMBETULAN: Kemas kini jumlah koin yang pernah diperoleh sepanjang zaman
+    localPlayerData.totalCoinsEarned = (parseInt(localPlayerData.totalCoinsEarned) || 0) + coinsEarned;
 
-        // 🔥 PANGGIL FUNGSI REKOD KEHADIRAN LTE (FIRESTORE) DI SINI 🔥
-        if (typeof updateLteProgress === "function") {
-            updateLteProgress();
-            console.log("Merekod progres LTE ke Firebase...");
-        }
+    // 🔥 TAMBAHAN: Kira dan kemas kini Level murid secara dinamik (Contoh: Setiap 100 XP naik 1 Level)
+    const newLevel = Math.floor(localPlayerData.xp / 100) + 1;
+    if (newLevel !== localPlayerData.level) {
+        localPlayerData.level = newLevel;
+        console.log(`🎉 TAHNIAH! Murid naik ke Level ${newLevel}!`);
+    }
 
+    // 🔥 PANGGIL FUNGSI REKOD KEHADIRAN LTE (FIRESTORE) DI SINI 🔥
+    if (typeof updateLteProgress === "function") {
+        updateLteProgress();
+        console.log("Merekod progres LTE ke Firebase...");
+    }
+} // <--- PENUTUP SINTAKS UNTUK BLOK SAFEGUARD YANG SEBELUM INI HILANG
+	
 // 🔥 MULTI-LEADERBOARD: SIMPAN XP MENGIKUT SUBJEK
         let currentType = (typeof currentGameType !== 'undefined' && currentGameType !== "") ? currentGameType.toLowerCase() : "";
 
