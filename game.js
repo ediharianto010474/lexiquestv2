@@ -3849,7 +3849,6 @@ if (typeof localPlayerData === 'undefined' || !localPlayerData.name) {
         updateLteProgress();
         console.log("Merekod progres LTE ke Firebase...");
     }
-} // <--- PENUTUP SINTAKS UNTUK BLOK SAFEGUARD YANG SEBELUM INI HILANG
 	
 // 🔥 MULTI-LEADERBOARD: SIMPAN XP MENGIKUT SUBJEK
         let currentType = (typeof currentGameType !== 'undefined' && currentGameType !== "") ? currentGameType.toLowerCase() : "";
