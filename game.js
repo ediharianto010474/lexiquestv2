@@ -3849,77 +3849,103 @@ if (typeof localPlayerData === 'undefined' || !localPlayerData.name) {
         updateLteProgress();
         console.log("Merekod progres LTE ke Firebase...");
     }
-	
-// 🔥 MULTI-LEADERBOARD: SIMPAN XP MENGIKUT SUBJEK
-        let currentType = (typeof currentGameType !== 'undefined' && currentGameType !== "") ? currentGameType.toLowerCase() : "";
+    
+    // 🔥 MULTI-LEADERBOARD: SIMPAN XP MENGIKUT SUBJEK
+    let currentType = (typeof currentGameType !== 'undefined' && currentGameType !== "") ? currentGameType.toLowerCase() : "";
 
-        const senaraiSubjekMaju = [
-            { field: 'score_matematik', label: 'Matematik', list: typeof mathCategoryDifficulty !== 'undefined' ? [...mathCategoryDifficulty.easy, ...mathCategoryDifficulty.medium, ...mathCategoryDifficulty.hard] : [] },
-            { field: 'score_english',   label: 'English',   list: typeof englishCategoryDifficulty !== 'undefined' ? [...englishCategoryDifficulty.easy, ...englishCategoryDifficulty.medium, ...englishCategoryDifficulty.hard] : [] },
-            { field: 'score_sains',     label: 'Sains',     list: typeof scienceCategoryDifficulty !== 'undefined' ? [...scienceCategoryDifficulty.easy, ...scienceCategoryDifficulty.medium, ...scienceCategoryDifficulty.hard] : [] },
-            { field: 'score_bm',        label: 'BM',        list: typeof bmCategoryDifficulty !== 'undefined' ? [...bmCategoryDifficulty.easy, ...bmCategoryDifficulty.medium, ...bmCategoryDifficulty.hard] : [] },
-            { field: 'score_sejarah',   label: 'Sejarah',   list: typeof sejarahCategoryDifficulty !== 'undefined' ? [...sejarahCategoryDifficulty.easy, ...sejarahCategoryDifficulty.medium, ...sejarahCategoryDifficulty.hard] : [] },
-            { field: 'score_pjk',       label: 'PJK',       list: typeof kesihatanCategoryDifficulty !== 'undefined' ? [...kesihatanCategoryDifficulty.easy, ...kesihatanCategoryDifficulty.medium, ...kesihatanCategoryDifficulty.hard] : [] },
-            { field: 'score_muzik',     label: 'Muzik',     list: typeof muzikCategoryDifficulty !== 'undefined' ? [...muzikCategoryDifficulty.easy, ...muzikCategoryDifficulty.medium, ...muzikCategoryDifficulty.hard] : [] },
-            { field: 'score_moral',     label: 'Moral',     list: typeof moralCategoryDifficulty !== 'undefined' ? [...moralCategoryDifficulty.easy, ...moralCategoryDifficulty.medium, ...moralCategoryDifficulty.hard] : [] },
-            { field: 'score_psv',       label: 'PSV',       list: typeof psvCategoryDifficulty !== 'undefined' ? [...psvCategoryDifficulty.easy, ...psvCategoryDifficulty.medium, ...psvCategoryDifficulty.hard] : [] },
-            { field: 'score_rbt',       label: 'RBT',       list: typeof rbtCategoryDifficulty !== 'undefined' ? [...rbtCategoryDifficulty.easy, ...rbtCategoryDifficulty.medium, ...rbtCategoryDifficulty.hard] : [] },
-            
-            // 🟢 TAMBAHAN BAHARU UNTUK PAI & BA 🟢
-            { field: 'score_pai',       label: 'PAI',       list: typeof paiCategoryDifficulty !== 'undefined' ? [...paiCategoryDifficulty.easy, ...paiCategoryDifficulty.medium, ...paiCategoryDifficulty.hard] : [] },
-            { field: 'score_ba',        label: 'B.Arab',    list: typeof baCategoryDifficulty !== 'undefined' ? [...baCategoryDifficulty.easy, ...baCategoryDifficulty.medium, ...baCategoryDifficulty.hard] : [] }
-        ];
-
-        let padananSubjek = senaraiSubjekMaju.find(subjek => subjek.list.includes(currentType));
-
-        if (padananSubjek) {
-            localPlayerData[padananSubjek.field] = (parseInt(localPlayerData[padananSubjek.field]) || 0) + pointsEarned;
-            console.log(`➕ Tambah ${pointsEarned} XP ${padananSubjek.label}. Jumlah: ${localPlayerData[padananSubjek.field]}`);
-        } else {
-            // Backup kecemasan (jika ada subjek lama yang belum dipetakan)
-            console.log("⚠️ Kategori tidak dijumpai dalam senaraiSubjekMaju:", currentType);
-            // Anda boleh buang baris 'score_english' jika tidak mahu ia masuk ke English secara rawak
-        }
-
-        // Hujung minggu checker
-        const todayDay = new Date().getDay();
-        if (todayDay === 0 || todayDay === 6) {
-            localPlayerData.hasPlayedWeekend = true;
-        }
-
-        // 🏆 SIMPAN MARKAH TERTINGGI (HIGH SCORE) KATEGORI (Asal)
-        if (!localPlayerData.games) localPlayerData.games = {}; 
+    const senaraiSubjekMaju = [
+        { field: 'score_matematik', label: 'Matematik', list: typeof mathCategoryDifficulty !== 'undefined' ? [...mathCategoryDifficulty.easy, ...mathCategoryDifficulty.medium, ...mathCategoryDifficulty.hard] : [] },
+        { field: 'score_english',   label: 'English',   list: typeof englishCategoryDifficulty !== 'undefined' ? [...englishCategoryDifficulty.easy, ...englishCategoryDifficulty.medium, ...englishCategoryDifficulty.hard] : [] },
+        { field: 'score_sains',     label: 'Sains',     list: typeof scienceCategoryDifficulty !== 'undefined' ? [...scienceCategoryDifficulty.easy, ...scienceCategoryDifficulty.medium, ...scienceCategoryDifficulty.hard] : [] },
+        { field: 'score_bm',        label: 'BM',        list: typeof bmCategoryDifficulty !== 'undefined' ? [...bmCategoryDifficulty.easy, ...bmCategoryDifficulty.medium, ...bmCategoryDifficulty.hard] : [] },
+        { field: 'score_sejarah',   label: 'Sejarah',   list: typeof sejarahCategoryDifficulty !== 'undefined' ? [...sejarahCategoryDifficulty.easy, ...sejarahCategoryDifficulty.medium, ...sejarahCategoryDifficulty.hard] : [] },
+        { field: 'score_pjk',       label: 'PJK',       list: typeof kesihatanCategoryDifficulty !== 'undefined' ? [...kesihatanCategoryDifficulty.easy, ...kesihatanCategoryDifficulty.medium, ...kesihatanCategoryDifficulty.hard] : [] },
+        { field: 'score_muzik',     label: 'Muzik',     list: typeof muzikCategoryDifficulty !== 'undefined' ? [...muzikCategoryDifficulty.easy, ...muzikCategoryDifficulty.medium, ...muzikCategoryDifficulty.hard] : [] },
+        { field: 'score_moral',     label: 'Moral',     list: typeof moralCategoryDifficulty !== 'undefined' ? [...moralCategoryDifficulty.easy, ...moralCategoryDifficulty.medium, ...moralCategoryDifficulty.hard] : [] },
+        { field: 'score_psv',       label: 'PSV',       list: typeof psvCategoryDifficulty !== 'undefined' ? [...psvCategoryDifficulty.easy, ...psvCategoryDifficulty.medium, ...psvCategoryDifficulty.hard] : [] },
+        { field: 'score_rbt',       label: 'RBT',       list: typeof rbtCategoryDifficulty !== 'undefined' ? [...rbtCategoryDifficulty.easy, ...rbtCategoryDifficulty.medium, ...rbtCategoryDifficulty.hard] : [] },
         
-        let catName = (typeof currentGameType !== 'undefined' && currentGameType !== "") ? currentGameType : "missing";
-        let currentBest = localPlayerData.games[catName] || 0;
-        
-        if (typeof currentBest === 'object') {
-            currentBest = parseInt(currentBest.score || currentBest.best || currentBest.mark || 0);
-        } else {
-            currentBest = parseInt(currentBest) || 0;
-        }
+        // 🟢 TAMBAHAN BAHARU UNTUK PAI & BA 🟢
+        { field: 'score_pai',       label: 'PAI',       list: typeof paiCategoryDifficulty !== 'undefined' ? [...paiCategoryDifficulty.easy, ...paiCategoryDifficulty.medium, ...paiCategoryDifficulty.hard] : [] },
+        { field: 'score_ba',        label: 'B.Arab',    list: typeof baCategoryDifficulty !== 'undefined' ? [...baCategoryDifficulty.easy, ...baCategoryDifficulty.medium, ...baCategoryDifficulty.hard] : [] }
+    ];
 
-        if (score > currentBest) {
-            localPlayerData.games[catName] = score;
-            console.log(`⭐ Markah tertinggi baru untuk ${catName}: ${score}`);
-        }
+    let padananSubjek = senaraiSubjekMaju.find(subjek => subjek.list.includes(currentType));
 
-        // Simpan Data ke LocalStorage
-        localStorage.setItem('currentPlayer', JSON.stringify(localPlayerData));
-        
-        // Hantar Data ke Cloud & Kemaskini UI
-        if (typeof saveCloudPlayerData === 'function') saveCloudPlayerData();
-        if (typeof updateUI === 'function') updateUI();
-        if (typeof updateJulyLteCardUI === 'function') updateJulyLteCardUI();
-    } // <-- Kurungan penutup localPlayerData diletakkan di sini dengan selamat
+    if (padananSubjek) {
+        localPlayerData[padananSubjek.field] = (parseInt(localPlayerData[padananSubjek.field]) || 0) + pointsEarned;
+        console.log(`➕ Tambah ${pointsEarned} XP ${padananSubjek.label}. Jumlah: ${localPlayerData[padananSubjek.field]}`);
+    } else {
+        // Backup kecemasan (jika ada subjek lama yang belum dipetakan)
+        console.log("⚠️ Kategori tidak dijumpai dalam senaraiSubjekMaju:", currentType);
+        // Anda boleh buang baris 'score_english' jika tidak mahu ia masuk ke English secara rawak
+    }
 
-    // 🎥 CCTV TRACKER (Rekod syiling yang telah di-boost)
+    // Hujung minggu checker
+    const todayDay = new Date().getDay();
+    if (todayDay === 0 || todayDay === 6) {
+        localPlayerData.hasPlayedWeekend = true;
+    }
+
+    // 🏆 SIMPAN MARKAH TERTINGGI (HIGH SCORE) KATEGORI (Asal)
+    if (!localPlayerData.games) localPlayerData.games = {}; 
+    
+    let catName = (typeof currentGameType !== 'undefined' && currentGameType !== "") ? currentGameType : "missing";
+    let currentBest = localPlayerData.games[catName] || 0;
+    
+    if (typeof currentBest === 'object') {
+        currentBest = parseInt(currentBest.score || currentBest.best || currentBest.mark || 0);
+    } else {
+        currentBest = parseInt(currentBest) || 0;
+    }
+
+    if (score > currentBest) {
+        localPlayerData.games[catName] = score;
+        console.log(`⭐ Markah tertinggi baru untuk ${catName}: ${score}`);
+    }
+
+    // Simpan Data ke LocalStorage
+    localStorage.setItem('currentPlayer', JSON.stringify(localPlayerData));
+    
+    // Hantar Data ke Cloud & Kemaskini UI
+    if (typeof saveCloudPlayerData === 'function') saveCloudPlayerData();
+    if (typeof updateUI === 'function') updateUI();
+    if (typeof updateJulyLteCardUI === 'function') updateJulyLteCardUI();
+
+    // =======================================================
+    // 📢 NOTIFIKASI UI (DITAMBAH DI SINI)
+    // =======================================================
+    let mesejNotifikasi = `Tahniah! Anda berjaya mengumpul ${pointsEarned} XP dan ${coinsEarned} Koin.`;
+    
+    // Tambah mesej bonus jika ada event LTE sedang berjalan
+    if (dipengaruhiLTE && jenisBoost !== "") {
+        mesejNotifikasi += `\n\n🎉 BONUS ACARA: ${jenisBoost}`;
+    }
+
+    // Paparkan notifikasi 
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Selesai!',
+            text: mesejNotifikasi,
+            icon: 'success',
+            confirmButtonText: 'Teruskan',
+            confirmButtonColor: '#3085d6'
+        });
+    } else {
+        alert(mesejNotifikasi);
+    }
+
+    // =======================================================
+    // 🎥 CCTV TRACKER (DIPINDAHKAN KE SINI AGAR TIDAK RALAT)
+    // =======================================================
     if (window.Trackers) {
         let isPerfect = (score === totalQuestions && totalQuestions > 0); 
         let catNameForTracker = (typeof currentGameType !== 'undefined' && currentGameType !== "") ? currentGameType : "unknown_game";
         Trackers.rekodTamatGame(catNameForTracker, score, isPerfect);
         Trackers.rekodKoinDapat(coinsEarned); 
     }
+
+}
 
     // 🎯 REKOD BUKU LOG KE FIREBASE
     try {
