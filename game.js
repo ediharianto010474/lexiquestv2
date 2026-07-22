@@ -3829,19 +3829,31 @@ if (typeof localPlayerData === 'undefined' || !localPlayerData.name) {
     }
     // =======================================================
 
-    // Kemas kini ke dalam akaun tempatan (Dompet Murid)
+// =======================================================
+    // 🛡️ KEMAS KINI AMAN (CEGAH RESET COINS & LEVEL)
+    // =======================================================
+    
+    // 1. SEMAKAN KESELAMATAN KETAT:
+    // Jika data coins atau xp tidak wujud di memori, BATALKAN simpanan serta-merta.
+    if (typeof localPlayerData.coins === 'undefined' || typeof localPlayerData.xp === 'undefined') {
+        console.error("⚠️ RALAT KRITIKAL: Data XP/Coins tempatan hilang! Simpanan dibatalkan untuk elak reset data.");
+        return; // Hentikan fungsi endGame() di sini supaya data di Firestore tidak terpadam
+    }
+
+    // 2. KEMAS KINI DOMPET MURID (DATA SAH):
     localPlayerData.totalScore = (parseInt(localPlayerData.totalScore) || 0) + pointsEarned;
     localPlayerData.xp = (parseInt(localPlayerData.xp) || 0) + pointsEarned; 
     localPlayerData.coins = (parseInt(localPlayerData.coins) || 0) + coinsEarned;
-    
-    // 🔥 PEMBETULAN: Kemas kini jumlah koin yang pernah diperoleh sepanjang zaman
     localPlayerData.totalCoinsEarned = (parseInt(localPlayerData.totalCoinsEarned) || 0) + coinsEarned;
 
-    // 🔥 TAMBAHAN: Kira dan kemas kini Level murid secara dinamik (Contoh: Setiap 100 XP naik 1 Level)
-    const newLevel = Math.floor(localPlayerData.xp / 100) + 1;
-    if (newLevel !== localPlayerData.level) {
-        localPlayerData.level = newLevel;
-        console.log(`🎉 TAHNIAH! Murid naik ke Level ${newLevel}!`);
+    // 3. PENGIRAAN LEVEL SELAMAT:
+    // Memastikan Level murid HANYA BOLEH NAIK, dan tidak akan pernah turun balik ke Level 1.
+    const calculatedLevel = Math.floor(localPlayerData.xp / 100) + 1;
+    const currentLevel = parseInt(localPlayerData.level) || 1;
+
+    if (calculatedLevel > currentLevel) {
+        localPlayerData.level = calculatedLevel;
+        console.log(`🎉 TAHNIAH! Murid naik ke Level ${calculatedLevel}!`);
     }
 
     // 🔥 PANGGIL FUNGSI REKOD KEHADIRAN LTE (FIRESTORE) DI SINI 🔥
