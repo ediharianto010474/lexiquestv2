@@ -314,6 +314,7 @@ async function processShopPurchase(itemID, itemName, price, purchaseType = 'self
             itemName: itemName,
             status: "Belum Dituntut",
             shopType: purchaseType === 'gift' ? "Gift Shop" : "Edu Shop",
+            school: localPlayerData.school || 'SK_DEFAULT',
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
