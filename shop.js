@@ -299,10 +299,18 @@ async function processShopPurchase(itemID, itemName, price, purchaseType = 'self
             totalSpent: firebase.firestore.FieldValue.increment(finalPrice)
         });
 
-        // Potong stok barang
-        await db.collection("eduItems").doc(itemID).update({
-            stock: firebase.firestore.FieldValue.increment(-1)
-        });
+        // Potong stok barang di Firestore
+await db.collection("eduItems").doc(itemID).update({
+    stock: firebase.firestore.FieldValue.increment(-1)
+});
+
+// 💡 KEMAS KINI STOK DALAM CACHE TEMPATAN (Supaya UI paparkan stok baharu serta-merta)
+if (typeof shopCacheTemp !== 'undefined' && shopCacheTemp.dataPenuh) {
+    const itemDalamCache = shopCacheTemp.dataPenuh.find(i => i.id === itemID);
+    if (itemDalamCache) {
+        itemDalamCache.stock = Math.max(0, itemDalamCache.stock - 1);
+    }
+}
 
         // 4. DAFTARKAN KOD PENEBUSAN KE KOLEKSI UTAMA 'claims'
         await db.collection("claims").add({
