@@ -141,9 +141,9 @@ function prosesMasukLobi3v3() {
 
         function extractDifficulty(diffObject) {
             if (typeof diffObject !== 'undefined' && diffObject) {
-                if (diffObject.easy) allEasyCats.push(...diffObject.easy.map(c => c.toLowerCase()));
-                if (diffObject.medium) allMedCats.push(...diffObject.medium.map(c => c.toLowerCase()));
-                if (diffObject.hard) allHardCats.push(...diffObject.hard.map(c => c.toLowerCase()));
+                if (diffObject.easy) allEasyCats.push(...diffObject.easy.map(canonicalCategoryName));
+                if (diffObject.medium) allMedCats.push(...diffObject.medium.map(canonicalCategoryName));
+                if (diffObject.hard) allHardCats.push(...diffObject.hard.map(canonicalCategoryName));
             }
         }
 
@@ -162,11 +162,10 @@ function prosesMasukLobi3v3() {
         // 🕌 🇸🇦 TAMBAHAN PAI & BAHASA ARAB DI SINI
         extractDifficulty(typeof paiCategoryDifficulty !== 'undefined' ? paiCategoryDifficulty : undefined);
         extractDifficulty(typeof baCategoryDifficulty !== 'undefined' ? baCategoryDifficulty : undefined);
-        extractDifficulty(typeof arabicCategoryDifficulty !== 'undefined' ? arabicCategoryDifficulty : undefined);
 
         // 🛡️ PELAN SANDARAN KESELAMATAN (HARDCODE FALLBACK)
-        const fallbackEasy = ['missing', 'spelling', 'plural', 'gendernouns', 'occupation', 'number_recognition', 'addition', 'subtraction', 'kata_nama', 'mufrodat', 'arqam', 'alquran', 'jawi', 'aqidah', 'pengenalan_ilmu_sejarah', 'keselamatan_bengkel', 'unsur_seni', 'notasi_dan_balar', 'kepercayaan_kepada_tuhan', 'gimnastik_asas'];
-        const fallbackMed = ['puzzle', 'guessing', 'pasttense', 'superlatives', 'synonym', 'antonym', 'multiplication', 'division', 'time_and_money', 'simpulan_bahasa', 'hiwar', 'ibadah', 'sirah', 'zaman_air_batu', 'kerajaan_melayu_awal', 'asas_reka_bentuk', 'prinsip_rekaan', 'apresiasi_muzik', 'baik_hati', 'bertanggungjawab', 'olahraga_asas'];
+        const fallbackEasy = ['missing', 'spelling', 'plural', 'gendernouns', 'occupations', 'number_recognition', 'addition_basic', 'subtraction_basic', 'kata_nama', 'mufrodat', 'arqam', 'alquran', 'jawi', 'aqidah', 'pengenalan_ilmu_sejarah', 'keselamatan_bengkel', 'unsur_seni', 'notasi_dan_balar', 'kepercayaan_kepada_tuhan', 'gimnastik_asas'];
+        const fallbackMed = ['puzzle', 'guessing', 'pasttense', 'superlatives', 'synonym', 'antonym', 'multiplication_table', 'division_basic', 'money_matters', 'simpulan_bahasa', 'hiwar', 'ibadah', 'sirah', 'zaman_air_batu', 'kerajaan_melayu_awal', 'asas_reka_bentuk', 'prinsip_rekaan', 'apresiasi_muzik', 'baik_hati', 'bertanggungjawab', 'olahraga_asas'];
         const fallbackHard = ['grammar', 'architect', 'idioms', 'listening', 'speaking', 'fraction_and_decimal', 'area_and_perimeter', 'susunan_songsang', 'pemahaman', 'qawaid', 'akhlak', 'tokoh_terbilang', 'reka_bentuk_pembungkusan', 'asas_pertanian', 'menggambar', 'kraf_tradisional', 'nyanyian', 'keadilan', 'toleransi', 'pertolongan_cemas', 'kesihatan_diri'];
         
         allEasyCats.push(...fallbackEasy);
@@ -178,6 +177,11 @@ function prosesMasukLobi3v3() {
         // ---------------------------------------------------------
         // 8. Semak Markah di dalam studentInfo.games
         // ---------------------------------------------------------
+        // Normalisasi nama kategori lama -> nama kategori semasa.
+        // Ini membolehkan data v2/legacy terus dibaca tanpa menukar rekod Firebase.
+        // Nama kategori lama disokong melalui canonicalCategoryName().
+        // Tiada salinan alias tempatan diperlukan di sini.
+
         if (studentInfo.games) {
             // Tukar semua kunci subjek ke huruf kecil supaya mudah dipadankan
             const normalizedGames = {};
@@ -185,19 +189,20 @@ function prosesMasukLobi3v3() {
                 normalizedGames[key.toLowerCase()] = studentInfo.games[key];
             }
 
+            // Bentuk indeks canonical supaya data lama seperti 'occupation'
+            // tetap dipadankan dengan kategori semasa 'occupations'.
+            const canonicalGames = {};
+            Object.keys(normalizedGames).forEach(key => {
+                canonicalGames[canonicalCategoryName(key)] = normalizedGames[key];
+            });
+
             // Fungsi pengiraan untuk setiap aras
             function checkScore(subjectArray) {
                 let count = 0;
-                // Gunakan Set untuk buang nama kategori yang berulang (duplicate)
-                const uniqueSubjects = [...new Set(subjectArray)]; 
-                
+                const uniqueSubjects = [...new Set(subjectArray.map(canonicalCategoryName))];
                 uniqueSubjects.forEach(subject => {
-                    const gameData = normalizedGames[subject.toLowerCase()];
-                    if (gameData !== undefined) {
-                        // Semak kalau format Objek {highScore: x} atau Nombor bulat
-                        let score = (typeof gameData === 'object' && gameData !== null) ? (Number(gameData.highScore) || 0) : (Number(gameData) || 0);
-                        if (score >= 35) count++;
-                    }
+                    const gameData = canonicalGames[canonicalCategoryName(subject)];
+                    if (gameData !== undefined && getNormalizedScore(gameData) >= 35) count++;
                 });
                 return count;
             }
@@ -407,6 +412,7 @@ isGanjaranDisimpan = false;
         };
 
         await lobiBaruRef.set(dataLobi);
+        sessionStorage.setItem('slotPemainSemasa', 'A1');
         Swal.close();
         masukBilik(lobiBaruRef.key); // Gunakan .key untuk RTDB
 
@@ -474,22 +480,29 @@ window.pilihLobi = pilihLobi;
 // 🔥 FASA 3: FUNGSI DALAM BILIK (LIVE SYNC & JOIN)
 // ==========================================
 
-let pemantauBilik = null; // Untuk memastikan skrin "live"
+let pemantauBilik = null; // Callback RTDB bilik aktif
+let refBilikAktif = null; // Reference RTDB bilik aktif
 let timerBanningAktif = false; // KOD BARU: Untuk elak popup bertindih
 
 // FUNGSI 1: MASUK BILIK & HIDUPKAN "LIVE SYNC" (SUIS PAPARAN RTDB)
 function masukBilik(lobiId) {
-    // Matikan pemantau bilik lama jika ada sebelum masuk bilik baru
-    if (lobiAktifSemasa) {
-        firebase.database().ref('arena_lobbies/' + lobiAktifSemasa).off();
+    // Matikan listener bilik lama dengan callback yang tepat.
+    if (refBilikAktif && pemantauBilik) {
+        refBilikAktif.off('value', pemantauBilik);
     }
+    refBilikAktif = firebase.database().ref('arena_lobbies/' + lobiId);
     lobiAktifSemasa = lobiId;
 
-    // Pantau perubahan dalam bilik ini secara Live menggunakan RTDB!
-    firebase.database().ref('arena_lobbies/' + lobiId).on('value', (snapshot) => {
+    // Pantau perubahan dalam bilik ini secara Live menggunakan RTDB.
+    pemantauBilik = refBilikAktif.on('value', (snapshot) => {
         if (!snapshot.exists()) {
+            if (refBilikAktif && pemantauBilik) refBilikAktif.off('value', pemantauBilik);
+            refBilikAktif = null;
+            pemantauBilik = null;
+            lobiAktifSemasa = null;
+            sessionStorage.removeItem('slotPemainSemasa');
             Swal.fire('Ralat', 'Bilik ini telah ditutup atau dimusnahkan.', 'error');
-            if (typeof kembaliKeSenaraiLobi === "function") kembaliKeSenaraiLobi(); 
+            if (typeof kembaliKeSenaraiLobi === "function") kembaliKeSenaraiLobi();
             return;
         }
         
@@ -663,11 +676,33 @@ function masukBilik(lobiId) {
                 });
             }
             
+            // Jangan percaya slot daripada sessionStorage secara membuta tuli.
+            // Sahkan slot masih milik pemain semasa dalam data RTDB.
+            const slotValid = slotPemain && (
+                (lobi.teamA?.[slotPemain]?.name === studentInfo.name) ||
+                (lobi.teamB?.[slotPemain]?.name === studentInfo.name)
+            );
+
+            if (!slotValid) {
+                slotPemain = null;
+                sessionStorage.removeItem('slotPemainSemasa');
+                for (const team of ['teamA', 'teamB']) {
+                    for (const slot of ['A1','A2','A3','B1','B2','B3']) {
+                        if (lobi[team]?.[slot]?.name === studentInfo.name) {
+                            slotPemain = slot;
+                            sessionStorage.setItem('slotPemainSemasa', slot);
+                            break;
+                        }
+                    }
+                    if (slotPemain) break;
+                }
+            }
+
             if (slotPemain) {
-                kemaskiniPaparanBattle(lobi, lobiId, slotPemain); 
+                kemaskiniPaparanBattle(lobi, lobiId, slotPemain);
             } else {
-                console.error("Ralat: Masih tak jumpa slot! Guna A1 sebagai percubaan akhir.");
-                kemaskiniPaparanBattle(lobi, lobiId, 'A1'); 
+                console.error('Ralat: Slot pemain tidak ditemui dalam lobi semasa.');
+                Swal.fire('Ralat Slot', 'Slot pemain tidak dapat disahkan. Sila keluar dan masuk semula ke arena.', 'error');
             }
             
         } 
@@ -816,22 +851,52 @@ function kemaskiniPaparanBilik(lobi, lobiId) {
 }
 
 // FUNGSI 3: TEKAN SLOT UNTUK MASUK (RTDB)
-function sertaiSlotKosong(slotId, lobiId) {
+async function sertaiSlotKosong(slotId, lobiId) {
     const team = slotId.startsWith('A') ? 'teamA' : 'teamB';
-    
-    // 🔥 TAMBAH BARIS INI: Simpan memori kerusi peribadi peranti ini
-    sessionStorage.setItem('slotPemainSemasa', slotId); 
-    
-    // Guna slash '/' untuk nested update di RTDB
-    firebase.database().ref('arena_lobbies/' + lobiId).update({
-        [`${team}/${slotId}`]: {
-            name: studentInfo.name,
-            level: studentInfo.level,
-            avatar: studentInfo.activeAvatar || `https://ui-avatars.com/api/?name=${studentInfo.name}&background=random`
+    const lobbyRef = firebase.database().ref(`arena_lobbies/${lobiId}`);
+
+    try {
+        const snapshot = await lobbyRef.once('value');
+        if (!snapshot.exists()) throw new Error('Bilik tidak lagi wujud.');
+        const lobi = snapshot.val() || {};
+
+        if (lobi.status !== 'menunggu') {
+            Swal.fire('Tidak dapat menyertai', 'Bilik sudah memulakan perlawanan.', 'warning');
+            return;
         }
-    }).catch(err => {
+
+        // Elakkan seorang pemain mengambil lebih daripada satu slot.
+        for (const t of ['teamA', 'teamB']) {
+            for (const slot of ['A1','A2','A3','B1','B2','B3']) {
+                if (lobi[t]?.[slot]?.name === studentInfo.name) {
+                    Swal.fire('Sudah berada dalam bilik', 'Anda sudah mempunyai slot dalam bilik ini.', 'info');
+                    sessionStorage.setItem('slotPemainSemasa', slot);
+                    return;
+                }
+            }
+        }
+
+        const slotRef = lobbyRef.child(`${team}/${slotId}`);
+        const result = await slotRef.transaction(current => {
+            // Transaksi menghalang dua pemain mengambil slot yang sama serentak.
+            if (current !== null) return;
+            return {
+                name: studentInfo.name,
+                level: Number(studentInfo.level) || 0,
+                avatar: studentInfo.activeAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(studentInfo.name)}&background=random`
+            };
+        });
+
+        if (!result.committed) {
+            Swal.fire('Slot telah diambil', 'Pemain lain baru sahaja mengambil slot tersebut.', 'warning');
+            return;
+        }
+
+        sessionStorage.setItem('slotPemainSemasa', slotId);
+    } catch (err) {
+        console.error('Ralat menyertai slot:', err);
         Swal.fire('Ralat', 'Gagal menyertai slot: ' + err.message, 'error');
-    });
+    }
 }
 
 // FUNGSI 4: TUKAR NAMA PASUKAN (RTDB)
@@ -857,6 +922,10 @@ async function tukarNamaPasukan(teamField, lobiId) {
 // ==========================================
 async function tinggalkanBilik() {
     if (!lobiAktifSemasa) {
+        if (refBilikAktif && pemantauBilik) refBilikAktif.off('value', pemantauBilik);
+        refBilikAktif = null;
+        pemantauBilik = null;
+        sessionStorage.removeItem('slotPemainSemasa');
         kembaliKeSenaraiLobi();
         return;
     }
@@ -889,10 +958,26 @@ async function tinggalkanBilik() {
             });
             
             if (Object.keys(kemaskiniSlot).length > 0) {
+                if (data.status === 'banning' || data.status === 'picking') {
+                    kemaskiniSlot.status = 'menunggu';
+                    kemaskiniSlot.turnOrder = null;
+                    kemaskiniSlot.turnIndex = null;
+                    kemaskiniSlot.currentTurn = null;
+                    kemaskiniSlot.banningPool = null;
+                    kemaskiniSlot.bans = null;
+                    kemaskiniSlot.picks = null;
+                }
                 await lobiRef.update(kemaskiniSlot);
             }
         }
         
+        // Hentikan listener bilik supaya perubahan lobi lama tidak terus mengubah UI.
+        if (refBilikAktif && pemantauBilik) refBilikAktif.off('value', pemantauBilik);
+        refBilikAktif = null;
+        pemantauBilik = null;
+        lobiAktifSemasa = null;
+        sessionStorage.removeItem('slotPemainSemasa');
+
         Swal.close();
         kembaliKeSenaraiLobi(); 
         
@@ -1112,39 +1197,54 @@ function kemaskiniPaparanBanning(lobi, lobiId) {
 
 // FUNGSI APABILA PEMAIN KLIK PADA KAD SUBJEK UNTUK DISINGKIRKAN
 async function jalankanAksiBan(subjekId, slotSaya, lobi, lobiId) {
-    const teamSaya = slotSaya.startsWith('A') ? 'teamA' : 'teamB';
-    const objekSubjek = lobi.banningPool.find(s => s.id === subjekId);
-    
-    // Pastikan tatasusunan (array) ban sedia ada wujud sebelum push
-    let senaraiBanBaru = lobi.bans && lobi.bans[teamSaya] ? [...lobi.bans[teamSaya]] : [];
-    senaraiBanBaru.push(objekSubjek);
-
-    const indeksSeterusnya = lobi.turnIndex + 1;
-    const susunanGiliran = lobi.turnOrder;
-
-    let updateData = {};
-    updateData[`bans/${teamSaya}`] = senaraiBanBaru; // Cara RTDB kemaskini objek bersarang
-    updateData[`turnIndex`] = indeksSeterusnya;
-
-    if (indeksSeterusnya >= susunanGiliran.length) {
-        updateData['status'] = "picking"; 
-        updateData['currentTurn'] = susunanGiliran[0]; 
-        
-        Swal.fire({
-            title: 'FASA BANNING TAMAT!',
-            text: 'Bersedia untuk memilih subjek perlawanan anda!',
-            icon: 'success',
-            timer: 3000,
-            showConfirmButton: false,
-            background: '#1e293b',
-            color: '#fff'
-        });
-    } else {
-        updateData['currentTurn'] = susunanGiliran[indeksSeterusnya];
+    // UI bukan lapisan keselamatan: semak giliran sekali lagi sebelum menulis ke RTDB.
+    if (!lobi || lobi.status !== 'banning') return;
+    if (lobi.currentTurn !== slotSaya) {
+        Swal.fire('Belum giliran', 'Sila tunggu giliran anda.', 'info');
+        return;
     }
 
-    // Hantar data dikemaskini ke RTDB
-    await firebase.database().ref('arena_lobbies/' + lobiId).update(updateData);
+    const teamSaya = slotSaya.startsWith('A') ? 'teamA' : 'teamB';
+    if (!lobi[teamSaya]?.[slotSaya] || lobi[teamSaya][slotSaya].name !== studentInfo?.name) {
+        Swal.fire('Slot Tidak Sah', 'Slot pemain tidak sepadan dengan akaun semasa.', 'warning');
+        return;
+    }
+    const pool = Array.isArray(lobi.banningPool) ? lobi.banningPool : [];
+    const objekSubjek = pool.find(s => s.id === subjekId);
+    if (!objekSubjek) return;
+
+    const bans = lobi.bans || {};
+    const senaraiBanBaru = Array.isArray(bans[teamSaya]) ? [...bans[teamSaya]] : [];
+    if (senaraiBanBaru.some(s => s?.id === subjekId)) {
+        Swal.fire('Sudah diban', 'Subjek ini telah disingkirkan.', 'info');
+        return;
+    }
+    if (senaraiBanBaru.length >= 3) return;
+
+    const susunanGiliran = Array.isArray(lobi.turnOrder) && lobi.turnOrder.length
+        ? lobi.turnOrder
+        : ['A1', 'B1', 'A2', 'B2', 'A3', 'B3'];
+    const indeksSemasa = susunanGiliran.indexOf(slotSaya);
+    if (indeksSemasa === -1) return;
+    const indeksSeterusnya = indeksSemasa + 1;
+
+    const updateData = {};
+    updateData[`bans/${teamSaya}`] = [...senaraiBanBaru, objekSubjek];
+    updateData.turnIndex = indeksSeterusnya;
+
+    if (indeksSeterusnya >= susunanGiliran.length) {
+        updateData.status = 'picking';
+        updateData.currentTurn = susunanGiliran[0];
+    } else {
+        updateData.currentTurn = susunanGiliran[indeksSeterusnya];
+    }
+
+    try {
+        await firebase.database().ref(`arena_lobbies/${lobiId}`).update(updateData);
+    } catch (err) {
+        console.error('Ralat semasa ban:', err);
+        Swal.fire('Ralat', 'Gagal menyimpan pilihan ban.', 'error');
+    }
 }
 
 // =========================================================================
@@ -1298,6 +1398,10 @@ function jalankanAksiPick(subjekObj, slotSaya, lobi, lobiId) {
     }
 
     const teamSaya = slotSaya.startsWith('A') ? 'teamA' : 'teamB';
+    if (!lobi[teamSaya]?.[slotSaya] || lobi[teamSaya][slotSaya].name !== studentInfo?.name) {
+        alert('Slot pemain tidak sepadan dengan akaun semasa.');
+        return;
+    }
     
     // 2. SEMAKAN KESELAMATAN SUBJEK: Pastikan ahli sepasukan belum pilih subjek ini
     if (lobi.picks && lobi.picks[teamSaya]) {
@@ -1312,8 +1416,14 @@ function jalankanAksiPick(subjekObj, slotSaya, lobi, lobiId) {
     }
 
     // Susunan Aturan Giliran yang Adil
-    const aturanTurn = ['A1', 'B1', 'A2', 'B2', 'A3', 'B3'];
+    const aturanTurn = Array.isArray(lobi.turnOrder) && lobi.turnOrder.length
+        ? lobi.turnOrder
+        : ['A1', 'B1', 'A2', 'B2', 'A3', 'B3'];
     const indexSekeri = aturanTurn.indexOf(slotSaya);
+    if (indexSekeri === -1) {
+        console.error('Slot pemain tiada dalam turnOrder:', slotSaya, aturanTurn);
+        return;
+    }
     
     let updates = {};
     
@@ -1428,6 +1538,7 @@ let isGanjaranPvPDisimpan = false;
 // =========================================================================
 function kemaskiniPaparanBattle(lobi, lobiId, slotSaya) {
     if (!lobi) return;
+    window.rtdbLobiDataSemasa = lobi;
     const teamSaya = slotSaya.startsWith('A') ? 'teamA' : 'teamB';
 
     try {
@@ -1955,10 +2066,20 @@ function kemaskiniPanelBooster() {
 // FUNGSI 3: HANTAR SERANGAN BOOSTER KE FIREBASE
 // =========================================================================
 function hantarSeranganBooster(jenisBooster) {
-    const mySlot = document.getElementById('my-battle-slot').innerText; 
-    const isTeamA = mySlot.startsWith('A'); 
+    const slotEl = document.getElementById('my-battle-slot');
+    const mySlot = slotEl ? String(slotEl.innerText || '').trim() : '';
+    if (!lobiAktifSemasa || !/^[AB][1-3]$/.test(mySlot)) return;
+
+    const isTeamA = mySlot.startsWith('A');
     const teamLawan = isTeamA ? 'teamB' : 'teamA';
-    const slotLawan = isTeamA ? ['B1', 'B2', 'B3'] : ['A1', 'A2', 'A3'];
+    const slotLawanSemua = isTeamA ? ['B1', 'B2', 'B3'] : ['A1', 'A2', 'A3'];
+    const teamLawanData = window.rtdbLobiDataSemasa?.[teamLawan] || {};
+    const slotLawan = slotLawanSemua.filter(slot => !!teamLawanData[slot]?.name);
+
+    if (!slotLawan.length) {
+        console.warn('Tiada pemain lawan aktif untuk booster:', jenisBooster);
+        return;
+    }
     
     if (jenisBooster === 'mist') {
         // MIST: 1 pemain rawak
@@ -1973,7 +2094,7 @@ function hantarSeranganBooster(jenisBooster) {
     else if (jenisBooster === 'challenger') {
         // CHALLENGER: 2 pemain rawak
         // Cara goncang (shuffle) susunan pemain lawan
-        let lawanDigoncang = slotLawan.sort(() => 0.5 - Math.random());
+        let lawanDigoncang = [...slotLawan].sort(() => 0.5 - Math.random());
         
         // Ambil 2 pemain teratas dari senarai yang dah digoncang
         let mangsaChallenger = lawanDigoncang.slice(0, 2);
@@ -2027,7 +2148,7 @@ function hantarSeranganBooster(jenisBooster) {
                     }
 
                     // 💥 SEKATAN TAMBAHAN: Pastikan kita berjaya kumpul tepat 3 subjek 💥
-                    if (subjekAsal.length !== 3) {
+                    if (subjekAsal.length !== slotLawan.length) {
                         console.error(`[SWITCH] Ralat: Kita kumpul ${subjekAsal.length} subjek, sedangkan sepatutnya 3. Membatalkan.`, subjekAsal);
                         return;
                     }
@@ -2035,11 +2156,13 @@ function hantarSeranganBooster(jenisBooster) {
                     // 2. Putarkan subjek (Kebarangkalian 50% pusing Kanan, 50% pusing Kiri)
                     let subjekBaru = [];
                     let arahPutaran = Math.random() < 0.5 ? 1 : -1;
-                    
-                    if (arahPutaran === 1) { // Pusing Kanan (A, B, C -> C, A, B)
-                        subjekBaru = [subjekAsal[2], subjekAsal[0], subjekAsal[1]];
-                    } else { // Pusing Kiri (A, B, C -> B, C, A)
-                        subjekBaru = [subjekAsal[1], subjekAsal[2], subjekAsal[0]];
+                    const n = subjekAsal.length;
+                    if (n === 0) return;
+
+                    if (arahPutaran === 1) {
+                        subjekBaru = subjekAsal.map((_, i) => subjekAsal[(i - 1 + n) % n]);
+                    } else {
+                        subjekBaru = subjekAsal.map((_, i) => subjekAsal[(i + 1) % n]);
                     }
 
                     // 3. Sediakan kemaskini pukal (Update node 'picks' & Hantar 'debuff' ke node pemain)
@@ -2660,22 +2783,48 @@ function closeSubjectModal() {
 }
 
 // =========================================================================
+// 🔧 UTILITI DATA SKOR — SATU FORMAT PEMBACAAN UNTUK SEMUA SUBJEK
+// =========================================================================
+function canonicalCategoryName(name) {
+    const aliases = {
+        occupation: 'occupations',
+        addition: 'addition_basic',
+        subtraction: 'subtraction_basic',
+        multiplication: 'multiplication_table',
+        division: 'division_basic',
+        time_and_money: 'money_matters'
+    };
+    const key = String(name || '').toLowerCase().trim();
+    return aliases[key] || key;
+}
+
+function getNormalizedScore(rawScore) {
+    if (rawScore === null || rawScore === undefined) return 0;
+    if (typeof rawScore === 'object') {
+        return Number(
+            rawScore.highScore ?? rawScore.score ?? rawScore.best ?? rawScore.mark ?? 0
+        ) || 0;
+    }
+    return Number(rawScore) || 0;
+}
+
+function getRealScore(userScores, category) {
+    const scores = userScores || {};
+    const canonical = canonicalCategoryName(category);
+    const actualKey = Object.keys(scores).find(k => canonicalCategoryName(k) === canonical);
+    return actualKey !== undefined ? getNormalizedScore(scores[actualKey]) : 0;
+}
+
+// =========================================================================
 // 🇬🇧 1. FUNGSI KATEGORI ENGLISH
 // =========================================================================
 function renderCategoryButtons() {
     const userScores = localPlayerData.games || {};
     const PERFECT_SCORE = 50;
     
-    function getRealScore(cat) {
-        let rawScore = userScores[cat];
-        if (typeof rawScore === 'object' && rawScore !== null) {
-            return parseInt(rawScore.score || rawScore.best || rawScore.mark || 0);
-        }
-        return parseInt(rawScore) || 0;
-    }
 
     const createBtn = (cat, diff, isLocked) => {
-        const score = getRealScore(cat);
+        const score = getRealScore(userScores, cat);
         const isMastered = score >= PERFECT_SCORE;
         const actionOnClick = isLocked 
             ? `lockedAlert('${diff}')` 
@@ -2709,16 +2858,9 @@ function renderMathCategoryButtons() {
     const userScores = localPlayerData.games || {};
     const PERFECT_SCORE = 50;
     
-    function getRealScore(cat) {
-        let rawScore = userScores[cat];
-        if (typeof rawScore === 'object' && rawScore !== null) {
-            return parseInt(rawScore.score || rawScore.best || rawScore.mark || 0);
-        }
-        return parseInt(rawScore) || 0;
-    }
 
     const createBtn = (cat, diff, isLocked) => {
-        const score = getRealScore(cat);
+        const score = getRealScore(userScores, cat);
         const isMastered = score >= PERFECT_SCORE;
         
         let iconHtml = '🔢';
@@ -2773,16 +2915,9 @@ function renderScienceCategoryButtons() {
     const userScores = localPlayerData.games || {};
     const PERFECT_SCORE = 50;
     
-    function getRealScore(cat) {
-        let rawScore = userScores[cat];
-        if (typeof rawScore === 'object' && rawScore !== null) {
-            return parseInt(rawScore.score || rawScore.best || rawScore.mark || 0);
-        }
-        return parseInt(rawScore) || 0;
-    }
 
     const createBtn = (cat, diff, isLocked) => {
-        const score = getRealScore(cat);
+        const score = getRealScore(userScores, cat);
         const isMastered = score >= PERFECT_SCORE;
         
         let iconHtml = '🔬';
@@ -4606,9 +4741,9 @@ window.sendChallengeInvite = async function(opponentName) {
 
     function extractDifficulty(diffObject) {
         if (typeof diffObject !== 'undefined' && diffObject) {
-            if (diffObject.easy) allEasyCats.push(...diffObject.easy.map(c => c.toLowerCase()));
-            if (diffObject.medium) allMedCats.push(...diffObject.medium.map(c => c.toLowerCase()));
-            if (diffObject.hard) allHardCats.push(...diffObject.hard.map(c => c.toLowerCase()));
+            if (diffObject.easy) allEasyCats.push(...diffObject.easy.map(canonicalCategoryName));
+            if (diffObject.medium) allMedCats.push(...diffObject.medium.map(canonicalCategoryName));
+            if (diffObject.hard) allHardCats.push(...diffObject.hard.map(canonicalCategoryName));
         }
     }
 
@@ -4619,7 +4754,6 @@ window.sendChallengeInvite = async function(opponentName) {
     extractDifficulty(typeof bmCategoryDifficulty !== 'undefined' ? bmCategoryDifficulty : undefined);
     extractDifficulty(typeof paiCategoryDifficulty !== 'undefined' ? paiCategoryDifficulty : undefined);
     extractDifficulty(typeof baCategoryDifficulty !== 'undefined' ? baCategoryDifficulty : undefined);
-    extractDifficulty(typeof arabicCategoryDifficulty !== 'undefined' ? arabicCategoryDifficulty : undefined);
     
     // 🆕 Tambahan subjek baharu yang Cikgu perasan:
     extractDifficulty(typeof sejarahCategoryDifficulty !== 'undefined' ? sejarahCategoryDifficulty : undefined);
@@ -4632,7 +4766,7 @@ window.sendChallengeInvite = async function(opponentName) {
 // 🛡️ 2. PELAN SANDARAN KESELAMATAN (HARDCODE FALLBACK) YANG TELAH DIKEMAS KINI
     const fallbackEasy = [
         // English & Matematik & BM
-        'missing', 'spelling', 'plural', 'gendernouns', 'occupation', 'number_recognition', 'addition', 'subtraction', 'kata_nama',
+        'missing', 'spelling', 'plural', 'gendernouns', 'occupations', 'number_recognition', 'addition_basic', 'subtraction_basic', 'kata_nama',
         // Agama Islam & Bahasa Arab
         'mufrodat', 'arqam', 'alquran', 'jawi', 'aqidah', 
         // Subjek Elektif & Teras Lain (PSV, RBT, Muzik, Sejarah, Moral, PJK)
@@ -4643,7 +4777,7 @@ window.sendChallengeInvite = async function(opponentName) {
     
     const fallbackMed = [
         // English & Matematik & BM
-        'puzzle', 'guessing', 'pasttense', 'superlatives', 'synonym', 'antonym', 'multiplication', 'division', 'time_and_money', 'simpulan_bahasa',
+        'puzzle', 'guessing', 'pasttense', 'superlatives', 'synonym', 'antonym', 'multiplication_table', 'division_basic', 'money_matters', 'simpulan_bahasa',
         // Agama Islam & Bahasa Arab
         'hiwar', 'ibadah', 'sirah', 
         // Subjek Elektif & Teras Lain
@@ -4669,7 +4803,7 @@ window.sendChallengeInvite = async function(opponentName) {
 
     // 🔍 3. SEMAK LOG DATA PERMAINAN MURID
     playedGames.forEach(gameKey => {
-        const cat = String(gameKey).toLowerCase().trim(); 
+        const cat = canonicalCategoryName(gameKey); 
         
         if (allEasyCats.includes(cat)) hasEasy = true;
         if (allMedCats.includes(cat)) hasMed = true;
@@ -5243,7 +5377,7 @@ function endPvPMatch() {
     let result = (myScore > oppScore) ? "menang" : (myScore < oppScore ? "kalah" : "seri");
 
     // 1. TENTUKAN TIER (KUMPULAN KESUKARAN)
-    const easyCats = ['missing', 'spelling', 'plural', 'gendernouns', 'occupation'];
+    const easyCats = ['missing', 'spelling', 'plural', 'gendernouns', 'occupations'];
     const medCats = ['puzzle', 'guessing', 'pasttense', 'superlatives', 'synonym', 'antonym'];
     const hardCats = ['grammar', 'architect', 'idioms', 'listening', 'speaking'];
 
