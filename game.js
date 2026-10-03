@@ -92,6 +92,201 @@ const baCategoryDifficulty = {
     hard: ['hiwar']
 };
 
+// =======================================================
+// 💎 LEXI QUEST ECONOMY ENGINE V1
+// Coins = ganjaran pembelajaran yang aktif.
+// Gems  = mata wang premium/rare; penggunaan akan dikembangkan kemudian.
+// =======================================================
+const LEXI_ECONOMY = {
+    welcomeCoins: 500,
+    coinsPerCorrect: { easy: 10, medium: 15, hard: 20 },
+    xpPerCorrect: { easy: 1, medium: 2, hard: 3 },
+    completionBonus: [
+        { min: 100, coins: 100 },
+        { min: 90, coins: 75 },
+        { min: 70, coins: 50 },
+        { min: 50, coins: 25 },
+        { min: 0, coins: 0 }
+    ],
+    perfectTopicGems: 5
+};
+
+function ensureEconomyFields() {
+    if (typeof localPlayerData === 'undefined' || !localPlayerData) return false;
+    localPlayerData.coins = Number(localPlayerData.coins) || 0;
+    localPlayerData.xp = Number(localPlayerData.xp) || 0;
+    localPlayerData.points = Number(localPlayerData.points) || 0;
+    localPlayerData.totalScore = Number(localPlayerData.totalScore) || 0;
+    localPlayerData.totalCoinsEarned = Number(localPlayerData.totalCoinsEarned) || 0;
+    localPlayerData.gems = Number(localPlayerData.gems) || 0;
+    localPlayerData.totalGemsEarned = Number(localPlayerData.totalGemsEarned) || 0;
+    localPlayerData.topicMastery = localPlayerData.topicMastery || {};
+    localPlayerData.welcomeBonusClaimed = Boolean(localPlayerData.welcomeBonusClaimed);
+    return true;
+}
+
+function getCategoryDifficulty(category) {
+    const key = String(category || '');
+    const medium = [
+        ...(typeof mathCategoryDifficulty !== 'undefined' ? mathCategoryDifficulty.medium : []),
+        ...(typeof englishCategoryDifficulty !== 'undefined' ? englishCategoryDifficulty.medium : []),
+        ...(typeof scienceCategoryDifficulty !== 'undefined' ? scienceCategoryDifficulty.medium : []),
+        ...(typeof bmCategoryDifficulty !== 'undefined' ? bmCategoryDifficulty.medium : []),
+        ...(typeof sejarahCategoryDifficulty !== 'undefined' ? sejarahCategoryDifficulty.medium : []),
+        ...(typeof kesihatanCategoryDifficulty !== 'undefined' ? kesihatanCategoryDifficulty.medium : []),
+        ...(typeof muzikCategoryDifficulty !== 'undefined' ? muzikCategoryDifficulty.medium : []),
+        ...(typeof moralCategoryDifficulty !== 'undefined' ? moralCategoryDifficulty.medium : []),
+        ...(typeof psvCategoryDifficulty !== 'undefined' ? psvCategoryDifficulty.medium : []),
+        ...(typeof rbtCategoryDifficulty !== 'undefined' ? rbtCategoryDifficulty.medium : []),
+        ...(typeof paiCategoryDifficulty !== 'undefined' ? paiCategoryDifficulty.medium : []),
+        ...(typeof baCategoryDifficulty !== 'undefined' ? baCategoryDifficulty.medium : [])
+    ];
+    const hard = [
+        ...(typeof mathCategoryDifficulty !== 'undefined' ? mathCategoryDifficulty.hard : []),
+        ...(typeof englishCategoryDifficulty !== 'undefined' ? englishCategoryDifficulty.hard : []),
+        ...(typeof scienceCategoryDifficulty !== 'undefined' ? scienceCategoryDifficulty.hard : []),
+        ...(typeof bmCategoryDifficulty !== 'undefined' ? bmCategoryDifficulty.hard : []),
+        ...(typeof sejarahCategoryDifficulty !== 'undefined' ? sejarahCategoryDifficulty.hard : []),
+        ...(typeof kesihatanCategoryDifficulty !== 'undefined' ? kesihatanCategoryDifficulty.hard : []),
+        ...(typeof muzikCategoryDifficulty !== 'undefined' ? muzikCategoryDifficulty.hard : []),
+        ...(typeof moralCategoryDifficulty !== 'undefined' ? moralCategoryDifficulty.hard : []),
+        ...(typeof psvCategoryDifficulty !== 'undefined' ? psvCategoryDifficulty.hard : []),
+        ...(typeof rbtCategoryDifficulty !== 'undefined' ? rbtCategoryDifficulty.hard : []),
+        ...(typeof paiCategoryDifficulty !== 'undefined' ? paiCategoryDifficulty.hard : []),
+        ...(typeof baCategoryDifficulty !== 'undefined' ? baCategoryDifficulty.hard : [])
+    ];
+    if (hard.includes(key)) return 'hard';
+    if (medium.includes(key)) return 'medium';
+    return 'easy';
+}
+
+function getCategoryQuestionBank(category) {
+    const sources = [
+        typeof gameData !== 'undefined' ? gameData : null,
+        typeof mathData !== 'undefined' ? mathData : null,
+        typeof scienceData !== 'undefined' ? scienceData : null,
+        typeof malayLanguageData !== 'undefined' ? malayLanguageData : null,
+        typeof sejarahData !== 'undefined' ? sejarahData : null,
+        typeof pjkData !== 'undefined' ? pjkData : null,
+        typeof pendidikanMuzikData !== 'undefined' ? pendidikanMuzikData : null,
+        typeof moralData !== 'undefined' ? moralData : null,
+        typeof psvData !== 'undefined' ? psvData : null,
+        typeof rbtData !== 'undefined' ? rbtData : null,
+        typeof paiQuestions !== 'undefined' ? paiQuestions : null,
+        typeof baQuestions !== 'undefined' ? baQuestions : null
+    ];
+    for (const source of sources) {
+        if (source && Array.isArray(source[category])) return source[category];
+    }
+    return [];
+}
+
+function getCategoryQuestionCount(category) {
+    return getCategoryQuestionBank(category).length;
+}
+
+function getCompletionBonusCoins(percentage) {
+    const pct = Number(percentage) || 0;
+    const row = LEXI_ECONOMY.completionBonus.find(x => pct >= x.min);
+    return row ? row.coins : 0;
+}
+
+function getPlayerGems() {
+    return (typeof localPlayerData !== 'undefined' && localPlayerData) ? (Number(localPlayerData.gems) || 0) : 0;
+}
+
+async function claimWelcomeBonusOnce() {
+    if (!ensureEconomyFields()) return false;
+    if (localPlayerData.welcomeBonusClaimed) return false;
+    if (typeof db === 'undefined' || !db || typeof studentInfo === 'undefined' || !studentInfo || !studentInfo.name) return false;
+
+    const docId = `${studentInfo.school}_${studentInfo.class}_${studentInfo.name}`.replace(/\s+/g, '_');
+    try {
+        const playerRef = db.collection('players').doc(docId);
+        let granted = false;
+        await db.runTransaction(async transaction => {
+            const snap = await transaction.get(playerRef);
+            const cloud = snap.exists ? (snap.data() || {}) : {};
+            if (cloud.welcomeBonusClaimed === true) return;
+            transaction.set(playerRef, {
+                coins: (Number(cloud.coins) || 0) + LEXI_ECONOMY.welcomeCoins,
+                welcomeBonusClaimed: true,
+                welcomeBonusAmount: LEXI_ECONOMY.welcomeCoins,
+                welcomeBonusDate: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            granted = true;
+        });
+
+        if (granted) {
+            localPlayerData.coins += LEXI_ECONOMY.welcomeCoins;
+            localPlayerData.totalCoinsEarned += LEXI_ECONOMY.welcomeCoins;
+            localPlayerData.welcomeBonusClaimed = true;
+            localPlayerData.welcomeBonusAmount = LEXI_ECONOMY.welcomeCoins;
+            localStorage.setItem('playerData', JSON.stringify(localPlayerData));
+            localStorage.setItem('currentPlayer', JSON.stringify(localPlayerData));
+            updateUI();
+            console.log(`🎁 Welcome Gift: +${LEXI_ECONOMY.welcomeCoins} Coins`);
+            return true;
+        }
+        localPlayerData.welcomeBonusClaimed = true;
+        return false;
+    } catch (error) {
+        console.error('Gagal menuntut Welcome Gift:', error);
+        return false;
+    }
+}
+
+function showResultModal(result) {
+    const data = result || {};
+    const score = Number(data.score) || 0;
+    const totalQuestions = Number(data.totalQuestions) || 0;
+    const percentage = Number(data.percentage) || 0;
+    const pointsEarned = Number(data.pointsEarned) || 0;
+    const coinsEarned = Number(data.coinsEarned) || 0;
+    const gemsEarned = Number(data.gemsEarned) || 0;
+    const completionBonus = Number(data.completionBonus) || 0;
+    const difficulty = data.difficulty || 'Easy';
+    const topicTitle = data.topicTitle || (typeof currentGameType !== 'undefined' ? String(currentGameType).replace(/_/g, ' ') : 'Tajuk');
+    const boost = data.jenisBoost ? `<div class="mt-3 text-xs font-bold text-purple-600">✨ ${data.jenisBoost}</div>` : '';
+    const gemLine = gemsEarned > 0 ? `<div class="text-sm font-black text-cyan-600">+ ${gemsEarned} 💎 Gems</div>` : `<div class="text-sm text-gray-400">+ 0 💎 Gems</div>`;
+    const completionLine = completionBonus > 0 ? `<div class="text-sm text-amber-600 font-bold">+ ${completionBonus} 🏆 Bonus Tajuk</div>` : '';
+
+    if (typeof Swal === 'undefined') {
+        alert(`Permainan Tamat!\n${topicTitle}\n${score}/${totalQuestions} (${percentage}%)\n+${pointsEarned} XP | +${coinsEarned} Coins | +${gemsEarned} Gems`);
+        return Promise.resolve();
+    }
+
+    return Swal.fire({
+        icon: percentage >= 70 ? 'success' : (percentage >= 50 ? 'info' : 'warning'),
+        title: 'Permainan Tamat! 🏁',
+        html: `
+            <div class="text-center">
+                <div class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">${topicTitle}</div>
+                <div class="text-4xl font-black text-indigo-700 mb-2">${score} / ${totalQuestions}</div>
+                <div class="text-xl font-black text-indigo-600 mb-4">${percentage}%</div>
+                <div class="grid grid-cols-2 gap-2 text-left bg-gray-50 rounded-xl p-4">
+                    <div class="text-sm font-bold text-green-600">+ ${pointsEarned} XP</div>
+                    <div class="text-sm font-bold text-yellow-600">+ ${coinsEarned} Coins</div>
+                    ${gemLine}
+                    <div class="text-sm font-bold text-gray-600">Tahap: ${difficulty}</div>
+                </div>
+                ${completionLine}${boost}
+            </div>`,
+        confirmButtonText: 'Kembali ke Menu',
+        confirmButtonColor: '#4f46e5',
+        allowOutsideClick: false
+    }).then(() => {
+        const gameArena = document.getElementById('game-arena');
+        const menuScreen = document.getElementById('menu-screen');
+        const finalScoreScreen = document.getElementById('final-score');
+        if (gameArena) gameArena.classList.add('hidden');
+        if (finalScoreScreen) finalScoreScreen.classList.add('hidden');
+        if (menuScreen) menuScreen.classList.remove('hidden');
+        if (typeof playBgMusic === 'function') playBgMusic();
+        if (typeof backToSubjects === 'function') backToSubjects();
+    });
+}
+
 // ==========================================
 // 🛡️ GATEKEEPER: FUNGSI TARIK DATA & SEMAK AKSES LOBI 3V3
 // ==========================================
@@ -2820,11 +3015,9 @@ function getRealScore(userScores, category) {
 // =========================================================================
 function renderCategoryButtons() {
     const userScores = localPlayerData.games || {};
-    const PERFECT_SCORE = 50;
-    
-
     const createBtn = (cat, diff, isLocked) => {
         const score = getRealScore(userScores, cat);
+        const PERFECT_SCORE = getCategoryQuestionCount(cat) || 50;
         const isMastered = score >= PERFECT_SCORE;
         const actionOnClick = isLocked 
             ? `lockedAlert('${diff}')` 
@@ -2856,11 +3049,9 @@ function renderCategoryButtons() {
 // =========================================================================
 function renderMathCategoryButtons() {
     const userScores = localPlayerData.games || {};
-    const PERFECT_SCORE = 50;
-    
-
     const createBtn = (cat, diff, isLocked) => {
         const score = getRealScore(userScores, cat);
+        const PERFECT_SCORE = getCategoryQuestionCount(cat) || 50;
         const isMastered = score >= PERFECT_SCORE;
         
         let iconHtml = '🔢';
@@ -2913,11 +3104,9 @@ function renderMathCategoryButtons() {
 // =========================================================================
 function renderScienceCategoryButtons() {
     const userScores = localPlayerData.games || {};
-    const PERFECT_SCORE = 50;
-    
-
     const createBtn = (cat, diff, isLocked) => {
         const score = getRealScore(userScores, cat);
+        const PERFECT_SCORE = getCategoryQuestionCount(cat) || 50;
         const isMastered = score >= PERFECT_SCORE;
         
         let iconHtml = '🔬';
@@ -3775,412 +3964,210 @@ window.startMic = function(btnElement) {
 // 3. PENGIRAAN MARKAH (END GAME) - VERSI LENGKAP & SEMPURNA
 // ==========================================
 function endGame() {
-    // 🛡️ PENGHALANG 1: Hentikan jika arena permainan tersembunyi (elak muncul semasa login/logout)
+    // 🛡️ Hanya tamatkan permainan yang benar-benar aktif.
     const gameArena = document.getElementById('game-arena');
-    if (!gameArena || gameArena.classList.contains('hidden')) {
-        return; 
-    }
-
-    // 🛡️ PENGHALANG 2: Hentikan jika status permainan tidak aktif
-    if (window.isGameActive !== true) {
-        return;
-    }
-
-    // Matikan status permainan aktif
+    if (!gameArena || gameArena.classList.contains('hidden')) return;
+    if (window.isGameActive === false) return;
     window.isGameActive = false;
 
-    // 1. Hentikan masa (jika ia masih berjalan)
     if (typeof currentTimer !== 'undefined') clearInterval(currentTimer);
 
-    // ==========================================
-    // 🟢 KEMAS KINI STATUS FIREBASE KE "IDLE"
-    // ==========================================
-    if (typeof studentInfo !== 'undefined' && studentInfo && studentInfo.name) {
+    // Status pemain ke idle.
+    if (typeof studentInfo !== 'undefined' && studentInfo && studentInfo.name && typeof db !== 'undefined' && db) {
         const docId = `${studentInfo.school}_${studentInfo.class}_${studentInfo.name}`.replace(/\s+/g, '_');
-        if (typeof db !== 'undefined' && db) {
-            db.collection("players").doc(docId).set({
-                isOnline: true,
-                currentStatus: "idle"
-            }, { merge: true }).catch(e => console.log("Gagal kemaskini status idle:", e));
-        }
+        db.collection('players').doc(docId).set({
+            isOnline: true,
+            currentStatus: 'idle'
+        }, { merge: true }).catch(e => console.log('Gagal kemaskini status idle:', e));
     }
 
-    // 🎯 DAPATKAN INPUT HANYA DARI WADAH SOALAN (Mencegah deteksi input dari form login/logout)
     const container = document.getElementById('question-container');
     if (!container) return;
-
     const inputs = container.querySelectorAll('.game-input');
     const totalQuestions = inputs.length;
-
-    // Jika tiada soalan, elakkan ralat
     if (totalQuestions === 0) return;
 
-    // Sembunyikan butang semak supaya tak ditekan 2 kali
     const checkBtn = document.getElementById('check-btn');
     if (checkBtn) checkBtn.classList.add('hidden');
 
     let score = 0;
-
-    // 2. Semak setiap jawapan murid
     inputs.forEach(input => {
-        input.disabled = true; // Kunci kotak
-        
-        const userAnswer = input.value.trim().toLowerCase();
-        const rawAnswer = input.getAttribute('data-answer') || "";
-        const correctAnswersList = rawAnswer.trim().toLowerCase().split("|");
+        input.disabled = true;
+        const userAnswer = String(input.value || '').trim().toLowerCase();
+        const rawAnswer = input.getAttribute('data-answer') || '';
+        const correctAnswersList = rawAnswer.trim().toLowerCase().split('|');
 
-        if (correctAnswersList.includes(userAnswer) && userAnswer !== "") {
-            // BETUL
+        if (correctAnswersList.includes(userAnswer) && userAnswer !== '') {
             score++;
             input.classList.remove('bg-gray-50', 'border-gray-200');
             input.classList.add('bg-green-100', 'border-green-500', 'text-green-800', 'font-bold');
         } else {
-            // SALAH / KOSONG
             input.classList.remove('bg-gray-50', 'border-gray-200');
             input.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
-            
-            if (userAnswer === "") {
-                input.value = `(Jawapan: ${rawAnswer})`;
-            } else {
-                input.value = `${input.value} ❌ (Betul: ${rawAnswer})`;
-            }
+            if (userAnswer === '') input.value = `(Jawapan: ${rawAnswer})`;
+            else if (!input.value.includes('❌')) input.value = `${input.value} ❌ (Betul: ${rawAnswer})`;
         }
     });
 
-    // 3. Kira peratus markah
     const percentage = Math.round((score / totalQuestions) * 100);
-
-    // =========================================================================
-    // LOGIK SIMPAN MARKAH, XP & KOIN 💰 (VERSI STABIL - CEGAH RESET DATA)
-    // =========================================================================
-
-    // 🚫 SISTEM PENGHALANG (SAFEGUARD 1): Sekat simpanan jika data murid belum sedia/kosong
-    if (typeof localPlayerData === 'undefined' || !localPlayerData.name) {
-        console.error("⚠️ RALAT KRITIKAL: Data pemain belum dimuatkan sepenuhnya! Rekod permainan TIDAK disimpan bagi mengelakkan data ter-reset.");
+    if (!ensureEconomyFields() || !localPlayerData.name) {
+        console.error('⚠️ Data pemain belum sedia. Ganjaran tidak disimpan.');
         return;
     }
 
-    // 🛡️ SISTEM PENGHALANG (SAFEGUARD 2): Sekat jika data XP/Coins hilang dari memori
-    if (typeof localPlayerData.coins === 'undefined' || typeof localPlayerData.xp === 'undefined') {
-        console.error("⚠️ RALAT KRITIKAL: Data XP/Coins tempatan hilang! Simpanan dibatalkan untuk elak reset data.");
-        return;
+    const difficulty = getCategoryDifficulty(currentGameType);
+    const multiplier = difficulty === 'hard' ? 3 : (difficulty === 'medium' ? 2 : 1);
+    const pointsEarned = score * LEXI_ECONOMY.xpPerCorrect[difficulty];
+
+    // 💰 Coins: 10/15/20 bagi setiap jawapan betul + bonus tamat tajuk.
+    let coinsEarned = score * LEXI_ECONOMY.coinsPerCorrect[difficulty];
+    const completionBonus = getCompletionBonusCoins(percentage);
+    coinsEarned += completionBonus;
+
+    // 💎 Gems: mata wang rare. Buat masa ini hanya diberi sekali apabila tajuk
+    // dikuasai 100%; penggunaan Gems akan dikembangkan kemudian.
+    const masteryKey = String(currentGameType || 'unknown_topic');
+    let gemsEarned = 0;
+    if (percentage === 100 && !localPlayerData.topicMastery[masteryKey]) {
+        gemsEarned = LEXI_ECONOMY.perfectTopicGems;
+        localPlayerData.topicMastery[masteryKey] = {
+            mastered: true,
+            date: new Date().toISOString(),
+            questionCount: totalQuestions
+        };
     }
 
-    // 1. TAMBAHKAN SUBJEK KE DALAM ARRAY KESUKARAN
-    const allMedium = [
-        ...(typeof mathCategoryDifficulty !== 'undefined' ? mathCategoryDifficulty.medium : []),
-        ...(typeof englishCategoryDifficulty !== 'undefined' ? englishCategoryDifficulty.medium : []),
-        ...(typeof scienceCategoryDifficulty !== 'undefined' ? scienceCategoryDifficulty.medium : []),
-        ...(typeof bmCategoryDifficulty !== 'undefined' ? bmCategoryDifficulty.medium : []),
-        ...(typeof sejarahCategoryDifficulty !== 'undefined' ? sejarahCategoryDifficulty.medium : []),
-        ...(typeof kesihatanCategoryDifficulty !== 'undefined' ? kesihatanCategoryDifficulty.medium : []),
-        ...(typeof muzikCategoryDifficulty !== 'undefined' ? muzikCategoryDifficulty.medium : []),
-        ...(typeof moralCategoryDifficulty !== 'undefined' ? moralCategoryDifficulty.medium : []),
-        ...(typeof psvCategoryDifficulty !== 'undefined' ? psvCategoryDifficulty.medium : []),
-        ...(typeof rbtCategoryDifficulty !== 'undefined' ? rbtCategoryDifficulty.medium : []),
-        ...(typeof paiCategoryDifficulty !== 'undefined' ? paiCategoryDifficulty.medium : []), 
-        ...(typeof baCategoryDifficulty !== 'undefined' ? baCategoryDifficulty.medium : [])  
-    ];
-
-    const allHard = [
-        ...(typeof mathCategoryDifficulty !== 'undefined' ? mathCategoryDifficulty.hard : []),
-        ...(typeof englishCategoryDifficulty !== 'undefined' ? englishCategoryDifficulty.hard : []),
-        ...(typeof scienceCategoryDifficulty !== 'undefined' ? scienceCategoryDifficulty.hard : []),
-        ...(typeof bmCategoryDifficulty !== 'undefined' ? bmCategoryDifficulty.hard : []),
-        ...(typeof sejarahCategoryDifficulty !== 'undefined' ? sejarahCategoryDifficulty.hard : []),
-        ...(typeof kesihatanCategoryDifficulty !== 'undefined' ? kesihatanCategoryDifficulty.hard : []),
-        ...(typeof muzikCategoryDifficulty !== 'undefined' ? muzikCategoryDifficulty.hard : []),
-        ...(typeof moralCategoryDifficulty !== 'undefined' ? moralCategoryDifficulty.hard : []),
-        ...(typeof psvCategoryDifficulty !== 'undefined' ? psvCategoryDifficulty.hard : []),
-        ...(typeof rbtCategoryDifficulty !== 'undefined' ? rbtCategoryDifficulty.hard : []),
-        ...(typeof paiCategoryDifficulty !== 'undefined' ? paiCategoryDifficulty.hard : []), 
-        ...(typeof baCategoryDifficulty !== 'undefined' ? baCategoryDifficulty.hard : [])  
-    ];
-
-    // Tentukan pengganda (multiplier) kesukaran
-    let multiplier = 1; // Default: Easy
-    if (typeof currentGameType !== 'undefined' && currentGameType) {
-        if (allMedium.includes(currentGameType)) multiplier = 2;
-        else if (allHard.includes(currentGameType)) multiplier = 3;
-    }
-
-    // Kira XP dan Koin (Asas)
-    let pointsEarned = score * multiplier; 
-    let coinsEarned = score * 2 * multiplier; 
-
-    // =======================================================
-    // ✨ INTEGRASI BARU: PEMPROSESAN IMPAK GANJARAN LTE
-    // =======================================================
+    // LTE buff sedia ada terus berfungsi.
     let dipengaruhiLTE = false;
-    let jenisBoost = "";
-
+    let jenisBoost = '';
     if (typeof currentActiveEvent !== 'undefined' && currentActiveEvent !== null) {
-        // HALUAN A: Ganjaran Jenis Pengganda (Buff)
         if (currentActiveEvent.rewardType === 'xp_buff') {
-            pointsEarned = Math.floor(pointsEarned * currentActiveEvent.rewardValue);
+            const oldXP = pointsEarned;
+            const boostedXP = Math.floor(oldXP * Number(currentActiveEvent.rewardValue || 1));
+            // const asal adalah immutable; rekod menggunakan pemboleh ubah baru di bawah.
+            jenisBoost = `XP x${currentActiveEvent.rewardValue} BOOST!`;
             dipengaruhiLTE = true;
-            jenisBoost = `✨ XP x${currentActiveEvent.rewardValue} BOOST!`;
-            console.log(`🚀 LTE AKTIF: XP digandakan kepada ${pointsEarned}!`);
-        } 
-        else if (currentActiveEvent.rewardType === 'coins_buff') {
-            coinsEarned = Math.floor(coinsEarned * currentActiveEvent.rewardValue);
+            // Simpan nilai boost ke property untuk diproses kemudian.
+            localPlayerData.__lastXpBoost = boostedXP;
+        } else if (currentActiveEvent.rewardType === 'coins_buff') {
+            const boostedCoins = Math.floor(coinsEarned * Number(currentActiveEvent.rewardValue || 1));
+            coinsEarned = boostedCoins;
+            jenisBoost = `KOIN x${currentActiveEvent.rewardValue} BOOST!`;
             dipengaruhiLTE = true;
-            jenisBoost = `💰 KOIN x${currentActiveEvent.rewardValue} BOOST!`;
-            console.log(`💰 LTE AKTIF: Syiling digandakan kepada ${coinsEarned}!`);
         }
-        
-        // HALUAN B: Ganjaran Jenis Kumpul Hari (Login & Play)
-        if (currentActiveEvent.requiredAction === "login_and_play") {
+
+        if (currentActiveEvent.requiredAction === 'login_and_play') {
             if (!localPlayerData.lte_attendance) localPlayerData.lte_attendance = {};
-            if (!localPlayerData.lte_attendance[currentActiveEvent.name]) {
-                localPlayerData.lte_attendance[currentActiveEvent.name] = {};
-            }
-            
+            if (!localPlayerData.lte_attendance[currentActiveEvent.name]) localPlayerData.lte_attendance[currentActiveEvent.name] = {};
             const today = new Date();
             const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-            
-            // Rekodkan kehadiran hari ini
             localPlayerData.lte_attendance[currentActiveEvent.name][dateKey] = true;
-            
-            const totalDaysPlayed = Object.keys(localPlayerData.lte_attendance[currentActiveEvent.name]).length;
-            console.log(`📅 [LTE Kehadiran] Misi: ${currentActiveEvent.name} | Progress: ${totalDaysPlayed}/${currentActiveEvent.requiredDays} Hari`);
-
-            // =======================================================
-            // 🎁 SISTEM PENGANUGERAHAN AUTOMATIK LTE (AUTO-GIFT)
-            // =======================================================
-            if (totalDaysPlayed >= currentActiveEvent.requiredDays) {
-                let eventSafeName = currentActiveEvent.name.replace(/\s+/g, '_');
-                if (!localPlayerData.lte_claimed) localPlayerData.lte_claimed = {};
-                
-                if (!localPlayerData.lte_claimed[eventSafeName]) {
-                    // 1. Hadiah Jenis Lencana (Badge & Title)
-                    if (currentActiveEvent.rewardType === "custom_title" || currentActiveEvent.rewardType === "event_badge") {
-                        if (!localPlayerData.inventory) localPlayerData.inventory = [];
-                        
-                        let badgeIdToGive = "";
-                        if (currentActiveEvent.name.includes("Pencarian Perintis")) badgeIdToGive = "lte_feb_2026";
-                        if (currentActiveEvent.name.includes("Karnival Jaguh")) badgeIdToGive = "lte_jul_2026";
-                        if (currentActiveEvent.name.includes("Pahlawan Merdeka")) badgeIdToGive = "lte_aug_2026";
-                        
-                        if (badgeIdToGive && !localPlayerData.inventory.includes(badgeIdToGive)) {
-                            localPlayerData.inventory.push(badgeIdToGive);
-                            localPlayerData.lte_claimed[eventSafeName] = true;
-                            
-                            jenisBoost = `🏆 MISI SELESAI: Lencana & Title '${currentActiveEvent.rewardValue}' Diperolehi! Buka Profil Untuk Pakai.`;
-                            dipengaruhiLTE = true;
-                            console.log(`🎁 [AUTO-GIFT] Lencana ${badgeIdToGive} ditolak ke inventory!`);
-                        }
-                    }
-                    // 2. Hadiah Jenis Avatar
-                    else if (currentActiveEvent.rewardType === "custom_avatar") {
-                        if (!localPlayerData.ownedAvatars) localPlayerData.ownedAvatars = [];
-                        let avatarFile = `img|assets/avatars/${currentActiveEvent.rewardValue}`;
-                        
-                        if (!localPlayerData.ownedAvatars.includes(avatarFile)) {
-                            localPlayerData.ownedAvatars.push(avatarFile);
-                            localPlayerData.lte_claimed[eventSafeName] = true;
-                            
-                            jenisBoost = `👤 MISI SELESAI: Avatar Eksklusif Diperolehi! Buka Profil Untuk Pakai.`;
-                            dipengaruhiLTE = true;
-                            console.log(`🎁 [AUTO-GIFT] Avatar ${avatarFile} ditambah!`);
-                        }
-                    }
-                    // 3. Hadiah Jenis Border
-                    else if (currentActiveEvent.rewardType === "custom_border") {
-                        if (!localPlayerData.ownedBorders) localPlayerData.ownedBorders = [];
-                        let borderFile = `assets/borders/${currentActiveEvent.rewardValue}`;
-                        
-                        if (!localPlayerData.ownedBorders.includes(borderFile)) {
-                            localPlayerData.ownedBorders.push(borderFile);
-                            localPlayerData.lte_claimed[eventSafeName] = true;
-                            
-                            jenisBoost = `🖼️ MISI SELESAI: Bingkai Profil Eksklusif Diperolehi! Buka Profil Untuk Pakai.`;
-                            dipengaruhiLTE = true;
-                            console.log(`🎁 [AUTO-GIFT] Border ${borderFile} ditambah!`);
-                        }
-                    }
-                }
-            }
         }
     }
 
-    // =======================================================
-    // 2. KEMAS KINI DOMPET MURID (DATA SAH)
-    // =======================================================
-    localPlayerData.points = (localPlayerData.points || 0) + pointsEarned;
-    localPlayerData.totalScore = (parseInt(localPlayerData.totalScore) || 0) + pointsEarned;
-    localPlayerData.xp = (parseInt(localPlayerData.xp) || 0) + pointsEarned; 
-    localPlayerData.coins = (parseInt(localPlayerData.coins) || 0) + coinsEarned;
-    localPlayerData.totalCoinsEarned = (parseInt(localPlayerData.totalCoinsEarned) || 0) + coinsEarned;
-
-    // 3. PENGIRAAN LEVEL SELAMAT
-    const calculatedLevel = Math.floor(localPlayerData.xp / 100) + 1;
-    const currentLevel = parseInt(localPlayerData.level) || 1;
-
-    if (calculatedLevel > currentLevel) {
-        localPlayerData.level = calculatedLevel;
-        console.log(`🎉 TAHNIAH! Murid naik ke Level ${calculatedLevel}!`);
+    let finalXPEarned = pointsEarned;
+    if (localPlayerData.__lastXpBoost) {
+        finalXPEarned = localPlayerData.__lastXpBoost;
+        delete localPlayerData.__lastXpBoost;
     }
 
-    // 4. REKOD PROGRES LTE KE FIRESTORE
-    if (typeof updateLteProgress === "function") {
-        updateLteProgress();
-        console.log("Merekod progres LTE ke Firebase...");
+    localPlayerData.points += finalXPEarned;
+    localPlayerData.totalScore += finalXPEarned;
+    localPlayerData.xp += finalXPEarned;
+    localPlayerData.coins += coinsEarned;
+    localPlayerData.totalCoinsEarned += coinsEarned;
+    localPlayerData.gems += gemsEarned;
+    localPlayerData.totalGemsEarned += gemsEarned;
+
+    // Level progresif: kekalkan formula UI sedia ada.
+    let tempXP = localPlayerData.xp;
+    let calculatedLevel = 1;
+    let requiredXp = 100;
+    while (tempXP >= requiredXp) {
+        tempXP -= requiredXp;
+        calculatedLevel++;
+        requiredXp += 50;
     }
+    localPlayerData.level = calculatedLevel;
 
-    // 5. SIMPAN KE LOCALSTORAGE
-    try {
-        localStorage.setItem('playerData', JSON.stringify(localPlayerData));
-    } catch (e) {
-        console.error("Gagal simpan ke localStorage:", e);
-    }
-
-    // 6. SYNC KE FIREBASE FIRESTORE
-    if (typeof db !== 'undefined' && typeof studentInfo !== 'undefined' && studentInfo.name) {
-        const docId = `${studentInfo.school}_${studentInfo.class}_${studentInfo.name}`.replace(/\s+/g, '_');
-        db.collection("players").doc(docId).set(localPlayerData, { merge: true })
-            .then(() => console.log("Data permainan berjaya disimpan ke Firebase!"))
-            .catch(e => console.error("Gagal simpan ke Firebase:", e));
-    }
-
-    // 7. SIMPAN PROGRES LEADERBOARD / HIGH SCORE
-    // Semua kod ini mesti berada DI DALAM endGame().
-    const currentType = (typeof currentGameType !== 'undefined' && currentGameType !== "")
-        ? String(currentGameType).toLowerCase()
-        : "";
-
-    const senaraiSubjekMaju = [
-        { field: 'score_matematik', label: 'Matematik', list: typeof mathCategoryDifficulty !== 'undefined' ? [...mathCategoryDifficulty.easy, ...mathCategoryDifficulty.medium, ...mathCategoryDifficulty.hard] : [] },
-        { field: 'score_english',   label: 'English',   list: typeof englishCategoryDifficulty !== 'undefined' ? [...englishCategoryDifficulty.easy, ...englishCategoryDifficulty.medium, ...englishCategoryDifficulty.hard] : [] },
-        { field: 'score_sains',     label: 'Sains',     list: typeof scienceCategoryDifficulty !== 'undefined' ? [...scienceCategoryDifficulty.easy, ...scienceCategoryDifficulty.medium, ...scienceCategoryDifficulty.hard] : [] },
-        { field: 'score_bm',        label: 'BM',        list: typeof bmCategoryDifficulty !== 'undefined' ? [...bmCategoryDifficulty.easy, ...bmCategoryDifficulty.medium, ...bmCategoryDifficulty.hard] : [] },
-        { field: 'score_sejarah',   label: 'Sejarah',   list: typeof sejarahCategoryDifficulty !== 'undefined' ? [...sejarahCategoryDifficulty.easy, ...sejarahCategoryDifficulty.medium, ...sejarahCategoryDifficulty.hard] : [] },
-        { field: 'score_pjk',       label: 'PJK',       list: typeof kesihatanCategoryDifficulty !== 'undefined' ? [...kesihatanCategoryDifficulty.easy, ...kesihatanCategoryDifficulty.medium, ...kesihatanCategoryDifficulty.hard] : [] },
-        { field: 'score_muzik',     label: 'Muzik',     list: typeof muzikCategoryDifficulty !== 'undefined' ? [...muzikCategoryDifficulty.easy, ...muzikCategoryDifficulty.medium, ...muzikCategoryDifficulty.hard] : [] },
-        { field: 'score_moral',     label: 'Moral',     list: typeof moralCategoryDifficulty !== 'undefined' ? [...moralCategoryDifficulty.easy, ...moralCategoryDifficulty.medium, ...moralCategoryDifficulty.hard] : [] },
-        { field: 'score_psv',       label: 'PSV',       list: typeof psvCategoryDifficulty !== 'undefined' ? [...psvCategoryDifficulty.easy, ...psvCategoryDifficulty.medium, ...psvCategoryDifficulty.hard] : [] },
-        { field: 'score_rbt',       label: 'RBT',       list: typeof rbtCategoryDifficulty !== 'undefined' ? [...rbtCategoryDifficulty.easy, ...rbtCategoryDifficulty.medium, ...rbtCategoryDifficulty.hard] : [] },
-        { field: 'score_pai',       label: 'PAI',       list: typeof paiCategoryDifficulty !== 'undefined' ? [...paiCategoryDifficulty.easy, ...paiCategoryDifficulty.medium, ...paiCategoryDifficulty.hard] : [] },
-        { field: 'score_ba',        label: 'B.Arab',    list: typeof baCategoryDifficulty !== 'undefined' ? [...baCategoryDifficulty.easy, ...baCategoryDifficulty.medium, ...baCategoryDifficulty.hard] : [] }
-    ];
-
-    const padananSubjek = senaraiSubjekMaju.find(subjek => subjek.list.includes(currentType));
-
-    if (padananSubjek) {
-        localPlayerData[padananSubjek.field] =
-            (parseInt(localPlayerData[padananSubjek.field]) || 0) + pointsEarned;
-    }
-
-    // Tandakan aktiviti hujung minggu.
-    const todayDay = new Date().getDay();
-    if (todayDay === 0 || todayDay === 6) {
-        localPlayerData.hasPlayedWeekend = true;
-    }
-
-    // Simpan HIGH SCORE kategori menggunakan skor sebenar.
+    // 📚 Rekod high score dan mastery mengikut jumlah sebenar soalan dalam bank.
     if (!localPlayerData.games) localPlayerData.games = {};
+    const catName = currentGameType || 'missing';
+    const currentBest = getRealScore(localPlayerData.games, catName);
+    if (score > currentBest) localPlayerData.games[catName] = score;
 
-    const catName = (typeof currentGameType !== 'undefined' && currentGameType !== "")
-        ? currentGameType
-        : "missing";
+    // XP mengikut subjek.
+    const subjectLists = [
+        { field: 'score_matematik', list: typeof mathCategoryDifficulty !== 'undefined' ? [...mathCategoryDifficulty.easy, ...mathCategoryDifficulty.medium, ...mathCategoryDifficulty.hard] : [] },
+        { field: 'score_english', list: typeof englishCategoryDifficulty !== 'undefined' ? [...englishCategoryDifficulty.easy, ...englishCategoryDifficulty.medium, ...englishCategoryDifficulty.hard] : [] },
+        { field: 'score_sains', list: typeof scienceCategoryDifficulty !== 'undefined' ? [...scienceCategoryDifficulty.easy, ...scienceCategoryDifficulty.medium, ...scienceCategoryDifficulty.hard] : [] },
+        { field: 'score_bm', list: typeof bmCategoryDifficulty !== 'undefined' ? [...bmCategoryDifficulty.easy, ...bmCategoryDifficulty.medium, ...bmCategoryDifficulty.hard] : [] },
+        { field: 'score_sejarah', list: typeof sejarahCategoryDifficulty !== 'undefined' ? [...sejarahCategoryDifficulty.easy, ...sejarahCategoryDifficulty.medium, ...sejarahCategoryDifficulty.hard] : [] },
+        { field: 'score_pjk', list: typeof kesihatanCategoryDifficulty !== 'undefined' ? [...kesihatanCategoryDifficulty.easy, ...kesihatanCategoryDifficulty.medium, ...kesihatanCategoryDifficulty.hard] : [] },
+        { field: 'score_muzik', list: typeof muzikCategoryDifficulty !== 'undefined' ? [...muzikCategoryDifficulty.easy, ...muzikCategoryDifficulty.medium, ...muzikCategoryDifficulty.hard] : [] },
+        { field: 'score_moral', list: typeof moralCategoryDifficulty !== 'undefined' ? [...moralCategoryDifficulty.easy, ...moralCategoryDifficulty.medium, ...moralCategoryDifficulty.hard] : [] },
+        { field: 'score_psv', list: typeof psvCategoryDifficulty !== 'undefined' ? [...psvCategoryDifficulty.easy, ...psvCategoryDifficulty.medium, ...psvCategoryDifficulty.hard] : [] },
+        { field: 'score_rbt', list: typeof rbtCategoryDifficulty !== 'undefined' ? [...rbtCategoryDifficulty.easy, ...rbtCategoryDifficulty.medium, ...rbtCategoryDifficulty.hard] : [] },
+        { field: 'score_pai', list: typeof paiCategoryDifficulty !== 'undefined' ? [...paiCategoryDifficulty.easy, ...paiCategoryDifficulty.medium, ...paiCategoryDifficulty.hard] : [] },
+        { field: 'score_ba', list: typeof baCategoryDifficulty !== 'undefined' ? [...baCategoryDifficulty.easy, ...baCategoryDifficulty.medium, ...baCategoryDifficulty.hard] : [] }
+    ];
+    const subjectMatch = subjectLists.find(x => x.list.includes(catName));
+    if (subjectMatch) subjectMatch && (localPlayerData[subjectMatch.field] = (Number(localPlayerData[subjectMatch.field]) || 0) + finalXPEarned);
 
-    let currentBest = localPlayerData.games[catName] || 0;
-    if (typeof currentBest === 'object') {
-        currentBest = parseInt(
-            currentBest.score || currentBest.best || currentBest.mark || 0
-        );
-    } else {
-        currentBest = parseInt(currentBest) || 0;
-    }
+    // Played list.
+    if (!localPlayerData.playedGamesList) localPlayerData.playedGamesList = [];
+    if (!localPlayerData.playedGamesList.includes(catName)) localPlayerData.playedGamesList.push(catName);
 
-    if (score > currentBest) {
-        localPlayerData.games[catName] = score;
-    }
+    const todayDay = new Date().getDay();
+    if (todayDay === 0 || todayDay === 6) localPlayerData.hasPlayedWeekend = true;
 
-    // Simpan salinan lokal & kemas kini UI.
     try {
         localStorage.setItem('currentPlayer', JSON.stringify(localPlayerData));
         localStorage.setItem('playerData', JSON.stringify(localPlayerData));
     } catch (e) {
-        console.error("Gagal simpan data pemain:", e);
+        console.error('Gagal simpan localStorage:', e);
     }
 
     if (typeof saveCloudPlayerData === 'function') saveCloudPlayerData();
     if (typeof updateUI === 'function') updateUI();
     if (typeof updateJulyLteCardUI === 'function') updateJulyLteCardUI();
+    if (typeof updateLteProgress === 'function') updateLteProgress();
+    if (typeof checkAndUnlockLevels === 'function') checkAndUnlockLevels();
 
-    // CCTV tracker.
     if (window.Trackers) {
-        const isPerfect = (score === totalQuestions && totalQuestions > 0);
-        const catNameForTracker =
-            (typeof currentGameType !== 'undefined' && currentGameType !== "")
-                ? currentGameType
-                : "unknown_game";
-
-        Trackers.rekodTamatGame(catNameForTracker, score, isPerfect);
-        Trackers.rekodKoinDapat(coinsEarned);
+        const isPerfect = score === totalQuestions && totalQuestions > 0;
+        if (typeof Trackers.rekodTamatGame === 'function') Trackers.rekodTamatGame(catName, score, isPerfect);
+        if (typeof Trackers.rekodKoinDapat === 'function') Trackers.rekodKoinDapat(coinsEarned);
     }
 
-    // Rekod buku log permainan.
     try {
-        const currentDifficulty =
-            multiplier === 3 ? "Hard" :
-            multiplier === 2 ? "Medium" : "Easy";
-
-        if (typeof saveGameRecord === 'function') {
-            saveGameRecord(
-                catName,
-                currentDifficulty,
-                score,
-                totalQuestions
-            );
-        }
-
-        if (typeof checkAndUnlockLevels === 'function') {
-            checkAndUnlockLevels();
-        }
+        const currentDifficulty = difficulty === 'hard' ? 'Hard' : (difficulty === 'medium' ? 'Medium' : 'Easy');
+        if (typeof saveGameRecord === 'function') saveGameRecord(catName, currentDifficulty, score, totalQuestions);
     } catch (error) {
-        console.error("Ralat memanggil saveGameRecord:", error);
+        console.error('Ralat saveGameRecord:', error);
     }
 
-    // 8. SATU-SATUNYA SweetAlert keputusan permainan.
-    // Tiada popup keputusan dijalankan ketika fail JS dimuatkan.
-    const safePercentage = Math.round((score / totalQuestions) * 100);
+    if (typeof db !== 'undefined' && db && typeof studentInfo !== 'undefined' && studentInfo.name) {
+        const docId = `${studentInfo.school}_${studentInfo.class}_${studentInfo.name}`.replace(/\s+/g, '_');
+        db.collection('players').doc(docId).set(localPlayerData, { merge: true })
+            .then(() => console.log('Data permainan + Coins + Gems berjaya disimpan ke Firebase!'))
+            .catch(e => console.error('Gagal sync pemain:', e));
+    }
 
-    Swal.fire({
-        icon: safePercentage >= 50 ? 'success' : 'error',
-        title: 'Permainan Tamat! 🏁',
-        html: `
-            Anda berjaya menjawab <b>${score}</b> daripada
-            <b>${totalQuestions}</b> soalan dengan betul.<br><br>
-            Markah Keseluruhan:
-            <span class="text-2xl font-bold text-indigo-600">${safePercentage}%</span>
-            <br><br>
-            <span class="text-sm text-green-600 font-bold">
-                + ${pointsEarned} XP Earned!
-            </span>
-            <br>
-            <span class="text-sm text-yellow-600 font-bold">
-                + ${coinsEarned} Coins Earned!
-            </span>
-        `,
-        confirmButtonText: 'Kembali ke Menu',
-        confirmButtonColor: '#4f46e5',
-        allowOutsideClick: false
-    }).then(() => {
-        const gameArena = document.getElementById('game-arena');
-        const menuScreen = document.getElementById('menu-screen');
-        const finalScoreScreen = document.getElementById('final-score');
-
-        if (gameArena) gameArena.classList.add('hidden');
-        if (finalScoreScreen) finalScoreScreen.classList.add('hidden');
-        if (menuScreen) menuScreen.classList.remove('hidden');
-
-        if (typeof playBgMusic === 'function') playBgMusic();
-        if (typeof backToSubjects === 'function') backToSubjects();
+    showResultModal({
+        score,
+        totalQuestions,
+        percentage,
+        pointsEarned: finalXPEarned,
+        coinsEarned,
+        gemsEarned,
+        completionBonus,
+        difficulty: difficulty.charAt(0).toUpperCase() + difficulty.slice(1),
+        topicTitle: String(catName).replace(/_/g, ' ').toUpperCase(),
+        dipengaruhiLTE,
+        jenisBoost
     });
 }
-    
 
 function updateUI() {
     // 1. Pastikan data pemain wujud
@@ -4199,8 +4186,22 @@ function updateUI() {
     const elCoins = document.getElementById('display-coins');
     const elUserCoins = document.getElementById('user-coins');
     
-    if (elCoins) elCoins.innerText = localPlayerData.coins || 0;
-    if (elUserCoins) elUserCoins.innerText = localPlayerData.coins || 0;
+    if (elCoins) elCoins.innerText = Number(localPlayerData.coins || 0).toLocaleString();
+    if (elUserCoins) elUserCoins.innerText = Number(localPlayerData.coins || 0).toLocaleString();
+
+    // 💎 Sokongan Gems. Jika elemen UI belum ada, data tetap disimpan untuk kegunaan akan datang.
+    const gemElements = ['display-gems', 'user-gems', 'gems-count', 'display-gem'];
+    gemElements.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = Number(localPlayerData.gems || 0).toLocaleString();
+    });
+
+    // Pastikan field ekonomi baharu sentiasa wujud. Welcome Gift dituntut sekali sahaja
+    // dan dipagari oleh transaksi Firestore apabila sambungan tersedia.
+    ensureEconomyFields();
+    if (!localPlayerData.welcomeBonusClaimed && typeof claimWelcomeBonusOnce === 'function') {
+        claimWelcomeBonusOnce().catch(err => console.warn('Welcome Gift:', err));
+    }
 
     // 4. Kemaskini Nama & Kelas
     const nameEl = document.getElementById('menu-player-name');
