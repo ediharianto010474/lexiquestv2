@@ -174,11 +174,17 @@
             </div>
         </div>
 
-        <!-- BLOK COIN & LOGOUT ASAL -->
+        <!-- BLOK WALLET: COINS + GEMS + LOGOUT -->
         <div class="flex flex-col items-end gap-2 flex-shrink-0">
-            <div class="bg-yellow-400 text-yellow-900 px-3 py-1.5 rounded-xl font-bold shadow-[0_3px_0_0_#ca8a04] flex items-center gap-1.5 border border-yellow-200">
-                <span class="text-base md:text-lg">💰</span>
-                <span id="user-coins" class="text-base md:text-lg">0</span>
+            <div class="flex items-center gap-2">
+                <div class="bg-yellow-400 text-yellow-900 px-3 py-1.5 rounded-xl font-bold shadow-[0_3px_0_0_#ca8a04] flex items-center gap-1.5 border border-yellow-200 min-w-[82px] justify-center" title="Coins">
+                    <span class="text-base md:text-lg">💰</span>
+                    <span id="user-coins" class="text-base md:text-lg">0</span>
+                </div>
+                <div class="bg-cyan-400 text-cyan-950 px-3 py-1.5 rounded-xl font-bold shadow-[0_3px_0_0_#0891b2] flex items-center gap-1.5 border border-cyan-200 min-w-[82px] justify-center" title="Gems">
+                    <span class="text-base md:text-lg">💎</span>
+                    <span id="display-gems" class="text-base md:text-lg">0</span>
+                </div>
             </div>
             <button onclick="logout()" class="text-[9px] md:text-[10px] font-black text-red-500 hover:text-red-700 uppercase tracking-widest transition-colors drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
                 Logout ➔
