@@ -729,18 +729,31 @@ async function claimEndBossRewards(finalBlowPlayerName) {
 
     if (myRankIndex === -1) return null; 
 
-    let bonusXp = 0, bonusCoins = 0;
+    let bonusXp = 0, bonusCoins = 0, bonusGems = 0;
 
-    if (myRankIndex === 0) { bonusXp += 3000; bonusCoins += 5000; } 
-    else if (myRankIndex === 1) { bonusXp += 2000; bonusCoins += 4000; } 
-    else if (myRankIndex === 2) { bonusXp += 1000; bonusCoins += 3000; } 
-    else { bonusXp += 500; bonusCoins += 1000; }
+    // 💎 GANJARAN GEMS BOSS BATTLE
+    // Gems diberikan berdasarkan kedudukan akhir supaya kekal rare dan bernilai.
+    if (myRankIndex === 0) {
+        bonusXp += 3000; bonusCoins += 5000; bonusGems += 10;
+    } else if (myRankIndex === 1) {
+        bonusXp += 2000; bonusCoins += 4000; bonusGems += 7;
+    } else if (myRankIndex === 2) {
+        bonusXp += 1000; bonusCoins += 3000; bonusGems += 5;
+    } else {
+        bonusXp += 500; bonusCoins += 1000; bonusGems += 2;
+    }
 
     let isFinalBlow = (myName === finalBlowPlayerName);
-    if (isFinalBlow) { bonusXp += 1000; bonusCoins += 2500; }
+    if (isFinalBlow) {
+        bonusXp += 1000;
+        bonusCoins += 2500;
+        bonusGems += 5; // 💎 Bonus Final Blow
+    }
 
     localPlayerData.coins = parseInt(localPlayerData.coins || 0) + bonusCoins;
     localPlayerData.total_xp = parseInt(localPlayerData.total_xp || 0) + bonusXp;
+    localPlayerData.gems = parseInt(localPlayerData.gems || 0) + bonusGems;
+    localPlayerData.totalGemsEarned = parseInt(localPlayerData.totalGemsEarned || 0) + bonusGems;
     localStorage.setItem('currentPlayer', JSON.stringify(localPlayerData));
 
     try {
@@ -748,12 +761,14 @@ async function claimEndBossRewards(finalBlowPlayerName) {
         if (!snapshot.empty) {
             await db.collection("players").doc(snapshot.docs[0].id).update({
                 coins: firebase.firestore.FieldValue.increment(bonusCoins),
-                total_xp: firebase.firestore.FieldValue.increment(bonusXp)
+                total_xp: firebase.firestore.FieldValue.increment(bonusXp),
+                gems: firebase.firestore.FieldValue.increment(bonusGems),
+                totalGemsEarned: firebase.firestore.FieldValue.increment(bonusGems)
             });
         }
     } catch (err) {}
 
-    return { xp: bonusXp, coins: bonusCoins, rank: myRankIndex + 1, isFinalBlow };
+    return { xp: bonusXp, coins: bonusCoins, gems: bonusGems, rank: myRankIndex + 1, isFinalBlow };
 }
 
 // ==========================================
@@ -927,6 +942,7 @@ if (!slayerName || slayerName === 'undefined') {
                 <p class="text-sm font-bold text-gray-700">Kedudukan: <span class="text-blue-600">#${rewardInfo.rank}</span></p>
                 <p class="text-sm font-bold text-gray-700">Syiling: <span class="text-yellow-600">+${rewardInfo.coins} 💰</span></p>
                 <p class="text-sm font-bold text-gray-700">XP: <span class="text-green-600">+${rewardInfo.xp} ⭐</span></p>
+                <p class="text-sm font-bold text-gray-700">Gems: <span class="text-cyan-600">+${rewardInfo.gems} 💎</span></p>
                 ${rewardInfo.isFinalBlow ? `<p class="mt-2 text-xs text-red-600 font-black text-center animate-pulse">(TERMASUK BONUS FINAL BLOW!)</p>` : ''}
             </div>
         `;
