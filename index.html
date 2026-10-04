@@ -29,6 +29,402 @@
 </script>
 
     <link rel="stylesheet" href="style.css">
+
+
+<!-- ========================================================= -->
+<!-- 📱 LEXIQUEST MOBILE RESPONSIVE PATCH v1.0                 -->
+<!-- Tidak mengubah fungsi JavaScript / ID asal.                -->
+<!-- ========================================================= -->
+<style id="lexiquest-mobile-responsive">
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
+    body { -webkit-text-size-adjust: 100%; }
+    button, input, select, textarea { max-width: 100%; }
+    img, video, canvas { max-width: 100%; height: auto; }
+
+    @media (max-width: 640px) {
+        /* ---------- GLOBAL ---------- */
+        body { min-height: 100dvh; }
+        .glass { max-width: calc(100vw - 20px) !important; }
+
+        /* ---------- LOGIN ---------- */
+        #auth-screen {
+            width: calc(100vw - 24px) !important;
+            max-width: 430px !important;
+            margin: 0 auto !important;
+            padding: 14px !important;
+            min-height: 100dvh;
+        }
+        #auth-screen input,
+        #auth-screen select,
+        #auth-screen button { min-height: 44px; }
+
+        /* ---------- MAIN MENU HEADER ---------- */
+        #menu-screen {
+            width: 100%;
+            padding: 8px 8px 90px !important;
+            overflow-x: hidden;
+        }
+
+        #menu-screen > div:first-child {
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            padding: 6px !important;
+            margin-bottom: 6px !important;
+        }
+
+        #dashboard-avatar-container {
+            width: 58px !important;
+            height: 58px !important;
+            font-size: 2rem !important;
+        }
+
+        #menu-screen > div:first-child > div.flex.items-center.gap-3 {
+            width: 100%;
+            justify-content: center;
+            gap: 8px !important;
+            min-width: 0;
+        }
+
+        #menu-screen #menu-player-name {
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.95rem !important;
+        }
+
+        #menu-screen #menu-player-class,
+        #menu-screen #header-active-title,
+        #menu-screen #menu-player-level {
+            max-width: 110px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #menu-screen > div:first-child .w-40,
+        #menu-screen > div:first-child .md\:w-48 {
+            width: min(100%, 220px) !important;
+        }
+
+        /* Wallet menjadi satu baris dan tidak menolak profil */
+        #menu-screen > div:first-child > div.flex.flex-col.items-end {
+            width: 100%;
+            align-items: center !important;
+            gap: 4px !important;
+        }
+
+        #menu-screen > div:first-child > div.flex.flex-col.items-end > div {
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        #menu-screen > div:first-child .min-w-\[82px\] {
+            min-width: 0 !important;
+            width: 42vw;
+            max-width: 130px;
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+        }
+
+        #lte-active-widget {
+            width: 100% !important;
+            max-width: 360px;
+            margin: 0 auto;
+            justify-content: center;
+        }
+
+        /* ---------- STUDENT MENU ---------- */
+        #dashboard-student {
+            width: 100% !important;
+            padding: 0 4px 30px;
+            gap: 10px !important;
+        }
+
+        #dashboard-student > div:first-child {
+            width: 100% !important;
+            max-width: 390px !important;
+        }
+
+        #dashboard-student button {
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+
+        /* ---------- FLOATING ONLINE PLAYERS ---------- */
+        #menu-screen > div.fixed.bottom-4.left-4 {
+            display: none !important;
+        }
+
+        /* Music button: kecil dan tidak bertembung dengan Boss card */
+        body > button.fixed.bottom-4.right-4 {
+            right: 10px !important;
+            bottom: 10px !important;
+            padding: 9px !important;
+            width: 42px;
+            height: 42px;
+        }
+        body > button.fixed.bottom-4.right-4 i {
+            font-size: 0.95rem !important;
+        }
+
+        /* Boss notification card */
+        #boss-challenge-btn-floating {
+            width: 100% !important;
+            max-width: 350px !important;
+        }
+        #dashboard-student .fixed.bottom-4.left-1\/2 {
+            bottom: 58px !important;
+            width: calc(100% - 24px) !important;
+            max-width: 350px !important;
+        }
+
+        /* ---------- ADMIN DASHBOARDS ---------- */
+        #dashboard-super-admin,
+        #dashboard-school-admin {
+            width: 100% !important;
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+            padding: 0 4px 30px;
+        }
+        #dashboard-super-admin > button,
+        #dashboard-school-admin > button {
+            grid-column: auto !important;
+            min-height: 82px;
+            padding: 14px !important;
+        }
+
+        /* ---------- FULLSCREEN SCREENS / MODALS ---------- */
+        #game-arena,
+        #challenge-lobby-screen,
+        #pvp-arena,
+        #leaderboard-screen,
+        #shop-screen,
+        #subject-modal,
+        #boss-arena,
+        #arena-lobby-container,
+        #screen-battle-analysis {
+            padding: 8px !important;
+            align-items: center !important;
+        }
+
+        #game-arena > div,
+        #challenge-lobby-screen > div,
+        #leaderboard-screen > div,
+        #shop-screen > div,
+        #pvp-arena > div {
+            width: 100% !important;
+            max-width: 100% !important;
+            max-height: calc(100dvh - 16px) !important;
+            border-radius: 20px !important;
+            padding: 12px !important;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* ---------- SOLO GAME ---------- */
+        #game-arena > div {
+            padding: 12px !important;
+        }
+        #game-arena .border-b-2 {
+            margin-bottom: 10px !important;
+            padding-bottom: 10px !important;
+            gap: 8px !important;
+        }
+        #game-title {
+            font-size: 1.15rem !important;
+            line-height: 1.2;
+            max-width: 55vw;
+            overflow-wrap: anywhere;
+        }
+        #timer-text { font-size: 1rem !important; }
+        #question-container {
+            min-height: 0 !important;
+            max-height: calc(100dvh - 190px) !important;
+            padding-right: 0 !important;
+            margin-bottom: 10px !important;
+        }
+        #question-container > div {
+            padding: 12px !important;
+            border-radius: 16px !important;
+            overflow-wrap: anywhere;
+        }
+        #question-container label {
+            padding: 11px !important;
+            gap: 8px !important;
+            min-height: 48px;
+        }
+        #question-container label span {
+            font-size: 0.95rem !important;
+            line-height: 1.35 !important;
+            overflow-wrap: anywhere;
+        }
+        #question-container input[type="radio"] {
+            width: 22px !important;
+            height: 22px !important;
+            flex: 0 0 auto;
+        }
+        #check-btn {
+            min-height: 50px;
+            padding: 12px !important;
+            font-size: 0.95rem !important;
+        }
+        #final-score {
+            margin-top: 10px !important;
+            padding: 14px !important;
+        }
+
+        /* ---------- PVP ---------- */
+        #pvp-arena > div { gap: 8px !important; }
+        #pvp-arena > div > div:first-child {
+            padding: 10px !important;
+            border-width: 2px !important;
+            border-radius: 18px !important;
+        }
+        #pvp-arena .w-1\/3 { width: 31% !important; }
+        #pvp-arena .w-16.h-16 {
+            width: 46px !important;
+            height: 46px !important;
+            font-size: 1.35rem !important;
+            margin-bottom: 4px !important;
+        }
+        #pvp-arena [id$="-name"] { font-size: 0.68rem !important; }
+        #pvp-arena [id$="-score"] { font-size: 1.8rem !important; }
+        #pvp-arena .text-5xl.md\:text-6xl {
+            font-size: 2rem !important;
+        }
+        #pvp-category-title {
+            font-size: 0.55rem !important;
+            padding-left: 7px !important;
+            padding-right: 7px !important;
+        }
+        #pvp-arena .glass {
+            padding: 12px !important;
+        }
+        #pvp-question-display {
+            font-size: 1.35rem !important;
+            min-height: 70px !important;
+            overflow-wrap: anywhere;
+            text-align: center;
+        }
+        #pvp-options-container {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+        }
+        #pvp-options-container button {
+            min-height: 52px;
+            padding: 10px !important;
+            font-size: 0.95rem !important;
+            overflow-wrap: anywhere;
+        }
+        #pvp-answer-input { font-size: 1.1rem !important; padding: 12px !important; }
+
+        /* ---------- LEADERBOARD / SHOP / ADMIN ---------- */
+        #leaderboard-screen .text-2xl,
+        #shop-screen .text-2xl { font-size: 1.15rem !important; }
+        #leaderboard-list { padding-right: 0 !important; }
+        #shop-screen .grid { grid-template-columns: 1fr !important; }
+
+        #admin-screen,
+        #sa-schools-screen,
+        #sa-students-screen,
+        #sa-analysis-screen,
+        #sch-manage-shop-screen {
+            width: calc(100vw - 16px) !important;
+            max-width: calc(100vw - 16px) !important;
+            max-height: calc(100dvh - 16px);
+            overflow-y: auto;
+            padding: 14px !important;
+            margin: 8px auto !important;
+            border-radius: 20px !important;
+        }
+
+        #admin-screen h2,
+        #sa-schools-screen h2,
+        #sa-students-screen h2,
+        #sa-analysis-screen h2,
+        #sch-manage-shop-screen h2 {
+            font-size: 1.2rem !important;
+            line-height: 1.25;
+        }
+
+        #sa-analysis-screen .grid {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+        }
+        #sa-analysis-screen .text-5xl { font-size: 2.5rem !important; }
+
+        /* Jadual / data table boleh scroll secara mendatar, bukan memaksa skrin */
+        .overflow-x-auto {
+            max-width: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+        table { min-width: 560px; }
+
+        /* ---------- GENERIC FORMS ---------- */
+        input, select, textarea { font-size: 16px !important; }
+        .grid.grid-cols-2 { grid-template-columns: 1fr !important; }
+        .grid.grid-cols-3 { grid-template-columns: 1fr !important; }
+        .grid.grid-cols-4 { grid-template-columns: 1fr !important; }
+
+        /* SweetAlert: elakkan popup terkeluar skrin */
+        .swal2-popup {
+            width: calc(100vw - 24px) !important;
+            max-width: 420px !important;
+            padding: 1rem !important;
+            border-radius: 20px !important;
+        }
+        .swal2-title {
+            font-size: 1.2rem !important;
+            line-height: 1.25 !important;
+        }
+        .swal2-html-container {
+            margin: 0.5rem 0 !important;
+            max-height: 55vh !important;
+            overflow-y: auto !important;
+        }
+        .swal2-actions { flex-wrap: wrap !important; }
+        .swal2-actions button {
+            min-height: 44px !important;
+            margin: 4px !important;
+        }
+
+        /* ---------- BOSS ARENA ---------- */
+        #boss-arena {
+            padding: 6px !important;
+            align-items: stretch !important;
+        }
+        #boss-arena > div {
+            width: 100% !important;
+            max-width: 100% !important;
+            max-height: calc(100dvh - 12px) !important;
+            border-radius: 18px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+        #boss-arena button { min-height: 44px; }
+
+        /* ---------- LANDSCAPE PHONE ---------- */
+        @media (orientation: landscape) and (max-height: 500px) {
+            #dashboard-student { padding-bottom: 15px; }
+            #dashboard-student button.w-16.h-16 {
+                width: 52px !important;
+                height: 52px !important;
+            }
+            #dashboard-student .fixed.bottom-4.left-1\/2 {
+                display: none !important;
+            }
+            #question-container { max-height: calc(100dvh - 130px) !important; }
+        }
+    }
+</style>
+
 </head>
 
 <body class="bg-cover bg-center bg-fixed bg-no-repeat min-h-screen font-['Poppins']" style="background-image: url('assets/bg.webp');"> 
