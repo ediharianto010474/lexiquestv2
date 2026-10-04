@@ -31,398 +31,338 @@
     <link rel="stylesheet" href="style.css">
 
 
-<!-- ========================================================= -->
-<!-- 📱 LEXIQUEST MOBILE RESPONSIVE PATCH v1.0                 -->
-<!-- Tidak mengubah fungsi JavaScript / ID asal.                -->
-<!-- ========================================================= -->
-<style id="lexiquest-mobile-responsive">
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
-    body { -webkit-text-size-adjust: 100%; }
-    button, input, select, textarea { max-width: 100%; }
-    img, video, canvas { max-width: 100%; height: auto; }
+<!-- ============================================================
+     📱 LEXIQUEST MOBILE UI 2.0
+     Responsive override: fungsi/game JS tidak diubah.
+     ============================================================ -->
+<style>
+html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
 
-    @media (max-width: 640px) {
-        /* ---------- GLOBAL ---------- */
-        body { min-height: 100dvh; }
-        .glass { max-width: calc(100vw - 20px) !important; }
+button, input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+}
 
-        /* ---------- LOGIN ---------- */
-        #auth-screen {
-            width: calc(100vw - 24px) !important;
-            max-width: 430px !important;
-            margin: 0 auto !important;
-            padding: 14px !important;
-            min-height: 100dvh;
-        }
-        #auth-screen input,
-        #auth-screen select,
-        #auth-screen button { min-height: 44px; }
+@media (max-width: 767px) {
+    :root { --mobile-gutter: 10px; --mobile-bottom-safe: 82px; }
 
-        /* ---------- MAIN MENU HEADER ---------- */
-        #menu-screen {
-            width: 100%;
-            padding: 8px 8px 90px !important;
-            overflow-x: hidden;
-        }
-
-        #menu-screen > div:first-child {
-            width: 100% !important;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: stretch !important;
-            justify-content: center !important;
-            gap: 8px !important;
-            padding: 6px !important;
-            margin-bottom: 6px !important;
-        }
-
-        #dashboard-avatar-container {
-            width: 58px !important;
-            height: 58px !important;
-            font-size: 2rem !important;
-        }
-
-        #menu-screen > div:first-child > div.flex.items-center.gap-3 {
-            width: 100%;
-            justify-content: center;
-            gap: 8px !important;
-            min-width: 0;
-        }
-
-        #menu-screen #menu-player-name {
-            max-width: 180px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-size: 0.95rem !important;
-        }
-
-        #menu-screen #menu-player-class,
-        #menu-screen #header-active-title,
-        #menu-screen #menu-player-level {
-            max-width: 110px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        #menu-screen > div:first-child .w-40,
-        #menu-screen > div:first-child .md\:w-48 {
-            width: min(100%, 220px) !important;
-        }
-
-        /* Wallet menjadi satu baris dan tidak menolak profil */
-        #menu-screen > div:first-child > div.flex.flex-col.items-end {
-            width: 100%;
-            align-items: center !important;
-            gap: 4px !important;
-        }
-
-        #menu-screen > div:first-child > div.flex.flex-col.items-end > div {
-            width: 100%;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        #menu-screen > div:first-child .min-w-\[82px\] {
-            min-width: 0 !important;
-            width: 42vw;
-            max-width: 130px;
-            padding-left: 8px !important;
-            padding-right: 8px !important;
-        }
-
-        #lte-active-widget {
-            width: 100% !important;
-            max-width: 360px;
-            margin: 0 auto;
-            justify-content: center;
-        }
-
-        /* ---------- STUDENT MENU ---------- */
-        #dashboard-student {
-            width: 100% !important;
-            padding: 0 4px 30px;
-            gap: 10px !important;
-        }
-
-        #dashboard-student > div:first-child {
-            width: 100% !important;
-            max-width: 390px !important;
-        }
-
-        #dashboard-student button {
-            flex-shrink: 0;
-            touch-action: manipulation;
-        }
-
-        /* ---------- FLOATING ONLINE PLAYERS ---------- */
-        #menu-screen > div.fixed.bottom-4.left-4 {
-            display: none !important;
-        }
-
-        /* Music button: kecil dan tidak bertembung dengan Boss card */
-        body > button.fixed.bottom-4.right-4 {
-            right: 10px !important;
-            bottom: 10px !important;
-            padding: 9px !important;
-            width: 42px;
-            height: 42px;
-        }
-        body > button.fixed.bottom-4.right-4 i {
-            font-size: 0.95rem !important;
-        }
-
-        /* Boss notification card */
-        #boss-challenge-btn-floating {
-            width: 100% !important;
-            max-width: 350px !important;
-        }
-        #dashboard-student .fixed.bottom-4.left-1\/2 {
-            bottom: 58px !important;
-            width: calc(100% - 24px) !important;
-            max-width: 350px !important;
-        }
-
-        /* ---------- ADMIN DASHBOARDS ---------- */
-        #dashboard-super-admin,
-        #dashboard-school-admin {
-            width: 100% !important;
-            grid-template-columns: 1fr !important;
-            gap: 10px !important;
-            padding: 0 4px 30px;
-        }
-        #dashboard-super-admin > button,
-        #dashboard-school-admin > button {
-            grid-column: auto !important;
-            min-height: 82px;
-            padding: 14px !important;
-        }
-
-        /* ---------- FULLSCREEN SCREENS / MODALS ---------- */
-        #game-arena,
-        #challenge-lobby-screen,
-        #pvp-arena,
-        #leaderboard-screen,
-        #shop-screen,
-        #subject-modal,
-        #boss-arena,
-        #arena-lobby-container,
-        #screen-battle-analysis {
-            padding: 8px !important;
-            align-items: center !important;
-        }
-
-        #game-arena > div,
-        #challenge-lobby-screen > div,
-        #leaderboard-screen > div,
-        #shop-screen > div,
-        #pvp-arena > div {
-            width: 100% !important;
-            max-width: 100% !important;
-            max-height: calc(100dvh - 16px) !important;
-            border-radius: 20px !important;
-            padding: 12px !important;
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
-        /* ---------- SOLO GAME ---------- */
-        #game-arena > div {
-            padding: 12px !important;
-        }
-        #game-arena .border-b-2 {
-            margin-bottom: 10px !important;
-            padding-bottom: 10px !important;
-            gap: 8px !important;
-        }
-        #game-title {
-            font-size: 1.15rem !important;
-            line-height: 1.2;
-            max-width: 55vw;
-            overflow-wrap: anywhere;
-        }
-        #timer-text { font-size: 1rem !important; }
-        #question-container {
-            min-height: 0 !important;
-            max-height: calc(100dvh - 190px) !important;
-            padding-right: 0 !important;
-            margin-bottom: 10px !important;
-        }
-        #question-container > div {
-            padding: 12px !important;
-            border-radius: 16px !important;
-            overflow-wrap: anywhere;
-        }
-        #question-container label {
-            padding: 11px !important;
-            gap: 8px !important;
-            min-height: 48px;
-        }
-        #question-container label span {
-            font-size: 0.95rem !important;
-            line-height: 1.35 !important;
-            overflow-wrap: anywhere;
-        }
-        #question-container input[type="radio"] {
-            width: 22px !important;
-            height: 22px !important;
-            flex: 0 0 auto;
-        }
-        #check-btn {
-            min-height: 50px;
-            padding: 12px !important;
-            font-size: 0.95rem !important;
-        }
-        #final-score {
-            margin-top: 10px !important;
-            padding: 14px !important;
-        }
-
-        /* ---------- PVP ---------- */
-        #pvp-arena > div { gap: 8px !important; }
-        #pvp-arena > div > div:first-child {
-            padding: 10px !important;
-            border-width: 2px !important;
-            border-radius: 18px !important;
-        }
-        #pvp-arena .w-1\/3 { width: 31% !important; }
-        #pvp-arena .w-16.h-16 {
-            width: 46px !important;
-            height: 46px !important;
-            font-size: 1.35rem !important;
-            margin-bottom: 4px !important;
-        }
-        #pvp-arena [id$="-name"] { font-size: 0.68rem !important; }
-        #pvp-arena [id$="-score"] { font-size: 1.8rem !important; }
-        #pvp-arena .text-5xl.md\:text-6xl {
-            font-size: 2rem !important;
-        }
-        #pvp-category-title {
-            font-size: 0.55rem !important;
-            padding-left: 7px !important;
-            padding-right: 7px !important;
-        }
-        #pvp-arena .glass {
-            padding: 12px !important;
-        }
-        #pvp-question-display {
-            font-size: 1.35rem !important;
-            min-height: 70px !important;
-            overflow-wrap: anywhere;
-            text-align: center;
-        }
-        #pvp-options-container {
-            grid-template-columns: 1fr !important;
-            gap: 8px !important;
-        }
-        #pvp-options-container button {
-            min-height: 52px;
-            padding: 10px !important;
-            font-size: 0.95rem !important;
-            overflow-wrap: anywhere;
-        }
-        #pvp-answer-input { font-size: 1.1rem !important; padding: 12px !important; }
-
-        /* ---------- LEADERBOARD / SHOP / ADMIN ---------- */
-        #leaderboard-screen .text-2xl,
-        #shop-screen .text-2xl { font-size: 1.15rem !important; }
-        #leaderboard-list { padding-right: 0 !important; }
-        #shop-screen .grid { grid-template-columns: 1fr !important; }
-
-        #admin-screen,
-        #sa-schools-screen,
-        #sa-students-screen,
-        #sa-analysis-screen,
-        #sch-manage-shop-screen {
-            width: calc(100vw - 16px) !important;
-            max-width: calc(100vw - 16px) !important;
-            max-height: calc(100dvh - 16px);
-            overflow-y: auto;
-            padding: 14px !important;
-            margin: 8px auto !important;
-            border-radius: 20px !important;
-        }
-
-        #admin-screen h2,
-        #sa-schools-screen h2,
-        #sa-students-screen h2,
-        #sa-analysis-screen h2,
-        #sch-manage-shop-screen h2 {
-            font-size: 1.2rem !important;
-            line-height: 1.25;
-        }
-
-        #sa-analysis-screen .grid {
-            grid-template-columns: 1fr !important;
-            gap: 10px !important;
-        }
-        #sa-analysis-screen .text-5xl { font-size: 2.5rem !important; }
-
-        /* Jadual / data table boleh scroll secara mendatar, bukan memaksa skrin */
-        .overflow-x-auto {
-            max-width: 100%;
-            -webkit-overflow-scrolling: touch;
-        }
-        table { min-width: 560px; }
-
-        /* ---------- GENERIC FORMS ---------- */
-        input, select, textarea { font-size: 16px !important; }
-        .grid.grid-cols-2 { grid-template-columns: 1fr !important; }
-        .grid.grid-cols-3 { grid-template-columns: 1fr !important; }
-        .grid.grid-cols-4 { grid-template-columns: 1fr !important; }
-
-        /* SweetAlert: elakkan popup terkeluar skrin */
-        .swal2-popup {
-            width: calc(100vw - 24px) !important;
-            max-width: 420px !important;
-            padding: 1rem !important;
-            border-radius: 20px !important;
-        }
-        .swal2-title {
-            font-size: 1.2rem !important;
-            line-height: 1.25 !important;
-        }
-        .swal2-html-container {
-            margin: 0.5rem 0 !important;
-            max-height: 55vh !important;
-            overflow-y: auto !important;
-        }
-        .swal2-actions { flex-wrap: wrap !important; }
-        .swal2-actions button {
-            min-height: 44px !important;
-            margin: 4px !important;
-        }
-
-        /* ---------- BOSS ARENA ---------- */
-        #boss-arena {
-            padding: 6px !important;
-            align-items: stretch !important;
-        }
-        #boss-arena > div {
-            width: 100% !important;
-            max-width: 100% !important;
-            max-height: calc(100dvh - 12px) !important;
-            border-radius: 18px !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-        }
-        #boss-arena button { min-height: 44px; }
-
-        /* ---------- LANDSCAPE PHONE ---------- */
-        @media (orientation: landscape) and (max-height: 500px) {
-            #dashboard-student { padding-bottom: 15px; }
-            #dashboard-student button.w-16.h-16 {
-                width: 52px !important;
-                height: 52px !important;
-            }
-            #dashboard-student .fixed.bottom-4.left-1\/2 {
-                display: none !important;
-            }
-            #question-container { max-height: calc(100dvh - 130px) !important; }
-        }
+    body {
+        min-height: 100dvh;
+        background-attachment: scroll !important;
     }
+
+    /* ---------- AUTH / LOGIN ---------- */
+    #auth-screen {
+        width: calc(100% - 20px) !important;
+        max-width: 430px !important;
+        margin: 18px auto 70px !important;
+        padding: 10px !important;
+    }
+    #auth-screen h1 { font-size: 2rem !important; }
+    #login-screen input, #login-screen select { min-height: 46px; }
+    #login-screen button { min-height: 48px; }
+
+    /* ---------- TOP HEADER ---------- */
+    #menu-screen > div:first-child {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        grid-template-areas:
+            "profile wallet"
+            "event event" !important;
+        align-items: center !important;
+        gap: 7px !important;
+        width: 100% !important;
+        padding: 8px 10px 5px !important;
+        margin: 0 !important;
+        position: relative;
+        z-index: 30;
+    }
+
+    #menu-screen > div:first-child > #lte-active-widget {
+        grid-area: event !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        justify-self: stretch !important;
+        transform: none !important;
+        margin: 0 !important;
+    }
+
+    #menu-screen > div:first-child > #lte-info-modal { grid-area: auto; }
+
+    #menu-screen > div:first-child > .flex.items-center.gap-3 {
+        grid-area: profile !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        gap: 8px !important;
+    }
+
+    #dashboard-avatar-container {
+        width: 50px !important;
+        height: 50px !important;
+        min-width: 50px !important;
+        font-size: 2rem !important;
+    }
+
+    #menu-player-name {
+        display: block;
+        max-width: 145px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.88rem !important;
+    }
+
+    #menu-player-level, #menu-player-class, #header-active-title {
+        font-size: 8px !important;
+        padding: 2px 5px !important;
+        white-space: nowrap;
+        max-width: 82px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #xp-text, #next-level-text { font-size: 7px !important; }
+    #menu-screen > div:first-child .w-40,
+    #menu-screen > div:first-child .md\:w-48 { width: min(155px, 100%) !important; }
+
+    #menu-screen > div:first-child > .flex.flex-col.items-end {
+        grid-area: wallet !important;
+        width: auto !important;
+        gap: 4px !important;
+        align-items: flex-end !important;
+    }
+
+    #menu-screen > div:first-child > .flex.flex-col.items-end > .flex {
+        gap: 4px !important;
+    }
+
+    #user-coins, #display-gems { font-size: 11px !important; }
+    #menu-screen > div:first-child .bg-yellow-400,
+    #menu-screen > div:first-child .bg-cyan-400 {
+        padding: 5px 7px !important;
+        border-radius: 10px !important;
+    }
+    #menu-screen > div:first-child button[onclick="logout()"] {
+        font-size: 8px !important;
+    }
+
+    /* ---------- STUDENT HOME ---------- */
+    #dashboard-student {
+        width: 100% !important;
+        min-height: calc(100dvh - 105px);
+        margin-top: 2px !important;
+        padding: 0 10px var(--mobile-bottom-safe) !important;
+        justify-content: flex-start !important;
+    }
+
+    #dashboard-student > div:first-child {
+        width: 100% !important;
+        max-width: 430px !important;
+        gap: 7px !important;
+        margin: 4px auto 0 !important;
+        padding-bottom: 95px;
+    }
+
+    #dashboard-student > div:first-child > div:not(:last-child) {
+        width: 100% !important;
+    }
+
+    #dashboard-student button.w-16 {
+        width: 68px !important;
+        height: 68px !important;
+        min-width: 68px !important;
+    }
+
+    #dashboard-student .gap-3 { gap: 12px !important; }
+    #dashboard-student .gap-6 { gap: 30px !important; }
+
+    #dashboard-student button.w-16 i { font-size: 1.05rem !important; }
+    #dashboard-student button.w-16 span { font-size: 7px !important; }
+
+    /* Make touch targets comfortable without making them overlap. */
+    #dashboard-student button {
+        touch-action: manipulation;
+    }
+
+    /* ---------- BOSS FLOATING ALERT ---------- */
+    #dashboard-student > div:first-child > div.fixed.bottom-4 {
+        position: fixed !important;
+        left: 10px !important;
+        right: 10px !important;
+        bottom: 70px !important;
+        width: auto !important;
+        max-width: 430px !important;
+        margin: 0 auto !important;
+        transform: none !important;
+        z-index: 80 !important;
+    }
+
+    #boss-challenge-btn-floating {
+        width: 100% !important;
+        max-height: 150px !important;
+        border-radius: 18px !important;
+    }
+    #boss-challenge-btn-floating > div:first-child {
+        padding: 9px 42px 9px 12px !important;
+    }
+    #boss-challenge-btn-floating > div:first-child > div:first-child {
+        font-size: 1.35rem !important;
+        margin-bottom: 0 !important;
+    }
+    #boss-challenge-btn-floating h3 {
+        font-size: 10px !important;
+        line-height: 1.15 !important;
+    }
+    #floating-boss-name {
+        font-size: 9px !important;
+        line-height: 1.25 !important;
+        margin-top: 3px !important;
+    }
+    #boss-challenge-btn-radar {
+        padding: 7px 10px !important;
+    }
+
+    /* ---------- ONLINE PLAYERS ---------- */
+    #menu-screen > .fixed.bottom-4.left-4 {
+        display: none !important;
+    }
+
+    /* ---------- MUSIC ---------- */
+    body > button[onclick="toggleBgMusic()"] {
+        right: 10px !important;
+        bottom: 10px !important;
+        width: 44px !important;
+        height: 44px !important;
+        padding: 8px !important;
+        z-index: 95 !important;
+    }
+    body > button[onclick="toggleBgMusic()"] i {
+        font-size: 15px !important;
+    }
+
+    /* ---------- ALL MODAL / SCREEN OVERLAYS ---------- */
+    #game-arena, #challenge-lobby-screen, #pvp-arena, #leaderboard-screen,
+    #shop-screen, #achievements-screen {
+        padding: 8px !important;
+        align-items: flex-start !important;
+        overflow-y: auto !important;
+    }
+
+    #game-arena > .glass,
+    #challenge-lobby-screen > .glass,
+    #leaderboard-screen > .glass,
+    #shop-screen > .glass {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: calc(100dvh - 16px) !important;
+        border-radius: 20px !important;
+        padding: 12px !important;
+    }
+
+    /* ---------- SOLO GAME ---------- */
+    #game-arena > .glass { padding: 10px !important; }
+    #game-arena .flex.flex-col.sm\:flex-row {
+        gap: 7px !important;
+        margin-bottom: 8px !important;
+        padding-bottom: 8px !important;
+    }
+    #game-title { font-size: 1.05rem !important; order: 1; }
+    #game-arena button[onclick="showScreen('menu-screen')"] {
+        font-size: 11px !important;
+        padding: 7px 10px !important;
+        order: 0;
+    }
+    #game-arena #timer-text { font-size: 15px !important; }
+    #game-arena .bg-red-100 { padding: 6px 10px !important; order: 2; }
+    #question-container {
+        min-height: 0 !important;
+        max-height: calc(100dvh - 185px) !important;
+        padding-right: 0 !important;
+        margin-bottom: 8px !important;
+    }
+    #question-container > div {
+        padding: 12px !important;
+        border-radius: 16px !important;
+    }
+    #question-container label {
+        padding: 10px !important;
+        gap: 8px !important;
+    }
+    #question-container label span { font-size: 14px !important; line-height: 1.25 !important; }
+    #question-container input[type="radio"] {
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+    }
+    #check-btn { padding: 12px !important; font-size: 15px !important; }
+
+    /* ---------- PVP ---------- */
+    #pvp-arena { align-items: flex-start !important; }
+    #pvp-arena > .w-full { max-height: none !important; gap: 8px !important; }
+    #pvp-arena .bg-gradient-to-r {
+        padding: 10px !important;
+        border-width: 2px !important;
+        border-radius: 18px !important;
+    }
+    #pvp-arena .bg-gradient-to-r > div:first-child,
+    #pvp-arena .bg-gradient-to-r > div:last-child { width: 32% !important; }
+    #pvp-arena .bg-gradient-to-r > div:nth-child(2) { width: 36% !important; }
+    #pvp-arena .bg-gradient-to-r .w-16 {
+        width: 42px !important; height: 42px !important;
+        font-size: 1.25rem !important;
+    }
+    #pvp-p1-name, #pvp-p2-name { font-size: 10px !important; }
+    #pvp-p1-score, #pvp-p2-score { font-size: 1.8rem !important; }
+    #pvp-arena .animate-bounce { font-size: 2.2rem !important; }
+    #pvp-question-display { font-size: 1.35rem !important; min-height: 55px !important; }
+    #pvp-arena .glass { padding: 12px !important; border-radius: 18px !important; }
+    #pvp-options-container { grid-template-columns: 1fr !important; gap: 8px !important; }
+    #pvp-options-container button { padding: 11px !important; font-size: 15px !important; }
+    #pvp-arena .mt-8 { margin-top: 12px !important; }
+
+    /* ---------- SHOP / LEADERBOARD ---------- */
+    #leaderboard-screen .glass, #shop-screen .glass { padding: 12px !important; }
+    #leaderboard-list { padding-right: 0 !important; }
+    #shop-screen .flex.gap-2.mb-6 { padding-bottom: 7px !important; margin-bottom: 10px !important; }
+    #shop-screen .shop-tab-btn { padding: 7px 10px !important; font-size: 11px !important; }
+
+    /* ---------- ADMIN / DATA TABLES ---------- */
+    #admin-screen, #sa-schools-screen, #sa-students-screen, #sa-analysis-screen,
+    #sch-manage-shop-screen {
+        overflow-x: hidden !important;
+    }
+    table { min-width: 620px; }
+    .overflow-x-auto { max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+
+    /* ---------- SWEETALERT2 ---------- */
+    .swal2-container { padding: 10px !important; z-index: 10000 !important; }
+    .swal2-popup {
+        width: calc(100% - 10px) !important;
+        max-width: 390px !important;
+        border-radius: 20px !important;
+        padding: 1rem !important;
+    }
+    .swal2-title { font-size: 1.15rem !important; }
+    .swal2-html-container { font-size: .85rem !important; margin: .5rem 0 !important; }
+    .swal2-actions { width: 100% !important; gap: 7px !important; }
+    .swal2-actions button { min-height: 42px !important; margin: 0 !important; flex: 1; }
+}
+
+@media (max-width: 360px) {
+    #dashboard-avatar-container { width: 44px !important; height: 44px !important; min-width: 44px !important; }
+    #menu-player-name { max-width: 118px; font-size: .78rem !important; }
+    #menu-player-level, #menu-player-class, #header-active-title { max-width: 65px; font-size: 7px !important; }
+    #dashboard-student button.w-16 { width: 62px !important; height: 62px !important; min-width: 62px !important; }
+    #dashboard-student .gap-6 { gap: 20px !important; }
+    #user-coins, #display-gems { font-size: 10px !important; }
+}
+
+@media (min-width: 768px) {
+    #display-gems { display: inline-block; }
+}
 </style>
 
 </head>
@@ -570,14 +510,14 @@
             </div>
         </div>
 
-        <!-- BLOK WALLET: COINS + GEMS + LOGOUT -->
+        <!-- BLOK COIN & LOGOUT ASAL -->
         <div class="flex flex-col items-end gap-2 flex-shrink-0">
-            <div class="flex items-center gap-2">
-                <div class="bg-yellow-400 text-yellow-900 px-3 py-1.5 rounded-xl font-bold shadow-[0_3px_0_0_#ca8a04] flex items-center gap-1.5 border border-yellow-200 min-w-[82px] justify-center" title="Coins">
+            <div class="flex items-center gap-1.5">
+                <div class="bg-yellow-400 text-yellow-900 px-3 py-1.5 rounded-xl font-bold shadow-[0_3px_0_0_#ca8a04] flex items-center gap-1.5 border border-yellow-200">
                     <span class="text-base md:text-lg">💰</span>
                     <span id="user-coins" class="text-base md:text-lg">0</span>
                 </div>
-                <div class="bg-cyan-400 text-cyan-950 px-3 py-1.5 rounded-xl font-bold shadow-[0_3px_0_0_#0891b2] flex items-center gap-1.5 border border-cyan-200 min-w-[82px] justify-center" title="Gems">
+                <div class="bg-cyan-400 text-cyan-950 px-3 py-1.5 rounded-xl font-bold shadow-[0_3px_0_0_#0891b2] flex items-center gap-1.5 border border-cyan-200">
                     <span class="text-base md:text-lg">💎</span>
                     <span id="display-gems" class="text-base md:text-lg">0</span>
                 </div>
