@@ -750,6 +750,112 @@
   }
 
 </style>
+
+<style id="lexiquest-mobile-landscape-boss-final-fix">
+/* FINAL STRUCTURAL FIX: dashboard mempunyai 2 anak terus:
+   anak #1 = menu utama, anak #2 = Boss Challenge.
+   Jadi Boss MESTI diposisikan pada kolum kanan. */
+@media (max-width: 767px) and (orientation: landscape) {
+  #dashboard-student:not(.hidden) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(210px, 30vw) !important;
+    grid-template-areas: "menu boss" !important;
+    align-items: start !important;
+    column-gap: .8rem !important;
+    row-gap: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: .35rem .7rem .7rem !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Anak pertama dashboard = menu utama */
+  #dashboard-student:not(.hidden) > div:first-child {
+    grid-area: menu !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: static !important;
+  }
+
+  /* RESET CSS LAMA: selector div:last-child di bawah menu pernah tersalah
+     dianggap sebagai Boss. Ia sebenarnya wrapper butang Shop/Challenge. */
+  #dashboard-student:not(.hidden) > div:first-child > div:last-child {
+    display: contents !important;
+    grid-area: auto !important;
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Anak kedua dashboard = wrapper Boss Challenge.
+     INILAH elemen yang sebelum ini tersalah sasaran oleh CSS lama. */
+  #dashboard-student:not(.hidden) > div:nth-child(2) {
+    grid-area: boss !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    align-self: start !important;
+    justify-self: stretch !important;
+    pointer-events: none !important;
+    z-index: 100 !important;
+  }
+
+  /* Kad Boss sendiri juga tidak boleh fixed/absolute */
+  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating {
+    position: relative !important;
+    display: flex !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    pointer-events: auto !important;
+    max-height: calc(100dvh - 115px) !important;
+    overflow: hidden auto !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Kurangkan saiz kad supaya muat kemas dalam kolum kanan */
+  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating .p-4 {
+    padding: .55rem !important;
+  }
+
+  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating .text-3xl {
+    font-size: 1.45rem !important;
+    margin-bottom: .15rem !important;
+  }
+
+  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating h3 {
+    font-size: .72rem !important;
+  }
+
+  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating p {
+    font-size: .58rem !important;
+  }
+}
+
+/* Portrait kekal dikunci oleh mobile-landscape-lock. */
+</style>
+
 </head>
 <body class="bg-cover bg-center bg-fixed bg-no-repeat min-h-screen font-['Poppins']" style="background-image: url('assets/bg.webp');">
 <div class="mt-16 p-2 md:p-6 text-center animate-fade-in max-w-md mx-auto relative flex flex-col justify-center items-center overflow-hidden bg-transparent" id="auth-screen">
