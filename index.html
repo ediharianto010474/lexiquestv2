@@ -750,112 +750,6 @@
   }
 
 </style>
-
-<style id="lexiquest-mobile-landscape-boss-final-fix">
-/* FINAL STRUCTURAL FIX: dashboard mempunyai 2 anak terus:
-   anak #1 = menu utama, anak #2 = Boss Challenge.
-   Jadi Boss MESTI diposisikan pada kolum kanan. */
-@media (max-width: 767px) and (orientation: landscape) {
-  #dashboard-student:not(.hidden) {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(210px, 30vw) !important;
-    grid-template-areas: "menu boss" !important;
-    align-items: start !important;
-    column-gap: .8rem !important;
-    row-gap: 0 !important;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: .35rem .7rem .7rem !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Anak pertama dashboard = menu utama */
-  #dashboard-student:not(.hidden) > div:first-child {
-    grid-area: menu !important;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    position: static !important;
-  }
-
-  /* RESET CSS LAMA: selector div:last-child di bawah menu pernah tersalah
-     dianggap sebagai Boss. Ia sebenarnya wrapper butang Shop/Challenge. */
-  #dashboard-student:not(.hidden) > div:first-child > div:last-child {
-    display: contents !important;
-    grid-area: auto !important;
-    position: static !important;
-    inset: auto !important;
-    transform: none !important;
-    width: auto !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    pointer-events: auto !important;
-  }
-
-  /* Anak kedua dashboard = wrapper Boss Challenge.
-     INILAH elemen yang sebelum ini tersalah sasaran oleh CSS lama. */
-  #dashboard-student:not(.hidden) > div:nth-child(2) {
-    grid-area: boss !important;
-    display: block !important;
-    width: 100% !important;
-    max-width: none !important;
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    position: static !important;
-    inset: auto !important;
-    transform: none !important;
-    align-self: start !important;
-    justify-self: stretch !important;
-    pointer-events: none !important;
-    z-index: 100 !important;
-  }
-
-  /* Kad Boss sendiri juga tidak boleh fixed/absolute */
-  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating {
-    position: relative !important;
-    display: flex !important;
-    inset: auto !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    transform: none !important;
-    width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    pointer-events: auto !important;
-    max-height: calc(100dvh - 115px) !important;
-    overflow: hidden auto !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Kurangkan saiz kad supaya muat kemas dalam kolum kanan */
-  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating .p-4 {
-    padding: .55rem !important;
-  }
-
-  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating .text-3xl {
-    font-size: 1.45rem !important;
-    margin-bottom: .15rem !important;
-  }
-
-  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating h3 {
-    font-size: .72rem !important;
-  }
-
-  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating p {
-    font-size: .58rem !important;
-  }
-}
-
-/* Portrait kekal dikunci oleh mobile-landscape-lock. */
-</style>
-
 </head>
 <body class="bg-cover bg-center bg-fixed bg-no-repeat min-h-screen font-['Poppins']" style="background-image: url('assets/bg.webp');">
 <div class="mt-16 p-2 md:p-6 text-center animate-fade-in max-w-md mx-auto relative flex flex-col justify-center items-center overflow-hidden bg-transparent" id="auth-screen">
@@ -3561,5 +3455,234 @@ window.showScreen = function(screenId) {
   }
 }
 </style>
+
+<!-- =========================================================
+     LEXIQUEST v3 — FINAL BOSS CHALLENGE MOBILE POSITION FIX
+     Purpose:
+     1. Remove all fixed/center positioning from Boss Challenge.
+     2. Make the Boss wrapper a normal dashboard grid item.
+     3. Keep mobile portrait/landscape layout stable.
+     4. Do not change JavaScript behaviour.
+     ========================================================= -->
+<style id="lexiquest-boss-final-position-fix">
+  /* Safety: the hidden utility must always win. */
+  #boss-challenge-btn-floating.hidden,
+  #dashboard-student.hidden,
+  #menu-screen.hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 767px) {
+    /*
+      MOBILE STRUCTURE
+      dashboard
+        └── first child
+            ├── first child  = main menu
+            └── last child   = Boss wrapper
+
+      IMPORTANT:
+      The original Boss wrapper was:
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+
+      Therefore changing only the Boss card was insufficient.
+      This block resets BOTH wrapper and card.
+    */
+
+    #dashboard-student:not(.hidden) {
+      position: relative !important;
+      display: block !important;
+      width: 100% !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding-top: .35rem !important;
+      padding-bottom: 1rem !important;
+      overflow: visible !important;
+    }
+
+    #dashboard-student > div:first-child {
+      position: relative !important;
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      grid-template-areas:
+        "boss"
+        "menu" !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      gap: .55rem !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      align-items: start !important;
+      justify-items: stretch !important;
+      overflow: visible !important;
+    }
+
+    /* MAIN MENU */
+    #dashboard-student > div:first-child > div:first-child {
+      grid-area: menu !important;
+      order: 2 !important;
+      position: relative !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 .7rem !important;
+      box-sizing: border-box !important;
+      transform: none !important;
+    }
+
+    /*
+      FINAL BOSS WRAPPER RESET
+      This is the critical fix: reset the parent that originally
+      contained left-1/2 + -translate-x-1/2 + fixed positioning.
+    */
+    #dashboard-student > div:first-child > div:last-child {
+      grid-area: boss !important;
+      order: 1 !important;
+
+      position: relative !important;
+      inset: auto !important;
+      top: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      left: auto !important;
+
+      display: block !important;
+      float: none !important;
+      clear: both !important;
+
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      max-height: none !important;
+
+      margin: 0 0 .35rem 0 !important;
+      padding: 0 .7rem !important;
+      box-sizing: border-box !important;
+
+      transform: none !important;
+      translate: none !important;
+      rotate: none !important;
+      scale: none !important;
+
+      align-self: start !important;
+      justify-self: stretch !important;
+      z-index: 30 !important;
+      pointer-events: none !important;
+      overflow: visible !important;
+    }
+
+    /* FINAL BOSS CARD RESET */
+    #dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
+      position: relative !important;
+      inset: auto !important;
+      top: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      left: auto !important;
+
+      display: block !important;
+      float: none !important;
+
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      max-height: min(48dvh, 420px) !important;
+
+      margin: 0 !important;
+      padding: 0 !important;
+
+      box-sizing: border-box !important;
+      transform: none !important;
+      translate: none !important;
+      rotate: none !important;
+      scale: none !important;
+
+      pointer-events: auto !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+
+      align-self: stretch !important;
+      justify-self: stretch !important;
+      z-index: 31 !important;
+    }
+
+    /*
+      Prevent old Tailwind width/position utilities inside the Boss
+      container from creating another horizontal offset.
+    */
+    #dashboard-student > div:first-child > div:last-child
+      #boss-challenge-btn-floating > * {
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    /* Compact Boss content for small screens. */
+    #dashboard-student > div:first-child > div:last-child
+      #boss-challenge-btn-floating .p-4 {
+      padding: .55rem !important;
+    }
+
+    #dashboard-student > div:first-child > div:last-child
+      #boss-challenge-btn-floating .text-3xl {
+      font-size: 1.5rem !important;
+      line-height: 1.1 !important;
+    }
+
+    /* Main menu remains predictable on portrait phones. */
+    #dashboard-student button[onclick*="openSubjectModal"],
+    #dashboard-student button[onclick*="leaderboard-screen"],
+    #dashboard-student button[onclick*="showAchievementsScreen"],
+    #dashboard-student button[onclick*="shop-screen"],
+    #dashboard-student button[onclick*="checkChallengeEligibility"] {
+      transform: none !important;
+    }
+  }
+
+  /* LANDSCAPE PHONE */
+  @media (max-width: 767px) and (orientation: landscape) {
+    #dashboard-student > div:first-child {
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 30vw) !important;
+      grid-template-areas: "menu boss" !important;
+      gap: .65rem !important;
+      align-items: start !important;
+    }
+
+    #dashboard-student > div:first-child > div:first-child {
+      grid-area: menu !important;
+      order: 1 !important;
+      padding: 0 !important;
+    }
+
+    #dashboard-student > div:first-child > div:last-child {
+      grid-area: boss !important;
+      order: 2 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    #dashboard-student > div:first-child > div:last-child
+      #boss-challenge-btn-floating {
+      width: 100% !important;
+      max-width: 100% !important;
+      max-height: calc(100dvh - 100px) !important;
+    }
+
+    #dashboard-student button[onclick*="openSubjectModal"],
+    #dashboard-student button[onclick*="leaderboard-screen"],
+    #dashboard-student button[onclick*="showAchievementsScreen"],
+    #dashboard-student button[onclick*="shop-screen"],
+    #dashboard-student button[onclick*="checkChallengeEligibility"] {
+      height: 68px !important;
+    }
+  }
+
+  /* DESKTOP/TABLET: leave existing desktop positioning untouched. */
+</style>
+
 </body>
 </html>
