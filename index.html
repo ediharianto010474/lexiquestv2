@@ -750,6 +750,112 @@
   }
 
 </style>
+
+<style id="lexiquest-mobile-landscape-boss-final-fix">
+/* FINAL STRUCTURAL FIX: dashboard mempunyai 2 anak terus:
+   anak #1 = menu utama, anak #2 = Boss Challenge.
+   Jadi Boss MESTI diposisikan pada kolum kanan. */
+@media (max-width: 767px) and (orientation: landscape) {
+  #dashboard-student:not(.hidden) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(210px, 30vw) !important;
+    grid-template-areas: "menu boss" !important;
+    align-items: start !important;
+    column-gap: .8rem !important;
+    row-gap: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: .35rem .7rem .7rem !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Anak pertama dashboard = menu utama */
+  #dashboard-student:not(.hidden) > div:first-child {
+    grid-area: menu !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: static !important;
+  }
+
+  /* RESET CSS LAMA: selector div:last-child di bawah menu pernah tersalah
+     dianggap sebagai Boss. Ia sebenarnya wrapper butang Shop/Challenge. */
+  #dashboard-student:not(.hidden) > div:first-child > div:last-child {
+    display: contents !important;
+    grid-area: auto !important;
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Anak kedua dashboard = wrapper Boss Challenge.
+     INILAH elemen yang sebelum ini tersalah sasaran oleh CSS lama. */
+  #dashboard-student:not(.hidden) > div:nth-child(2) {
+    grid-area: boss !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    align-self: start !important;
+    justify-self: stretch !important;
+    pointer-events: none !important;
+    z-index: 100 !important;
+  }
+
+  /* Kad Boss sendiri juga tidak boleh fixed/absolute */
+  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating {
+    position: relative !important;
+    display: flex !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    pointer-events: auto !important;
+    max-height: calc(100dvh - 115px) !important;
+    overflow: hidden auto !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Kurangkan saiz kad supaya muat kemas dalam kolum kanan */
+  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating .p-4 {
+    padding: .55rem !important;
+  }
+
+  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating .text-3xl {
+    font-size: 1.45rem !important;
+    margin-bottom: .15rem !important;
+  }
+
+  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating h3 {
+    font-size: .72rem !important;
+  }
+
+  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating p {
+    font-size: .58rem !important;
+  }
+}
+
+/* Portrait kekal dikunci oleh mobile-landscape-lock. */
+</style>
+
 </head>
 <body class="bg-cover bg-center bg-fixed bg-no-repeat min-h-screen font-['Poppins']" style="background-image: url('assets/bg.webp');">
 <div class="mt-16 p-2 md:p-6 text-center animate-fade-in max-w-md mx-auto relative flex flex-col justify-center items-center overflow-hidden bg-transparent" id="auth-screen">
@@ -861,6 +967,8 @@
 <div class="flex items-center gap-3">
 <div class="w-16 h-16 md:w-20 md:h-20 flex flex-shrink-0 items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-300 drop-shadow-[0_8px_8px_rgba(0,0,0,0.3)] text-4xl md:text-5xl" id="dashboard-avatar-container" onclick="openProfile()"></div>
 <div>
+<!-- MOBILE BOSS SLOT: Boss Challenge akan dipaparkan tepat di bawah LTE -->
+<div id="lq-mobile-boss-slot" aria-live="polite"></div>
 <h2 class="text-lg md:text-xl font-black text-indigo-900 leading-none uppercase drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]" id="menu-player-name">Adventurer</h2>
 <div class="flex gap-1.5 my-1">
 <span class="text-[9px] md:text-[10px] font-bold text-green-600 bg-white/80 px-1.5 py-0.5 rounded-md border border-green-100 shadow-sm" id="menu-player-level">LVL 1</span>
@@ -971,7 +1079,39 @@
 
 <!-- 🔥 TAMAT SISTEM AMARAN BOSS GABUNGAN 🔥 -->
 </div>
-<!-- BOSS CHALLENGE UI DIKELUARKAN SEMENTARA — AKAN DIBINA SEMULA -->
+<div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-[92%] max-w-sm pointer-events-none">
+<!-- KAD UTAMA: Menggabungkan Amaran & Butang Lawan -->
+<div class="hidden pointer-events-auto bg-white/95 backdrop-blur-md rounded-3xl border-2 border-red-500 shadow-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-all flex flex-col relative" id="boss-challenge-btn-floating" onclick="attemptJoinBoss();">
+<!-- Lencana Hari Ini (Bouncing Badge) -->
+<div class="absolute top-3 right-3 bg-yellow-400 text-black text-[9px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md border border-white animate-bounce">
+                        HARI INI!
+                    </div>
+<!-- Bahagian 1: Notifikasi Amaran (Atas) -->
+<div class="p-4 flex flex-col items-center text-center">
+<div class="text-3xl mb-1 animate-pulse">🐉</div>
+<h3 class="font-black text-red-600 text-sm md:text-base uppercase tracking-wider">
+                            WARNING: BOSS APPEARED!
+                        </h3>
+<p class="text-[11px] text-gray-600 font-semibold mt-1 px-2 leading-relaxed" id="floating-boss-name">
+                            Mummy Mufrodat sedang menyerang! Klik untuk menyertai pertempuran!
+                        </p>
+</div>
+<!-- Bahagian 2: Status HP & Tombol Aksi Ungu (Bawah) -->
+<div class="hidden bg-purple-800 text-white px-4 py-3 border-t border-purple-950 flex flex-col items-center w-full" id="boss-challenge-btn-radar">
+<div class="text-xs font-black flex items-center gap-1.5 uppercase tracking-wider text-purple-100">
+<i class="fas fa-swords text-yellow-400 animate-pulse"></i> ⚔️ MASUK PERTEMPURAN ⚔️
+                        </div>
+<!-- Progress Bar HP Boss -->
+<div class="w-full mt-2">
+<div class="w-full bg-gray-950 rounded-full h-2.5 shadow-inner overflow-hidden p-[1px] border border-purple-600">
+<div class="bg-gradient-to-r from-red-600 via-orange-500 to-red-400 h-full rounded-full transition-all duration-300" id="radar-boss-hp-bar" style="width: 100%;"></div>
+</div>
+<div class="text-[10px] mt-1 text-purple-200 font-mono tracking-widest text-center font-bold" id="radar-boss-hp-text">
+                                HP: - / -
+                            </div>
+</div>
+</div>
+</div>
 </div></div> <!-- PENUTUP DASHBOARD STUDENT -->
 <!-- ========================================================= -->
 <!-- WIDGET PEMAIN DALAM TALIAN (KEKAL DI PENJURU KIRI)       -->
@@ -3424,300 +3564,22 @@ window.showScreen = function(screenId) {
 }
 </style>
 
-
-<!-- =========================================================
-     LEXIQUEST v3 — BOSS BAR v2
-     MOBILE: physically move the existing Boss wrapper into
-     the header immediately after the LTE widget.
-     This removes the Boss from the dashboard positioning tree.
-     ========================================================= -->
-<style id="lexiquest-boss-bar-v2">
-  @media (max-width: 767px) {
-    /* The Boss is now a normal header row, never centered/fixed. */
-    #menu-screen > div:first-child > .lq-boss-mobile-anchor {
-      grid-area: boss !important;
-      position: relative !important;
-      inset: auto !important;
-      left: auto !important;
-      right: auto !important;
-      top: auto !important;
-      bottom: auto !important;
-      transform: none !important;
-      width: 100% !important;
-      max-width: none !important;
-      min-width: 0 !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      display: block !important;
-      align-self: stretch !important;
-      justify-self: stretch !important;
-      pointer-events: none !important;
-      z-index: 60 !important;
-      box-sizing: border-box !important;
-      float: none !important;
-    }
-
-    #menu-screen > div:first-child > .lq-boss-mobile-anchor
-      #boss-challenge-btn-floating {
-      position: relative !important;
-      inset: auto !important;
-      left: auto !important;
-      right: auto !important;
-      top: auto !important;
-      bottom: auto !important;
-      transform: none !important;
-
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: center !important;
-      justify-content: space-between !important;
-
-      width: 100% !important;
-      max-width: none !important;
-      min-width: 0 !important;
-      max-height: none !important;
-      height: auto !important;
-
-      margin: 0 !important;
-      padding: 0 !important;
-      border-radius: 14px !important;
-
-      pointer-events: auto !important;
-      overflow: hidden !important;
-      box-sizing: border-box !important;
-      z-index: 61 !important;
-
-      /* Remove the old large-card appearance. */
-      box-shadow: 0 5px 16px rgba(0,0,0,.28) !important;
-    }
-
-    /* Compact contents = true "bar", not a floating card. */
-    #menu-screen > div:first-child > .lq-boss-mobile-anchor
-      #boss-challenge-btn-floating > .p-4 {
-      flex: 1 1 auto !important;
-      min-width: 0 !important;
-      padding: .55rem .7rem !important;
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: center !important;
-      justify-content: flex-start !important;
-      text-align: left !important;
-      gap: .55rem !important;
-    }
-
-    #menu-screen > div:first-child > .lq-boss-mobile-anchor
-      #boss-challenge-btn-floating > .p-4 > .text-3xl {
-      flex: 0 0 auto !important;
-      margin: 0 !important;
-      font-size: 1.35rem !important;
-    }
-
-    #menu-screen > div:first-child > .lq-boss-mobile-anchor
-      #boss-challenge-btn-floating > .p-4 h3 {
-      font-size: .68rem !important;
-      line-height: 1.05 !important;
-      margin: 0 !important;
-      text-align: left !important;
-      white-space: nowrap !important;
-    }
-
-    #menu-screen > div:first-child > .lq-boss-mobile-anchor
-      #boss-challenge-btn-floating > .p-4 p {
-      font-size: .58rem !important;
-      line-height: 1.15 !important;
-      margin: .12rem 0 0 !important;
-      padding: 0 !important;
-      text-align: left !important;
-      display: -webkit-box !important;
-      -webkit-line-clamp: 1 !important;
-      -webkit-box-orient: vertical !important;
-      overflow: hidden !important;
-    }
-
-    #menu-screen > div:first-child > .lq-boss-mobile-anchor
-      #boss-challenge-btn-radar {
-      flex: 0 0 auto !important;
-      width: auto !important;
-      min-width: 86px !important;
-      padding: .45rem .55rem !important;
-      border-top: 0 !important;
-      border-left: 1px solid rgba(49,46,129,.7) !important;
-      font-size: .55rem !important;
-    }
-
-    #menu-screen > div:first-child > .lq-boss-mobile-anchor
-      #boss-challenge-btn-radar .w-full {
-      margin-top: .15rem !important;
-    }
-
-    /* Badge belongs inside the bar, not floating over the viewport. */
-    #menu-screen > div:first-child > .lq-boss-mobile-anchor
-      #boss-challenge-btn-floating > .absolute {
-      position: absolute !important;
-      top: 4px !important;
-      right: 5px !important;
-      font-size: 6px !important;
-      padding: 1px 5px !important;
-      z-index: 3 !important;
-    }
-
-    /* Header layout: profile/wallet -> LTE -> BOSS -> dashboard. */
-    #menu-screen > div:first-child {
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr) auto !important;
-      grid-template-areas:
-        "profile wallet"
-        "lte lte"
-        "boss boss" !important;
-      align-items: center !important;
-    }
-
-    #menu-screen > div:first-child #lte-active-widget {
-      grid-area: lte !important;
-      justify-self: stretch !important;
-      width: 100% !important;
-      max-width: none !important;
-      transform: none !important;
-      margin: 0 !important;
-    }
-
-    #menu-screen > div:first-child > .lq-boss-mobile-anchor {
-      grid-area: boss !important;
-    }
-
-    /* Dashboard no longer owns the Boss position. */
-    #dashboard-student > div:first-child > .lq-boss-mobile-anchor {
-      display: none !important;
-    }
-  }
-
-  @media (max-width: 767px) and (orientation: landscape) {
-    #menu-screen > div:first-child {
-      grid-template-columns: minmax(0, 1fr) auto !important;
-      grid-template-areas:
-        "profile wallet"
-        "lte lte"
-        "boss boss" !important;
-      gap: .35rem .65rem !important;
-      padding: .45rem .65rem !important;
-    }
-
-    #menu-screen > div:first-child > .lq-boss-mobile-anchor
-      #boss-challenge-btn-floating {
-      min-height: 42px !important;
-    }
-
-    #menu-screen > div:first-child > .lq-boss-mobile-anchor
-      #boss-challenge-btn-floating > .p-4 {
-      padding: .38rem .6rem !important;
-    }
-  }
+<style id="lexiquest-mobile-boss-under-lte-35">
+#lq-mobile-boss-slot{display:none}
+@media (max-width:767px){
+ #menu-screen > div:first-child{display:flex!important;flex-direction:column!important;align-items:stretch!important;width:100%!important;gap:.35rem!important;padding:.45rem .55rem!important;box-sizing:border-box!important}
+ #menu-screen > div:first-child #lte-active-widget{order:1!important;width:100%!important;max-width:none!important;margin:0!important;transform:none!important;box-sizing:border-box!important}
+ #lq-mobile-boss-slot{display:block!important;order:2!important;width:100%!important;max-width:none!important;margin:0!important;padding:.05rem 0 .2rem!important;box-sizing:border-box!important}
+ #lq-mobile-boss-slot #boss-challenge-btn-floating{display:flex!important;position:relative!important;inset:auto!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;border-radius:18px!important;max-height:30dvh!important;overflow:hidden auto!important;z-index:40!important;box-sizing:border-box!important}
+ #lq-mobile-boss-slot #boss-challenge-btn-floating .p-4{padding:.55rem .7rem!important}
+ #menu-screen > .lq-boss-mobile-original-wrapper{display:none!important}
+ #menu-screen > div:first-child > div.flex.items-center.gap-3{order:3!important;width:100%!important;min-width:0!important}
+ #menu-screen > div:first-child > div.flex.flex-col.items-end{order:4!important;width:100%!important}
+ @media (orientation:landscape){#lq-mobile-boss-slot #boss-challenge-btn-floating{max-height:34dvh!important}}
+}
 </style>
-
-<script id="lexiquest-boss-bar-v2-script">
-(function () {
-  function setupBossBarMobile() {
-    const menu = document.getElementById('menu-screen');
-    const header = menu ? menu.querySelector(':scope > div:first-child') : null;
-    const lte = document.getElementById('lte-active-widget');
-    const boss = document.getElementById('boss-challenge-btn-floating');
-
-    if (!menu || !header || !lte || !boss) return;
-
-    /*
-      The actual old Boss wrapper is the parent of the Boss card.
-      We move THAT wrapper, not merely the card.
-    */
-    const wrapper = boss.parentElement;
-    if (!wrapper) return;
-
-    if (!wrapper.dataset.lqOriginalParent) {
-      wrapper.dataset.lqOriginalParent = '1';
-      wrapper._lqOriginalParent = wrapper.parentElement;
-      wrapper._lqOriginalNextSibling = wrapper.nextSibling;
-    }
-
-    const isMobile = window.matchMedia('(max-width: 767px)').matches;
-
-    if (isMobile) {
-      if (!wrapper.classList.contains('lq-boss-mobile-anchor')) {
-        wrapper.classList.add('lq-boss-mobile-anchor');
-      }
-
-      /* Move physically AFTER the LTE element. */
-      if (lte.nextElementSibling !== wrapper) {
-        lte.insertAdjacentElement('afterend', wrapper);
-      }
-
-      /* Strip old fixed/centering utility classes. */
-      [
-        'fixed',
-        'absolute',
-        'left-1/2',
-        '-translate-x-1/2',
-        'bottom-4',
-        'z-50',
-        'w-[92%]',
-        'max-w-sm'
-      ].forEach(cls => wrapper.classList.remove(cls));
-
-      /* The card itself must never retain old fixed positioning. */
-      boss.classList.remove('fixed', 'absolute', 'left-1/2', '-translate-x-1/2');
-    } else {
-      /* Restore desktop DOM position when leaving mobile width. */
-      const originalParent = wrapper._lqOriginalParent;
-      const originalNext = wrapper._lqOriginalNextSibling;
-
-      if (originalParent && wrapper.parentElement !== originalParent) {
-        if (originalNext && originalNext.parentElement === originalParent) {
-          originalParent.insertBefore(wrapper, originalNext);
-        } else {
-          originalParent.appendChild(wrapper);
-        }
-      }
-
-      wrapper.classList.remove('lq-boss-mobile-anchor');
-
-      /* Restore the original classes required by desktop CSS. */
-      [
-        'fixed',
-        'bottom-4',
-        'left-1/2',
-        'transform',
-        '-translate-x-1/2',
-        'z-50',
-        'w-[92%]',
-        'max-w-sm',
-        'pointer-events-none'
-      ].forEach(cls => wrapper.classList.add(cls));
-    }
-  }
-
-  function initBossBar() {
-    setupBossBarMobile();
-
-    let timer;
-    window.addEventListener('resize', function () {
-      clearTimeout(timer);
-      timer = setTimeout(setupBossBarMobile, 80);
-    });
-
-    /* Login/dashboard visibility changes do not alter the DOM location. */
-    const menu = document.getElementById('menu-screen');
-    if (menu) {
-      new MutationObserver(setupBossBarMobile).observe(menu, {
-        attributes: true,
-        attributeFilter: ['class']
-      });
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initBossBar);
-  } else {
-    initBossBar();
-  }
-})();
+<script id="lexiquest-mobile-boss-under-lte-35-script">
+(function(){let originalWrapper=null,moved=false;function placeBoss(){const menu=document.getElementById('menu-screen'),lte=document.getElementById('lte-active-widget'),slot=document.getElementById('lq-mobile-boss-slot'),boss=document.getElementById('boss-challenge-btn-floating');if(!menu||!lte||!slot||!boss)return;if(!originalWrapper){originalWrapper=boss.parentElement;if(originalWrapper)originalWrapper.classList.add('lq-boss-mobile-original-wrapper')}const mobile=window.matchMedia('(max-width:767px)').matches;if(mobile){if(boss.parentElement!==slot)slot.appendChild(boss);moved=true}else if(moved&&originalWrapper){originalWrapper.appendChild(boss);moved=false}}function boot(){placeBoss();window.addEventListener('resize',()=>setTimeout(placeBoss,50),{passive:true});window.addEventListener('orientationchange',()=>setTimeout(placeBoss,100),{passive:true});const menu=document.getElementById('menu-screen');if(menu){const observer=new MutationObserver(()=>{if(window.matchMedia('(max-width:767px)').matches)placeBoss()});observer.observe(menu,{childList:true,subtree:true})}}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot()})();
 </script>
 
 </body>
