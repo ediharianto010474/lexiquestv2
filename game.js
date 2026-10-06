@@ -108,7 +108,13 @@ const LEXI_ECONOMY = {
         { min: 50, coins: 25 },
         { min: 0, coins: 0 }
     ],
-    perfectTopicGems: 5
+    perfectTopicGems: 5,
+    // 💎 Ganjaran Gems untuk mod pertempuran. Gems kekal rare supaya bernilai.
+    battleGems: {
+        pvp: { easy: { win: 2, draw: 1, loss: 0 }, medium: { win: 3, draw: 1, loss: 0 }, hard: { win: 5, draw: 1, loss: 0 } },
+        arena3v3: { rank1: 5, rank2: 3, rank3: 2, other: 0 },
+        boss: { rank1: 10, rank2: 7, rank3: 5, other: 2, finalBlow: 5 }
+    }
 };
 
 function ensureEconomyFields() {
@@ -2667,6 +2673,14 @@ function prosesBattleAnalysis(roomData) {
         const finalCoins = Math.round(asasCoins * multiplierGanjaran);
         const finalXP = Math.round(asasXP * multiplierGanjaran);
 
+        // 💎 Gems Arena 3v3: diberikan berdasarkan ranking individu dalam perlawanan.
+        // Rank #1 = +5, Rank #2 = +3, Rank #3 = +2. Pemain lain = 0.
+        const rankingIndex3v3 = pemainBerMata.findIndex(pemain => pemain.slot === p.slot);
+        const finalGems = rankingIndex3v3 === 0 ? LEXI_ECONOMY.battleGems.arena3v3.rank1
+                         : rankingIndex3v3 === 1 ? LEXI_ECONOMY.battleGems.arena3v3.rank2
+                         : rankingIndex3v3 === 2 ? LEXI_ECONOMY.battleGems.arena3v3.rank3
+                         : LEXI_ECONOMY.battleGems.arena3v3.other;
+
         // =========================================================
         // ⭐ PENGESANAN AVATAR (VERSI BARU: TANPA TOPENG BULAT)
         // =========================================================
@@ -2722,6 +2736,9 @@ function prosesBattleAnalysis(roomData) {
                     <div class="flex items-center gap-1 text-cyan-400">
                         <i class="fas fa-sparkles text-xs"></i> +${finalXP.toLocaleString()} XP
                     </div>
+                    <div class="flex items-center gap-1 text-cyan-300">
+                        <i class="fas fa-gem text-xs"></i> +${finalGems.toLocaleString()} 💎
+                    </div>
                 </div>
             </div>
         `;
@@ -2736,8 +2753,12 @@ function prosesBattleAnalysis(roomData) {
         // "SUIS" UNTUK MENGHANTAR GANJARAN KE DATABASE
         // =========================================================
         if (adakahSaya) {
-            console.log(`🎯 [TRIGGER] Akaun SAYA dikesan! Memanggil fungsi ganjaran...`);
-            simpanGanjaranKeDatabase(p.uid || 'tiada_uid', finalCoins, finalXP);
+            console.log(`🎯 [TRIGGER] Akaun SAYA dikesan! Memanggil fungsi ganjaran... Gems: +${finalGems}`);
+            simpanGanjaranKeDatabase(p.uid || 'tiada_uid', finalCoins, finalXP, null, finalGems, {
+                mode: '3v3',
+                title: '🏟️ Arena 3v3 Tamat!',
+                gemsReward: finalGems
+            });
         }
     });
 
@@ -2799,7 +2820,7 @@ function kembaliKeLobiUtama() {
  * Menyimpan ganjaran Coins dan XP terus ke pangkalan data beserta Console Log
  */
 // 🔴 1. TAMBAHKAN PEMBOLEHBAH/FLAG INI DI BAGIAN PALING ATAS (Luar Fungsi/Global)
-async function simpanGanjaranKeDatabase(uid, earnedCoins, earnedXp, subjectKey = null) {
+async function simpanGanjaranKeDatabase(uid, earnedCoins, earnedXp, subjectKey = null, earnedGems = 0, rewardMeta = null) {
     
     // 🔴 2. SEKATAN KESELAMATAN: Jika sudah disimpan, langsung batalkan fungsi!
     if (isGanjaranDisimpan) {
@@ -2808,7 +2829,8 @@ async function simpanGanjaranKeDatabase(uid, earnedCoins, earnedXp, subjectKey =
     }
 
     console.log("====== 🔥 MULA PROSES SIMPAN GANJARAN 🔥 ======");
-    console.log("1. Data diterima dari perlawanan:", { UID: uid, Koin: earnedCoins, XP: earnedXp });
+    earnedGems = Number(earnedGems) || 0;
+    console.log("1. Data diterima dari perlawanan:", { UID: uid, Koin: earnedCoins, XP: earnedXp, Gems: earnedGems });
     console.log("2. studentInfo semasa:", typeof studentInfo !== 'undefined' ? studentInfo : "KOSONG/RALAT!");
 
     try {
@@ -2830,6 +2852,8 @@ async function simpanGanjaranKeDatabase(uid, earnedCoins, earnedXp, subjectKey =
         const updateData = {
             coins: firebase.firestore.FieldValue.increment(earnedCoins),
             totalScore: firebase.firestore.FieldValue.increment(earnedXp),
+            gems: firebase.firestore.FieldValue.increment(earnedGems),
+            totalGemsEarned: firebase.firestore.FieldValue.increment(earnedGems),
             lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         };
 
@@ -2852,9 +2876,53 @@ async function simpanGanjaranKeDatabase(uid, earnedCoins, earnedXp, subjectKey =
         console.log(`✅ [FIRESTORE SUCCESS] Ganjaran selamat dimasukkan ke database!`);
 
         // 7. Kemas kini data lokal & gerakkan UI
+        // 7. Kemas kini data lokal. Jika updater lama wujud, biarkan ia mengurus Coins/XP
+        // supaya tiada double-count. Gems dikendalikan di sini kerana ia baru ditambah.
         if (typeof kemasKiniDataLokal === 'function') {
-            console.log("6. Memanggil fungsi kemasKiniDataLokal() untuk ubah paparan UI...");
+            console.log("7. Memanggil fungsi kemasKiniDataLokal() untuk Coins/XP...");
             kemasKiniDataLokal(earnedCoins, earnedXp, subKey);
+
+            if (typeof localPlayerData !== 'undefined' && localPlayerData) {
+                ensureEconomyFields();
+                localPlayerData.gems += earnedGems;
+                localPlayerData.totalGemsEarned += earnedGems;
+            }
+        } else if (typeof localPlayerData !== 'undefined' && localPlayerData) {
+            ensureEconomyFields();
+            localPlayerData.coins += Number(earnedCoins) || 0;
+            localPlayerData.totalCoinsEarned += Number(earnedCoins) || 0;
+            localPlayerData.totalScore += Number(earnedXp) || 0;
+            localPlayerData.gems += earnedGems;
+            localPlayerData.totalGemsEarned += earnedGems;
+        }
+
+        if (typeof localPlayerData !== 'undefined' && localPlayerData) {
+            try {
+                localStorage.setItem('currentPlayer', JSON.stringify(localPlayerData));
+                localStorage.setItem('playerData', JSON.stringify(localPlayerData));
+            } catch (e) {
+                console.warn('Gagal simpan ganjaran 3v3 ke localStorage:', e);
+            }
+        }
+
+        if (typeof updateUI === 'function') updateUI();
+
+        // 💎 Notifikasi khas Gems untuk Arena 3v3.
+        if (rewardMeta && rewardMeta.mode === '3v3' && typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'success',
+                title: rewardMeta.title || 'Arena 3v3 Tamat! 🏟️',
+                html: `
+                    <div class="text-sm text-gray-600 mb-3">Ganjaran anda telah disimpan.</div>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="rounded-xl bg-yellow-50 p-3 font-black text-yellow-600">+${Number(earnedCoins).toLocaleString()}<br><span class="text-xs">💰 Coins</span></div>
+                        <div class="rounded-xl bg-indigo-50 p-3 font-black text-indigo-600">+${Number(earnedXp).toLocaleString()}<br><span class="text-xs">⭐ XP</span></div>
+                        <div class="rounded-xl bg-cyan-50 p-3 font-black text-cyan-600">+${earnedGems}<br><span class="text-xs">💎 Gems</span></div>
+                    </div>
+                `,
+                confirmButtonText: 'Teruskan',
+                confirmButtonColor: '#0891b2'
+            });
         }
 
     } catch (error) {
@@ -5354,8 +5422,8 @@ function endPvPMatch() {
     if (medCats.includes(currentCat)) tier = "medium";
     if (hardCats.includes(currentCat)) tier = "hard";
 
-    // 2. KIRA XP & COINS BERDASARKAN TIER
-    let xpReward = 0; let coinReward = 0;
+    // 2. KIRA XP, COINS & GEMS BERDASARKAN TIER
+    let xpReward = 0; let coinReward = 0; let gemsReward = 0;
     
     if (tier === "easy") {
         if (result === "menang") { xpReward = 100; coinReward = 200; }
@@ -5371,9 +5439,26 @@ function endPvPMatch() {
         else { xpReward = 150; coinReward = 200; }
     }
 
+    // 💎 Gems PvP: Menang Easy +2, Medium +3, Hard +5; Seri +1; Kalah 0.
+    const pvpGemTier = LEXI_ECONOMY.battleGems.pvp[tier];
+    if (pvpGemTier) {
+        if (result === "menang") gemsReward = pvpGemTier.win;
+        else if (result === "seri") gemsReward = pvpGemTier.draw;
+        else gemsReward = pvpGemTier.loss;
+    }
+
     // 3. Masukkan ganjaran ke data tempatan pemain
+    ensureEconomyFields();
     localPlayerData.coins = (localPlayerData.coins || 0) + coinReward;
     localPlayerData.totalScore = (localPlayerData.totalScore || 0) + xpReward;
+    localPlayerData.gems = (localPlayerData.gems || 0) + gemsReward;
+    localPlayerData.totalGemsEarned = (localPlayerData.totalGemsEarned || 0) + gemsReward;
+    try {
+        localStorage.setItem('currentPlayer', JSON.stringify(localPlayerData));
+        localStorage.setItem('playerData', JSON.stringify(localPlayerData));
+    } catch (e) {
+        console.warn('Gagal simpan ganjaran PvP ke localStorage:', e);
+    }
 
     // 4. SIMPAN KEPUTUSAN & GANJARAN KE FIREBASE (VERSI OPTIMUM & JAYAHED COINS)
     const today = new Date().toISOString().split('T')[0];
@@ -5383,6 +5468,8 @@ function endPvPMatch() {
     let updateData = {
         coins: localPlayerData.coins,
         totalScore: localPlayerData.totalScore,
+        gems: firebase.firestore.FieldValue.increment(gemsReward),
+        totalGemsEarned: firebase.firestore.FieldValue.increment(gemsReward),
         currentStatus: "idle" // 🟢 Sekali gus kemas kini status ke idle di sini!
     };
 
@@ -5417,7 +5504,8 @@ function endPvPMatch() {
                Markah Lawan: <b>${oppScore}</b><br><br>
                <b>Ganjaran Diterima:</b><br>
                +${xpReward} XP ⭐<br>
-               +${coinReward} Syiling 💰`,
+               +${coinReward} Syiling 💰<br>
+               <span class="font-black text-cyan-600">+${gemsReward} Gems 💎</span>`,
         icon: iconType,
         confirmButtonText: "Kembali ke Lobi",
         allowOutsideClick: false
