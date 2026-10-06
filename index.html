@@ -3261,5 +3261,183 @@ window.showScreen = function(screenId) {
         </div>
 
     </div> </div>
+
+
+<!-- =========================================================
+     LEXIQUEST MOBILE UI 3.1 HOTFIX
+     1) Jangan paparkan dashboard student semasa LOGIN.
+     2) Naikkan menu utama dan asingkan Boss Challenge.
+     3) LTE modal mempunyai close button yang sentiasa kelihatan.
+     ========================================================= -->
+<style id="lexiquest-mobile-hotfix-31">
+/* Tailwind .hidden mesti menang terhadap custom responsive display */
+#dashboard-student.hidden,
+#dashboard-super-admin.hidden,
+#dashboard-school-admin.hidden,
+#menu-screen.hidden,
+#boss-challenge-btn-floating.hidden,
+#lte-info-modal.hidden {
+    display: none !important;
+}
+
+@media (max-width: 767px) {
+    /* LOGIN: pastikan menu dashboard tidak bocor ke skrin login */
+    #auth-screen:not(.hidden) ~ #menu-screen,
+    #auth-screen:not(.hidden) ~ #dashboard-student {
+        display: none !important;
+    }
+
+    /* Menu hanya muncul apabila JS sudah membuang .hidden */
+    #menu-screen:not(.hidden) {
+        display: block !important;
+    }
+
+    /* Menu utama lebih dekat ke header, bukan menolak butang ke bawah */
+    #dashboard-student:not(.hidden) {
+        display: block !important;
+        margin-top: 0 !important;
+        padding-top: .35rem !important;
+        padding-bottom: 1rem !important;
+        min-height: 0 !important;
+    }
+
+    #dashboard-student > div:first-child {
+        display: block !important;
+        width: 100% !important;
+        max-width: 520px !important;
+        margin: 0 auto !important;
+    }
+
+    /* Menu 5 butang: kekalkan grid tetapi berada di bahagian atas */
+    #dashboard-student > div:first-child > div:first-child {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-areas:
+            "play ranking"
+            "medal shop"
+            "arena arena" !important;
+        gap: .65rem !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 .7rem !important;
+        box-sizing: border-box !important;
+    }
+
+    #dashboard-student > div:first-child > div:first-child > div:first-child {
+        display: contents !important;
+    }
+
+    #dashboard-student button[onclick*="openSubjectModal"] { grid-area: play; }
+    #dashboard-student button[onclick*="leaderboard-screen"] { grid-area: ranking; }
+    #dashboard-student button[onclick*="showAchievementsScreen"] { grid-area: medal; }
+    #dashboard-student button[onclick*="shop-screen"] { grid-area: shop; }
+    #dashboard-student button[onclick*="checkChallengeEligibility"] { grid-area: arena; }
+
+    #dashboard-student button[onclick*="openSubjectModal"],
+    #dashboard-student button[onclick*="leaderboard-screen"],
+    #dashboard-student button[onclick*="showAchievementsScreen"],
+    #dashboard-student button[onclick*="shop-screen"],
+    #dashboard-student button[onclick*="checkChallengeEligibility"] {
+        width: 100% !important;
+        height: 72px !important;
+        margin: 0 !important;
+    }
+
+    #dashboard-student button[onclick*="checkChallengeEligibility"] {
+        height: 68px !important;
+    }
+
+    /* Boss Challenge: jelas berasingan daripada menu */
+    #dashboard-student > div:first-child > div:last-child {
+        display: block !important;
+        width: 100% !important;
+        margin: 1.35rem 0 0 !important;
+        padding: 0 .7rem !important;
+        box-sizing: border-box !important;
+        position: static !important;
+    }
+
+    #dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
+        position: relative !important;
+        left: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* LTE modal: butang X besar, kontras dan sentiasa di dalam viewport */
+    #lte-info-modal {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 99999 !important;
+        width: 100vw !important;
+        height: 100dvh !important;
+        padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)) !important;
+        box-sizing: border-box !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow-y: auto !important;
+    }
+
+    #lte-info-modal > div {
+        width: min(92vw, 390px) !important;
+        max-width: 390px !important;
+        max-height: calc(100dvh - 32px) !important;
+        overflow: hidden !important;
+        position: relative !important;
+        padding-top: 3.25rem !important;
+        box-sizing: border-box !important;
+    }
+
+    #lte-info-modal button[onclick="closeLteModal()"] {
+        position: absolute !important;
+        top: 10px !important;
+        right: 10px !important;
+        z-index: 100000 !important;
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 50% !important;
+        background: rgba(15,23,42,.92) !important;
+        border: 2px solid rgba(250,204,21,.8) !important;
+        color: #fff !important;
+        font-size: 20px !important;
+        line-height: 1 !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,.45) !important;
+    }
+
+    #lte-info-modal button[onclick="closeLteModal()"]:active {
+        transform: scale(.92) !important;
+    }
+}
+</style>
+
+<script>
+/* LTE safety: tutup modal dengan ESC atau tap backdrop */
+(function () {
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && typeof closeLteModal === 'function') {
+            closeLteModal();
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        const modal = document.getElementById('lte-info-modal');
+        if (!modal || modal.classList.contains('hidden')) return;
+        if (e.target === modal && typeof closeLteModal === 'function') {
+            closeLteModal();
+        }
+    });
+})();
+</script>
+
 </body>
 </html>
