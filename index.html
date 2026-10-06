@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>LexiQuest 2.0 - Firebase Edition</title>
 
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -31,338 +31,402 @@
     <link rel="stylesheet" href="style.css">
 
 
-<!-- ============================================================
-     📱 LEXIQUEST MOBILE UI 2.0
-     Responsive override: fungsi/game JS tidak diubah.
-     ============================================================ -->
+<!-- =========================================================
+     LEXIQUEST RESPONSIVE UI 2.1
+     Notifikasi + Reward + Gems + Mobile Optimization
+     ========================================================= -->
 <style>
-html, body {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-}
+  :root {
+    --lq-safe-bottom: max(16px, env(safe-area-inset-bottom));
+    --lq-safe-top: max(12px, env(safe-area-inset-top));
+  }
 
-button, input, select, textarea {
+  /* SweetAlert2 — satu gaya konsisten untuk Laptop + Telefon */
+  .swal2-popup.lq-reward-popup,
+  .swal2-popup {
+    border-radius: 24px !important;
+    padding: 1.25rem !important;
+    width: min(92vw, 480px) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .swal2-title {
+    font-family: Poppins, sans-serif !important;
+    font-weight: 900 !important;
+    line-height: 1.15 !important;
+    font-size: clamp(1.25rem, 4vw, 1.8rem) !important;
+  }
+
+  .swal2-html-container {
+    font-family: Poppins, sans-serif !important;
+    font-size: clamp(.82rem, 2.5vw, .98rem) !important;
+    line-height: 1.55 !important;
+    max-height: 58vh !important;
+    overflow-y: auto !important;
+    margin: .75rem 0 !important;
+  }
+
+  .swal2-actions {
+    gap: .6rem !important;
+    width: 100% !important;
+  }
+
+  .swal2-actions .swal2-confirm,
+  .swal2-actions .swal2-cancel {
+    min-height: 44px !important;
+    border-radius: 14px !important;
+    font-family: Poppins, sans-serif !important;
+    font-weight: 900 !important;
+    padding: .65rem 1rem !important;
+  }
+
+  /* Toast: jangan menutup header / butang pada telefon */
+  .swal2-container.swal2-top,
+  .swal2-container.swal2-top-start,
+  .swal2-container.swal2-top-end {
+    padding-top: max(12px, env(safe-area-inset-top)) !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .swal2-toast {
+    width: min(94vw, 430px) !important;
+    border-radius: 18px !important;
+    padding: .7rem .9rem !important;
+  }
+
+  /* Kad ganjaran yang menggunakan kelas ini daripada game.js */
+  .lq-reward-card {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .65rem;
+    margin: .9rem 0;
+  }
+
+  .lq-reward-item {
+    min-width: 0;
+    border-radius: 16px;
+    padding: .7rem .45rem;
+    background: linear-gradient(145deg, rgba(248,250,252,.98), rgba(226,232,240,.88));
+    border: 1px solid rgba(148,163,184,.35);
+    box-shadow: 0 5px 15px rgba(15,23,42,.08);
+    text-align: center;
+  }
+
+  .lq-reward-item .lq-reward-value {
+    display: block;
+    font-size: clamp(1.05rem, 4vw, 1.45rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: .2rem;
+  }
+
+  .lq-reward-item .lq-reward-label {
+    display: block;
+    font-size: .62rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  .lq-gem-highlight {
+    background: linear-gradient(145deg, #ecfeff, #cffafe) !important;
+    border: 2px solid #22d3ee !important;
+    box-shadow: 0 0 22px rgba(34,211,238,.25) !important;
+  }
+
+  .lq-gem-highlight .lq-reward-value { color: #0891b2 !important; }
+
+  /* Wallet desktop */
+  #lq-wallet {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .lq-wallet-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    min-height: 38px;
+    padding: .42rem .75rem;
+    border-radius: 14px;
+    font-weight: 900;
+    box-shadow: 0 3px 0 rgba(15,23,42,.18);
+    white-space: nowrap;
+  }
+
+  .lq-wallet-coins {
+    background: linear-gradient(180deg,#fde047,#facc15);
+    color: #713f12;
+    border: 1px solid #fef08a;
+  }
+
+  .lq-wallet-gems {
+    background: linear-gradient(180deg,#67e8f9,#22d3ee);
+    color: #164e63;
+    border: 1px solid #cffafe;
+  }
+
+  /* Boss floating notification */
+  #boss-challenge-btn-floating {
+    max-height: min(42vh, 360px);
+    overflow: hidden auto !important;
+  }
+
+  /* Elakkan overlay berlaga dengan music button */
+  #menu-screen #boss-challenge-btn-floating {
+    margin-bottom: 62px;
+  }
+
+  /* Overlay besar: jangan melebihi viewport */
+  #challenge-lobby-screen > div,
+  #pvp-arena > div,
+  #arena-lobby-container > div,
+  #boss-arena > div {
+    max-height: calc(100dvh - 24px);
+  }
+
+  /* Touch target minimum */
+  #menu-screen button,
+  #challenge-lobby-screen button,
+  #pvp-arena button,
+  #arena-lobby-container button,
+  #boss-arena button {
     -webkit-tap-highlight-color: transparent;
-}
+  }
 
-@media (max-width: 767px) {
-    :root { --mobile-gutter: 10px; --mobile-bottom-safe: 82px; }
-
+  @media (max-width: 767px) {
     body {
-        min-height: 100dvh;
-        background-attachment: scroll !important;
+      background-attachment: scroll !important;
+      overflow-x: hidden !important;
     }
 
-    /* ---------- AUTH / LOGIN ---------- */
-    #auth-screen {
-        width: calc(100% - 20px) !important;
-        max-width: 430px !important;
-        margin: 18px auto 70px !important;
-        padding: 10px !important;
+    #menu-screen {
+      width: 100%;
+      overflow-x: hidden;
     }
-    #auth-screen h1 { font-size: 2rem !important; }
-    #login-screen input, #login-screen select { min-height: 46px; }
-    #login-screen button { min-height: 48px; }
 
-    /* ---------- TOP HEADER ---------- */
+    /* Header mobile */
     #menu-screen > div:first-child {
-        display: grid !important;
-        grid-template-columns: minmax(0, 1fr) auto !important;
-        grid-template-areas:
-            "profile wallet"
-            "event event" !important;
-        align-items: center !important;
-        gap: 7px !important;
-        width: 100% !important;
-        padding: 8px 10px 5px !important;
-        margin: 0 !important;
-        position: relative;
-        z-index: 30;
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      align-items: center !important;
+      gap: .55rem !important;
+      padding: .55rem .65rem !important;
+      margin-bottom: .35rem !important;
     }
 
-    #menu-screen > div:first-child > #lte-active-widget {
-        grid-area: event !important;
-        width: 100% !important;
-        min-width: 0 !important;
-        justify-self: stretch !important;
-        transform: none !important;
-        margin: 0 !important;
+    #menu-screen > div:first-child #lte-active-widget {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      justify-self: center;
+      max-width: 100%;
+      transform: none !important;
     }
 
-    #menu-screen > div:first-child > #lte-info-modal { grid-area: auto; }
-
-    #menu-screen > div:first-child > .flex.items-center.gap-3 {
-        grid-area: profile !important;
-        min-width: 0 !important;
-        width: 100% !important;
-        gap: 8px !important;
+    #menu-screen > div:first-child > div.flex.items-center.gap-3 {
+      grid-column: 1;
+      grid-row: 2;
+      min-width: 0;
+      gap: .5rem !important;
     }
 
     #dashboard-avatar-container {
-        width: 50px !important;
-        height: 50px !important;
-        min-width: 50px !important;
-        font-size: 2rem !important;
+      width: 50px !important;
+      height: 50px !important;
+      font-size: 1.8rem !important;
     }
 
     #menu-player-name {
-        display: block;
-        max-width: 145px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-size: 0.88rem !important;
+      max-width: 42vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: .9rem !important;
     }
 
-    #menu-player-level, #menu-player-class, #header-active-title {
-        font-size: 8px !important;
-        padding: 2px 5px !important;
-        white-space: nowrap;
-        max-width: 82px;
-        overflow: hidden;
-        text-overflow: ellipsis;
+    #menu-player-class,
+    #header-active-title {
+      max-width: 22vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    #xp-text, #next-level-text { font-size: 7px !important; }
-    #menu-screen > div:first-child .w-40,
-    #menu-screen > div:first-child .md\:w-48 { width: min(155px, 100%) !important; }
-
-    #menu-screen > div:first-child > .flex.flex-col.items-end {
-        grid-area: wallet !important;
-        width: auto !important;
-        gap: 4px !important;
-        align-items: flex-end !important;
+    #menu-screen > div:first-child .mt-1.w-40,
+    #menu-screen > div:first-child .mt-1.w-48 {
+      width: min(43vw, 180px) !important;
     }
 
-    #menu-screen > div:first-child > .flex.flex-col.items-end > .flex {
-        gap: 4px !important;
+    #lq-wallet {
+      grid-column: 2;
+      grid-row: 2;
+      align-self: center;
+      flex-direction: column;
+      align-items: stretch;
+      gap: .3rem;
+      min-width: 92px;
     }
 
-    #user-coins, #display-gems { font-size: 11px !important; }
-    #menu-screen > div:first-child .bg-yellow-400,
-    #menu-screen > div:first-child .bg-cyan-400 {
-        padding: 5px 7px !important;
-        border-radius: 10px !important;
-    }
-    #menu-screen > div:first-child button[onclick="logout()"] {
-        font-size: 8px !important;
+    .lq-wallet-pill {
+      min-height: 32px;
+      padding: .3rem .5rem;
+      border-radius: 11px;
+      font-size: .8rem;
     }
 
-    /* ---------- STUDENT HOME ---------- */
+    #user-coins,
+    #display-gems {
+      font-size: .82rem !important;
+    }
+
+    /* Main radial menu: elak bertindih pada skrin kecil */
     #dashboard-student {
-        width: 100% !important;
-        min-height: calc(100dvh - 105px);
-        margin-top: 2px !important;
-        padding: 0 10px var(--mobile-bottom-safe) !important;
-        justify-content: flex-start !important;
+      gap: .75rem !important;
+      margin-top: .35rem !important;
+      padding-bottom: 90px;
     }
 
-    #dashboard-student > div:first-child {
-        width: 100% !important;
-        max-width: 430px !important;
-        gap: 7px !important;
-        margin: 4px auto 0 !important;
-        padding-bottom: 95px;
+    #dashboard-student .w-16 {
+      width: 58px !important;
+      height: 58px !important;
     }
 
-    #dashboard-student > div:first-child > div:not(:last-child) {
-        width: 100% !important;
+    #dashboard-student .md\\:w-20 {
+      width: 58px !important;
+      height: 58px !important;
     }
 
-    #dashboard-student button.w-16 {
-        width: 68px !important;
-        height: 68px !important;
-        min-width: 68px !important;
+    #dashboard-student .gap-6 {
+      gap: 1.1rem !important;
     }
 
-    #dashboard-student .gap-3 { gap: 12px !important; }
-    #dashboard-student .gap-6 { gap: 30px !important; }
-
-    #dashboard-student button.w-16 i { font-size: 1.05rem !important; }
-    #dashboard-student button.w-16 span { font-size: 7px !important; }
-
-    /* Make touch targets comfortable without making them overlap. */
-    #dashboard-student button {
-        touch-action: manipulation;
+    #dashboard-student .gap-10 {
+      gap: 1.1rem !important;
     }
 
-    /* ---------- BOSS FLOATING ALERT ---------- */
-    #dashboard-student > div:first-child > div.fixed.bottom-4 {
-        position: fixed !important;
-        left: 10px !important;
-        right: 10px !important;
-        bottom: 70px !important;
-        width: auto !important;
-        max-width: 430px !important;
-        margin: 0 auto !important;
-        transform: none !important;
-        z-index: 80 !important;
+    /* Boss card */
+    #menu-screen #boss-challenge-btn-floating {
+      width: min(92vw, 360px) !important;
+      bottom: calc(62px + var(--lq-safe-bottom)) !important;
+      margin-bottom: 0 !important;
+      border-radius: 20px !important;
     }
 
-    #boss-challenge-btn-floating {
-        width: 100% !important;
-        max-height: 150px !important;
-        border-radius: 18px !important;
-    }
-    #boss-challenge-btn-floating > div:first-child {
-        padding: 9px 42px 9px 12px !important;
-    }
-    #boss-challenge-btn-floating > div:first-child > div:first-child {
-        font-size: 1.35rem !important;
-        margin-bottom: 0 !important;
-    }
-    #boss-challenge-btn-floating h3 {
-        font-size: 10px !important;
-        line-height: 1.15 !important;
-    }
-    #floating-boss-name {
-        font-size: 9px !important;
-        line-height: 1.25 !important;
-        margin-top: 3px !important;
-    }
-    #boss-challenge-btn-radar {
-        padding: 7px 10px !important;
+    #boss-challenge-btn-floating .p-4 {
+      padding: .75rem !important;
     }
 
-    /* ---------- ONLINE PLAYERS ---------- */
-    #menu-screen > .fixed.bottom-4.left-4 {
-        display: none !important;
+    /* Challenge / PvP / 3v3 */
+    #challenge-lobby-screen,
+    #pvp-arena,
+    #arena-lobby-container,
+    #boss-arena {
+      padding: .55rem !important;
+      align-items: flex-start !important;
+      padding-top: calc(.55rem + var(--lq-safe-top)) !important;
+      padding-bottom: calc(.55rem + var(--lq-safe-bottom)) !important;
     }
 
-    /* ---------- MUSIC ---------- */
-    body > button[onclick="toggleBgMusic()"] {
-        right: 10px !important;
-        bottom: 10px !important;
-        width: 44px !important;
-        height: 44px !important;
-        padding: 8px !important;
-        z-index: 95 !important;
-    }
-    body > button[onclick="toggleBgMusic()"] i {
-        font-size: 15px !important;
+    #challenge-lobby-screen > div,
+    #pvp-arena > div,
+    #arena-lobby-container > div {
+      width: 100% !important;
+      max-width: 100% !important;
+      border-radius: 20px !important;
     }
 
-    /* ---------- ALL MODAL / SCREEN OVERLAYS ---------- */
-    #game-arena, #challenge-lobby-screen, #pvp-arena, #leaderboard-screen,
-    #shop-screen, #achievements-screen {
-        padding: 8px !important;
-        align-items: flex-start !important;
-        overflow-y: auto !important;
+    #challenge-lobby-screen .flex.justify-between {
+      align-items: flex-start !important;
     }
 
-    #game-arena > .glass,
-    #challenge-lobby-screen > .glass,
-    #leaderboard-screen > .glass,
-    #shop-screen > .glass {
-        width: 100% !important;
-        max-width: 100% !important;
-        max-height: calc(100dvh - 16px) !important;
-        border-radius: 20px !important;
-        padding: 12px !important;
+    #challenge-lobby-screen h2 {
+      font-size: 1.15rem !important;
     }
 
-    /* ---------- SOLO GAME ---------- */
-    #game-arena > .glass { padding: 10px !important; }
-    #game-arena .flex.flex-col.sm\:flex-row {
-        gap: 7px !important;
-        margin-bottom: 8px !important;
-        padding-bottom: 8px !important;
+    #challenge-lobby-screen .flex.flex-col.sm\\:flex-row {
+      flex-direction: column !important;
     }
-    #game-title { font-size: 1.05rem !important; order: 1; }
-    #game-arena button[onclick="showScreen('menu-screen')"] {
-        font-size: 11px !important;
-        padding: 7px 10px !important;
-        order: 0;
-    }
-    #game-arena #timer-text { font-size: 15px !important; }
-    #game-arena .bg-red-100 { padding: 6px 10px !important; order: 2; }
-    #question-container {
-        min-height: 0 !important;
-        max-height: calc(100dvh - 185px) !important;
-        padding-right: 0 !important;
-        margin-bottom: 8px !important;
-    }
-    #question-container > div {
-        padding: 12px !important;
-        border-radius: 16px !important;
-    }
-    #question-container label {
-        padding: 10px !important;
-        gap: 8px !important;
-    }
-    #question-container label span { font-size: 14px !important; line-height: 1.25 !important; }
-    #question-container input[type="radio"] {
-        width: 20px !important;
-        height: 20px !important;
-        min-width: 20px !important;
-    }
-    #check-btn { padding: 12px !important; font-size: 15px !important; }
 
-    /* ---------- PVP ---------- */
-    #pvp-arena { align-items: flex-start !important; }
-    #pvp-arena > .w-full { max-height: none !important; gap: 8px !important; }
-    #pvp-arena .bg-gradient-to-r {
-        padding: 10px !important;
-        border-width: 2px !important;
-        border-radius: 18px !important;
+    /* PvP header/players */
+    #pvp-arena .text-4xl,
+    #pvp-arena .md\\:text-5xl {
+      font-size: 2rem !important;
     }
-    #pvp-arena .bg-gradient-to-r > div:first-child,
-    #pvp-arena .bg-gradient-to-r > div:last-child { width: 32% !important; }
-    #pvp-arena .bg-gradient-to-r > div:nth-child(2) { width: 36% !important; }
-    #pvp-arena .bg-gradient-to-r .w-16 {
-        width: 42px !important; height: 42px !important;
-        font-size: 1.25rem !important;
+
+    #pvp-arena .w-16.h-16 {
+      width: 48px !important;
+      height: 48px !important;
     }
-    #pvp-p1-name, #pvp-p2-name { font-size: 10px !important; }
-    #pvp-p1-score, #pvp-p2-score { font-size: 1.8rem !important; }
-    #pvp-arena .animate-bounce { font-size: 2.2rem !important; }
-    #pvp-question-display { font-size: 1.35rem !important; min-height: 55px !important; }
-    #pvp-arena .glass { padding: 12px !important; border-radius: 18px !important; }
-    #pvp-options-container { grid-template-columns: 1fr !important; gap: 8px !important; }
-    #pvp-options-container button { padding: 11px !important; font-size: 15px !important; }
-    #pvp-arena .mt-8 { margin-top: 12px !important; }
 
-    /* ---------- SHOP / LEADERBOARD ---------- */
-    #leaderboard-screen .glass, #shop-screen .glass { padding: 12px !important; }
-    #leaderboard-list { padding-right: 0 !important; }
-    #shop-screen .flex.gap-2.mb-6 { padding-bottom: 7px !important; margin-bottom: 10px !important; }
-    #shop-screen .shop-tab-btn { padding: 7px 10px !important; font-size: 11px !important; }
-
-    /* ---------- ADMIN / DATA TABLES ---------- */
-    #admin-screen, #sa-schools-screen, #sa-students-screen, #sa-analysis-screen,
-    #sch-manage-shop-screen {
-        overflow-x: hidden !important;
-    }
-    table { min-width: 620px; }
-    .overflow-x-auto { max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
-
-    /* ---------- SWEETALERT2 ---------- */
-    .swal2-container { padding: 10px !important; z-index: 10000 !important; }
+    /* Reward popup mobile */
+    .swal2-popup.lq-reward-popup,
     .swal2-popup {
-        width: calc(100% - 10px) !important;
-        max-width: 390px !important;
-        border-radius: 20px !important;
-        padding: 1rem !important;
+      width: calc(100vw - 24px) !important;
+      max-width: 430px !important;
+      border-radius: 20px !important;
+      padding: 1rem !important;
     }
-    .swal2-title { font-size: 1.15rem !important; }
-    .swal2-html-container { font-size: .85rem !important; margin: .5rem 0 !important; }
-    .swal2-actions { width: 100% !important; gap: 7px !important; }
-    .swal2-actions button { min-height: 42px !important; margin: 0 !important; flex: 1; }
-}
 
-@media (max-width: 360px) {
-    #dashboard-avatar-container { width: 44px !important; height: 44px !important; min-width: 44px !important; }
-    #menu-player-name { max-width: 118px; font-size: .78rem !important; }
-    #menu-player-level, #menu-player-class, #header-active-title { max-width: 65px; font-size: 7px !important; }
-    #dashboard-student button.w-16 { width: 62px !important; height: 62px !important; min-width: 62px !important; }
-    #dashboard-student .gap-6 { gap: 20px !important; }
-    #user-coins, #display-gems { font-size: 10px !important; }
-}
+    .swal2-html-container {
+      max-height: 55vh !important;
+    }
 
-@media (min-width: 768px) {
-    #display-gems { display: inline-block; }
-}
+    .lq-reward-card {
+      gap: .4rem;
+      margin: .65rem 0;
+    }
+
+    .lq-reward-item {
+      padding: .55rem .25rem;
+      border-radius: 13px;
+    }
+
+    .lq-reward-item .lq-reward-label {
+      font-size: .55rem;
+    }
+
+    .swal2-actions {
+      flex-direction: column !important;
+      align-items: stretch !important;
+    }
+
+    .swal2-actions .swal2-confirm,
+    .swal2-actions .swal2-cancel {
+      width: 100% !important;
+      margin: 0 !important;
+    }
+
+    /* Toast notification lebih kecil */
+    .swal2-toast {
+      width: calc(100vw - 20px) !important;
+      max-width: 400px !important;
+      font-size: .8rem !important;
+    }
+  }
+
+  @media (max-width: 360px) {
+    #menu-player-name { font-size: .78rem !important; max-width: 37vw; }
+    #menu-player-class, #header-active-title { display: none !important; }
+    #dashboard-avatar-container { width: 44px !important; height: 44px !important; }
+    #lq-wallet { min-width: 84px; }
+    .lq-wallet-pill { font-size: .72rem; min-height: 29px; }
+    #dashboard-student .w-16,
+    #dashboard-student .md\\:w-20 { width: 54px !important; height: 54px !important; }
+    #boss-challenge-btn-floating { width: calc(100vw - 20px) !important; }
+  }
+
+  @media (min-width: 768px) {
+    #menu-screen > div:first-child {
+      min-height: 92px;
+    }
+  }
 </style>
 
 </head>
@@ -510,16 +574,16 @@ button, input, select, textarea {
             </div>
         </div>
 
-        <!-- BLOK COIN & LOGOUT ASAL -->
+        <!-- BLOK WALLET & LOGOUT — RESPONSIVE -->
         <div class="flex flex-col items-end gap-2 flex-shrink-0">
-            <div class="flex items-center gap-1.5">
-                <div class="bg-yellow-400 text-yellow-900 px-3 py-1.5 rounded-xl font-bold shadow-[0_3px_0_0_#ca8a04] flex items-center gap-1.5 border border-yellow-200">
-                    <span class="text-base md:text-lg">💰</span>
-                    <span id="user-coins" class="text-base md:text-lg">0</span>
+            <div id="lq-wallet">
+                <div class="lq-wallet-pill lq-wallet-coins">
+                    <span>💰</span>
+                    <span id="user-coins">0</span>
                 </div>
-                <div class="bg-cyan-400 text-cyan-950 px-3 py-1.5 rounded-xl font-bold shadow-[0_3px_0_0_#0891b2] flex items-center gap-1.5 border border-cyan-200">
-                    <span class="text-base md:text-lg">💎</span>
-                    <span id="display-gems" class="text-base md:text-lg">0</span>
+                <div class="lq-wallet-pill lq-wallet-gems">
+                    <span>💎</span>
+                    <span id="display-gems">0</span>
                 </div>
             </div>
             <button onclick="logout()" class="text-[9px] md:text-[10px] font-black text-red-500 hover:text-red-700 uppercase tracking-widest transition-colors drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
