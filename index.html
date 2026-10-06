@@ -697,21 +697,6 @@
       border-radius: 18px 18px 0 0 !important;
     }
 
-    /* Music button: kecil dan selamat */
-    body > button[onclick="toggleBgMusic()"] {
-      right: 10px !important;
-      bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-      width: 42px !important;
-      height: 42px !important;
-      padding: 0 !important;
-      border-radius: 50% !important;
-      z-index: 80 !important;
-    }
-
-    body > button[onclick="toggleBgMusic()"] i {
-      font-size: 1rem !important;
-    }
-
     /* Semua skrin overlay mesti benar-benar memenuhi viewport telefon */
     #game-arena,
     #pvp-arena,
@@ -827,9 +812,15 @@
         </div>
     </div>
 
-<button onclick="toggleBgMusic()" class="fixed bottom-4 right-4 z-50 bg-slate-800 border-2 border-slate-600 p-3 rounded-full shadow-lg hover:scale-110 transition-transform">
-    <i id="music-btn-icon" class="fas fa-volume-up text-green-400 text-xl w-6 h-6 text-center"></i>
-</button>
+<!-- MOBILE LANDSCAPE LOCK / PORTRAIT BLOCK -->
+<div id="mobile-landscape-lock" aria-hidden="true">
+  <div class="mobile-landscape-card">
+    <div class="text-5xl mb-3">📱↔️</div>
+    <h2 class="text-xl font-black text-white uppercase tracking-wide">Pusingkan Telefon</h2>
+    <p class="text-sm text-slate-300 mt-2 leading-relaxed">LexiQuest dioptimumkan untuk paparan <strong class="text-yellow-300">landscape</strong>. Sila pusing telefon anda untuk meneruskan.</p>
+    <button id="btn-lock-landscape" type="button" class="mt-4 px-5 py-2.5 rounded-xl bg-yellow-400 text-slate-950 font-black shadow-lg">CUBA LANDSCAPE</button>
+  </div>
+</div>
 
 <div id="menu-screen" class="hidden animate-fade-in">
     
@@ -3269,6 +3260,64 @@ window.showScreen = function(screenId) {
      2) Naikkan menu utama dan asingkan Boss Challenge.
      3) LTE modal mempunyai close button yang sentiasa kelihatan.
      ========================================================= -->
+<style id="lexiquest-mobile-landscape-32">
+/* Telefon: LexiQuest direka untuk landscape. Pada portrait, aplikasi dikunci sementara. */
+#mobile-landscape-lock { display:none; }
+@media (max-width: 767px) and (orientation: portrait) {
+  #mobile-landscape-lock {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background: radial-gradient(circle at 50% 30%, rgba(30,64,175,.96), rgba(2,6,23,.99) 72%);
+    text-align:center;
+  }
+  .mobile-landscape-card {
+    width:min(88vw,360px);
+    padding:24px 20px;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:24px;
+    background:rgba(15,23,42,.88);
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+    backdrop-filter:blur(14px);
+  }
+}
+@media (max-width: 767px) and (orientation: landscape) {
+  #mobile-landscape-lock { display:none !important; }
+}
+
+@media (max-width: 767px) {
+  /* LTE kekal di header. Boss dipindahkan secara visual tepat di bawah LTE. */
+  #dashboard-student > div:first-child {
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    grid-template-areas:
+      "boss"
+      "menu" !important;
+    gap:.55rem !important;
+    align-items:start !important;
+  }
+  #dashboard-student > div:first-child > div:first-child {
+    grid-area:menu !important;
+    order:2 !important;
+  }
+  #dashboard-student > div:first-child > div:last-child {
+    grid-area:boss !important;
+    order:1 !important;
+    margin:.1rem 0 .35rem !important;
+    padding:0 .7rem !important;
+  }
+  #dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 !important;
+  }
+}
+</style>
+
 <style id="lexiquest-mobile-hotfix-31">
 /* Tailwind .hidden mesti menang terhadap custom responsive display */
 #dashboard-student.hidden,
@@ -3421,6 +3470,35 @@ window.showScreen = function(screenId) {
 </style>
 
 <script>
+/* Mobile landscape: cuba kunci orientasi selepas interaksi pengguna.
+   Sesetengah browser hanya membenarkan orientation.lock dalam fullscreen/PWA.
+   Jika browser menolak, portrait-block akan kekal sebagai fallback. */
+(function () {
+    async function requestLandscape() {
+        try {
+            if (screen.orientation && screen.orientation.lock) {
+                await screen.orientation.lock('landscape');
+            }
+        } catch (err) {
+            // Browser biasa mungkin menolak lock tanpa fullscreen/PWA. CSS fallback akan digunakan.
+        }
+    }
+
+    window.requestLexiQuestLandscape = requestLandscape;
+    document.addEventListener('DOMContentLoaded', function () {
+        requestLandscape();
+        const btn = document.getElementById('btn-lock-landscape');
+        if (btn) btn.addEventListener('click', requestLandscape);
+    });
+
+    document.addEventListener('click', function () {
+        // Percubaan semula selepas gesture pengguna, yang dibenarkan oleh sesetengah browser.
+        if (window.matchMedia && window.matchMedia('(max-width: 767px)').matches) requestLandscape();
+    }, { passive: true });
+})();
+</script>
+
+<script>
 /* LTE safety: tutup modal dengan ESC atau tap backdrop */
 (function () {
     document.addEventListener('keydown', function (e) {
@@ -3438,6 +3516,71 @@ window.showScreen = function(screenId) {
     });
 })();
 </script>
+
+
+<style id="lexiquest-mobile-landscape-final-32">
+/* FINAL MOBILE LANDSCAPE LAYOUT */
+@media (max-width: 767px) {
+  /* Boss Challenge sentiasa muncul dahulu dalam kandungan dashboard, tepat selepas header/LTE. */
+  #dashboard-student > div:first-child {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-areas: "boss" "menu" !important;
+    gap: .5rem !important;
+    align-items: start !important;
+  }
+  #dashboard-student > div:first-child > div:first-child {
+    grid-area: menu !important;
+    order: 2 !important;
+  }
+  #dashboard-student > div:first-child > div:last-child {
+    grid-area: boss !important;
+    order: 1 !important;
+    margin: 0 0 .25rem !important;
+    padding: 0 .7rem !important;
+  }
+  #dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* Speaker button telah dibuang; jika ada baki markup lama, paksa sembunyi. */
+  body > button[onclick="toggleBgMusic()"] { display: none !important; }
+}
+
+/* Pada landscape telefon, gunakan ruang mendatar dengan lebih baik. */
+@media (max-width: 767px) and (orientation: landscape) {
+  #menu-screen {
+    min-height: 100dvh !important;
+  }
+  #menu-screen > div:first-child {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas: "profile wallet" "lte lte" !important;
+  }
+  #dashboard-student {
+    padding: .35rem .7rem .7rem !important;
+  }
+  #dashboard-student > div:first-child > div:first-child {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    grid-template-areas: "play ranking medal shop arena" !important;
+    gap: .55rem !important;
+  }
+  #dashboard-student button[onclick*="openSubjectModal"],
+  #dashboard-student button[onclick*="leaderboard-screen"],
+  #dashboard-student button[onclick*="showAchievementsScreen"],
+  #dashboard-student button[onclick*="shop-screen"],
+  #dashboard-student button[onclick*="checkChallengeEligibility"] {
+    height: 68px !important;
+  }
+  #dashboard-student button[onclick*="checkChallengeEligibility"] {
+    height: 68px !important;
+  }
+}
+</style>
 
 </body>
 </html>
