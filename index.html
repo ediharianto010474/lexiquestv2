@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -15,999 +16,683 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 <script>
-if ('serviceWorker' in navigator) {
-window.addEventListener('load', () => {
-navigator.serviceWorker.register('./service-worker.js')
-.then(reg => console.log('Service Worker berjaya didaftarkan!', reg))
-.catch(err => console.log('Pendaftaran Service Worker gagal:', err));
-});
-}
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(reg => console.log('Service Worker berjaya didaftarkan!', reg))
+        .catch(err => console.log('Pendaftaran Service Worker gagal:', err));
+    });
+  }
 </script>
 <link href="style.css" rel="stylesheet"/>
 <!-- =========================================================
-LEXIQUEST RESPONSIVE UI 2.1
-Notifikasi + Reward + Gems + Mobile Optimization
-========================================================= -->
+     LEXIQUEST RESPONSIVE UI 2.1
+     Notifikasi + Reward + Gems + Mobile Optimization
+     ========================================================= -->
 <style>
-:root {
---lq-safe-bottom: max(16px, env(safe-area-inset-bottom));
---lq-safe-top: max(12px, env(safe-area-inset-top));
-}
-/* SweetAlert2 — satu gaya konsisten untuk Laptop + Telefon */
-.swal2-popup.lq-reward-popup,
-.swal2-popup {
-border-radius: 24px !important;
-padding: 1.25rem !important;
-width: min(92vw, 480px) !important;
-box-sizing: border-box !important;
-overflow: hidden !important;
-}
-.swal2-title {
-font-family: Poppins, sans-serif !important;
-font-weight: 900 !important;
-line-height: 1.15 !important;
-font-size: clamp(1.25rem, 4vw, 1.8rem) !important;
-}
-.swal2-html-container {
-font-family: Poppins, sans-serif !important;
-font-size: clamp(.82rem, 2.5vw, .98rem) !important;
-line-height: 1.55 !important;
-max-height: 58vh !important;
-overflow-y: auto !important;
-margin: .75rem 0 !important;
-}
-.swal2-actions {
-gap: .6rem !important;
-width: 100% !important;
-}
-.swal2-actions .swal2-confirm,
-.swal2-actions .swal2-cancel {
-min-height: 44px !important;
-border-radius: 14px !important;
-font-family: Poppins, sans-serif !important;
-font-weight: 900 !important;
-padding: .65rem 1rem !important;
-}
-/* Toast: jangan menutup header / butang pada telefon */
-.swal2-container.swal2-top,
-.swal2-container.swal2-top-start,
-.swal2-container.swal2-top-end {
-padding-top: max(12px, env(safe-area-inset-top)) !important;
-padding-left: 12px !important;
-padding-right: 12px !important;
-}
-.swal2-toast {
-width: min(94vw, 430px) !important;
-border-radius: 18px !important;
-padding: .7rem .9rem !important;
-}
-/* Kad ganjaran yang menggunakan kelas ini daripada game.js */
-.lq-reward-card {
-display: grid;
-grid-template-columns: repeat(3, minmax(0, 1fr));
-gap: .65rem;
-margin: .9rem 0;
-}
-.lq-reward-item {
-min-width: 0;
-border-radius: 16px;
-padding: .7rem .45rem;
-background: linear-gradient(145deg, rgba(248,250,252,.98), rgba(226,232,240,.88));
-border: 1px solid rgba(148,163,184,.35);
-box-shadow: 0 5px 15px rgba(15,23,42,.08);
-text-align: center;
-}
-.lq-reward-item .lq-reward-value {
-display: block;
-font-size: clamp(1.05rem, 4vw, 1.45rem);
-font-weight: 900;
-line-height: 1.1;
-margin-bottom: .2rem;
-}
-.lq-reward-item .lq-reward-label {
-display: block;
-font-size: .62rem;
-font-weight: 800;
-color: #64748b;
-text-transform: uppercase;
-letter-spacing: .04em;
-}
-.lq-gem-highlight {
-background: linear-gradient(145deg, #ecfeff, #cffafe) !important;
-border: 2px solid #22d3ee !important;
-box-shadow: 0 0 22px rgba(34,211,238,.25) !important;
-}
-.lq-gem-highlight .lq-reward-value { color: #0891b2 !important; }
-/* Wallet desktop */
-#lq-wallet {
-display: flex;
-align-items: center;
-gap: .55rem;
-flex-wrap: wrap;
-justify-content: flex-end;
-}
-.lq-wallet-pill {
-display: inline-flex;
-align-items: center;
-justify-content: center;
-gap: .35rem;
-min-height: 38px;
-padding: .42rem .75rem;
-border-radius: 14px;
-font-weight: 900;
-box-shadow: 0 3px 0 rgba(15,23,42,.18);
-white-space: nowrap;
-}
-.lq-wallet-coins {
-background: linear-gradient(180deg,#fde047,#facc15);
-color: #713f12;
-border: 1px solid #fef08a;
-}
-.lq-wallet-gems {
-background: linear-gradient(180deg,#67e8f9,#22d3ee);
-color: #164e63;
-border: 1px solid #cffafe;
-}
-/* Boss floating notification */
-#boss-challenge-btn-floating {
-max-height: min(42vh, 360px);
-overflow: hidden auto !important;
-}
-/* Elakkan overlay berlaga dengan music button */
-#menu-screen #boss-challenge-btn-floating {
-margin-bottom: 62px;
-}
-/* Overlay besar: jangan melebihi viewport */
-#challenge-lobby-screen > div,
-#pvp-arena > div,
-#arena-lobby-container > div,
-#boss-arena > div {
-max-height: calc(100dvh - 24px);
-}
-/* Touch target minimum */
-#menu-screen button,
-#challenge-lobby-screen button,
-#pvp-arena button,
-#arena-lobby-container button,
-#boss-arena button {
--webkit-tap-highlight-color: transparent;
-}
-@media (max-width: 767px) {
-body {
-background-attachment: scroll !important;
-overflow-x: hidden !important;
-}
-#menu-screen {
-width: 100%;
-overflow-x: hidden;
-}
-/* Header mobile */
-#menu-screen > div:first-child {
-display: grid !important;
-grid-template-columns: minmax(0, 1fr) auto !important;
-align-items: center !important;
-gap: .55rem !important;
-padding: .55rem .65rem !important;
-margin-bottom: .35rem !important;
-}
-#menu-screen > div:first-child #lte-active-widget {
-grid-column: 1 / -1;
-grid-row: 1;
-justify-self: center;
-max-width: 100%;
-transform: none !important;
-}
-#menu-screen > div:first-child > div.flex.items-center.gap-3 {
-grid-column: 1;
-grid-row: 2;
-min-width: 0;
-gap: .5rem !important;
-}
-#dashboard-avatar-container {
-width: 50px !important;
-height: 50px !important;
-font-size: 1.8rem !important;
-}
-#menu-player-name {
-max-width: 42vw;
-overflow: hidden;
-text-overflow: ellipsis;
-white-space: nowrap;
-font-size: .9rem !important;
-}
-#menu-player-class,
-#header-active-title {
-max-width: 22vw;
-overflow: hidden;
-text-overflow: ellipsis;
-white-space: nowrap;
-}
-#menu-screen > div:first-child .mt-1.w-40,
-#menu-screen > div:first-child .mt-1.w-48 {
-width: min(43vw, 180px) !important;
-}
-#lq-wallet {
-grid-column: 2;
-grid-row: 2;
-align-self: center;
-flex-direction: column;
-align-items: stretch;
-gap: .3rem;
-min-width: 92px;
-}
-.lq-wallet-pill {
-min-height: 32px;
-padding: .3rem .5rem;
-border-radius: 11px;
-font-size: .8rem;
-}
-#user-coins,
-#display-gems {
-font-size: .82rem !important;
-}
-/* Main radial menu: elak bertindih pada skrin kecil */
-#dashboard-student {
-gap: .75rem !important;
-margin-top: .35rem !important;
-padding-bottom: 90px;
-}
-#dashboard-student .w-16 {
-width: 58px !important;
-height: 58px !important;
-}
-#dashboard-student .md\\:w-20 {
-width: 58px !important;
-height: 58px !important;
-}
-#dashboard-student .gap-6 {
-gap: 1.1rem !important;
-}
-#dashboard-student .gap-10 {
-gap: 1.1rem !important;
-}
-/* Boss card */
-#menu-screen #boss-challenge-btn-floating {
-width: min(92vw, 360px) !important;
-bottom: calc(62px + var(--lq-safe-bottom)) !important;
-margin-bottom: 0 !important;
-border-radius: 20px !important;
-}
-#boss-challenge-btn-floating .p-4 {
-padding: .75rem !important;
-}
-/* Challenge / PvP / 3v3 */
-#challenge-lobby-screen,
-#pvp-arena,
-#arena-lobby-container,
-#boss-arena {
-padding: .55rem !important;
-align-items: flex-start !important;
-padding-top: calc(.55rem + var(--lq-safe-top)) !important;
-padding-bottom: calc(.55rem + var(--lq-safe-bottom)) !important;
-}
-#challenge-lobby-screen > div,
-#pvp-arena > div,
-#arena-lobby-container > div {
-width: 100% !important;
-max-width: 100% !important;
-border-radius: 20px !important;
-}
-#challenge-lobby-screen .flex.justify-between {
-align-items: flex-start !important;
-}
-#challenge-lobby-screen h2 {
-font-size: 1.15rem !important;
-}
-#challenge-lobby-screen .flex.flex-col.sm\\:flex-row {
-flex-direction: column !important;
-}
-/* PvP header/players */
-#pvp-arena .text-4xl,
-#pvp-arena .md\\:text-5xl {
-font-size: 2rem !important;
-}
-#pvp-arena .w-16.h-16 {
-width: 48px !important;
-height: 48px !important;
-}
-/* Reward popup mobile */
-.swal2-popup.lq-reward-popup,
-.swal2-popup {
-width: calc(100vw - 24px) !important;
-max-width: 430px !important;
-border-radius: 20px !important;
-padding: 1rem !important;
-}
-.swal2-html-container {
-max-height: 55vh !important;
-}
-.lq-reward-card {
-gap: .4rem;
-margin: .65rem 0;
-}
-.lq-reward-item {
-padding: .55rem .25rem;
-border-radius: 13px;
-}
-.lq-reward-item .lq-reward-label {
-font-size: .55rem;
-}
-.swal2-actions {
-flex-direction: column !important;
-align-items: stretch !important;
-}
-.swal2-actions .swal2-confirm,
-.swal2-actions .swal2-cancel {
-width: 100% !important;
-margin: 0 !important;
-}
-/* Toast notification lebih kecil */
-.swal2-toast {
-width: calc(100vw - 20px) !important;
-max-width: 400px !important;
-font-size: .8rem !important;
-}
-}
-@media (max-width: 360px) {
-#menu-player-name { font-size: .78rem !important; max-width: 37vw; }
-#menu-player-class, #header-active-title { display: none !important; }
-#dashboard-avatar-container { width: 44px !important; height: 44px !important; }
-#lq-wallet { min-width: 84px; }
-.lq-wallet-pill { font-size: .72rem; min-height: 29px; }
-#dashboard-student .w-16,
-#dashboard-student .md\\:w-20 { width: 54px !important; height: 54px !important; }
-#boss-challenge-btn-floating { width: calc(100vw - 20px) !important; }
-}
-@media (min-width: 768px) {
-#menu-screen > div:first-child {
-min-height: 92px;
-}
-}
-/* =========================================================
-LEXIQUEST MOBILE UI 3.0 — TRUE MOBILE RELAYOUT
-Tujuan: elakkan elemen desktop dipaksa masuk ke telefon.
-Tidak mengubah ID / fungsi JavaScript.
-========================================================= */
-@media (max-width: 767px) {
-html, body {
-width: 100% !important;
-min-width: 0 !important;
-max-width: 100% !important;
-overflow-x: hidden !important;
-}
-body {
-min-height: 100dvh !important;
-background-size: cover !important;
-background-position: center top !important;
-background-attachment: scroll !important;
-}
-/* ---- Main student dashboard ---- */
-#menu-screen {
-width: 100vw !important;
-max-width: 100vw !important;
-min-height: 100dvh !important;
-box-sizing: border-box !important;
-overflow-x: hidden !important;
-overflow-y: auto !important;
-padding-bottom: calc(82px + env(safe-area-inset-bottom)) !important;
-position: relative !important;
-}
-/* Header: 2 kolum + LTE baris sendiri */
-#menu-screen > div:first-child {
-width: 100% !important;
-box-sizing: border-box !important;
-display: grid !important;
-grid-template-columns: minmax(0, 1fr) auto !important;
-grid-template-areas:
-"profile wallet"
-"lte lte"
-"boss boss" !important;
-align-items: center !important;
-gap: .55rem .65rem !important;
-padding: .65rem !important;
-margin: 0 !important;
-min-height: 0 !important;
-background: rgba(255,255,255,.10) !important;
-backdrop-filter: blur(10px) !important;
--webkit-backdrop-filter: blur(10px) !important;
-}
-#menu-screen > div:first-child > .flex.items-center.gap-3 {
-grid-area: profile !important;
-min-width: 0 !important;
-width: 100% !important;
-gap: .5rem !important;
-}
-#lte-active-widget {
-grid-area: lte !important;
-width: 100% !important;
-max-width: none !important;
-min-width: 0 !important;
-box-sizing: border-box !important;
-justify-content: center !important;
-transform: none !important;
-margin: 0 !important;
-border-radius: 12px !important;
-padding: .45rem .65rem !important;
-}
-#lte-active-widget > div:last-child {
-min-width: 0 !important;
-overflow: hidden !important;
-}
-#lte-widget-title {
-overflow: hidden !important;
-text-overflow: ellipsis !important;
-white-space: nowrap !important;
-max-width: 72vw !important;
-}
-/* Boss Challenge diletakkan di bawah LTE */
-#menu-screen > div:first-child .lq-boss-structural-wrapper {
-grid-area: boss !important;
-width: 100% !important;
-max-width: none !important;
-min-width: 0 !important;
-box-sizing: border-box !important;
-margin: 0 !important;
-padding: 0 !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating {
-position: relative !important;
-inset: auto !important;
-left: auto !important;
-right: auto !important;
-top: auto !important;
-bottom: auto !important;
-transform: none !important;
-width: 100% !important;
-max-width: none !important;
-min-width: 0 !important;
-height: auto !important;
-margin: 0 !important;
-padding: 0 !important;
-border-radius: 14px !important;
-overflow: hidden auto !important;
-pointer-events: auto !important;
-box-sizing: border-box !important;
-display: flex !important;
-flex-direction: row !important;
-align-items: stretch !important;
-justify-content: space-between !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating > .p-4 {
-flex: 1 1 auto !important;
-min-width: 0 !important;
-padding: .5rem .65rem !important;
-display: flex !important;
-flex-direction: row !important;
-align-items: center !important;
-justify-content: flex-start !important;
-gap: .5rem !important;
-text-align: left !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating > .p-4 > .text-3xl {
-flex: 0 0 auto !important;
-margin: 0 !important;
-font-size: 1.35rem !important;
-line-height: 1 !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating h3 {
-margin: 0 !important;
-font-size: .67rem !important;
-line-height: 1.1 !important;
-white-space: nowrap !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating p {
-margin: .12rem 0 0 !important;
-padding: 0 !important;
-font-size: .55rem !important;
-line-height: 1.15 !important;
-display: -webkit-box !important;
--webkit-line-clamp: 1 !important;
--webkit-box-orient: vertical !important;
-overflow: hidden !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-radar {
-flex: 0 0 min(34%, 145px) !important;
-width: auto !important;
-padding: .45rem .5rem !important;
-border-top: 0 !important;
-border-left: 1px solid rgba(49,46,129,.75) !important;
-align-self: stretch !important;
-box-sizing: border-box !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating > .absolute {
-top: 3px !important;
-right: 4px !important;
-font-size: 5px !important;
-padding: 1px 4px !important;
-}
-#dashboard-avatar-container {
-width: 48px !important;
-height: 48px !important;
-min-width: 48px !important;
-font-size: 1.7rem !important;
-}
-#menu-player-name {
-max-width: 42vw !important;
-font-size: .86rem !important;
-overflow: hidden !important;
-text-overflow: ellipsis !important;
-white-space: nowrap !important;
-}
-#menu-player-class,
-#header-active-title {
-max-width: 21vw !important;
-overflow: hidden !important;
-text-overflow: ellipsis !important;
-white-space: nowrap !important;
-}
-#menu-screen > div:first-child .mt-1.w-40,
-#menu-screen > div:first-child .mt-1.w-48 {
-width: min(43vw, 170px) !important;
-}
-#lq-wallet {
-grid-area: wallet !important;
-min-width: 78px !important;
-width: auto !important;
-flex-direction: column !important;
-align-items: stretch !important;
-gap: .25rem !important;
-}
-.lq-wallet-pill {
-min-height: 29px !important;
-padding: .27rem .5rem !important;
-border-radius: 9px !important;
-font-size: .72rem !important;
-line-height: 1 !important;
-box-shadow: 0 2px 0 rgba(15,23,42,.18) !important;
-}
-#lq-wallet + button {
-font-size: .56rem !important;
-line-height: 1 !important;
-margin-top: -.05rem !important;
-}
-/* ---- Main game menu: grid, bukan radial/overlap ---- */
-#dashboard-student {
-width: 100% !important;
-max-width: 100% !important;
-box-sizing: border-box !important;
-display: block !important;
-margin: 0 !important;
-padding: 1rem .8rem 1.5rem !important;
-overflow: visible !important;
-}
-#dashboard-student > div:first-child {
-width: 100% !important;
-max-width: 520px !important;
-margin: 0 auto !important;
-display: grid !important;
-grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-grid-template-areas:
-"play ranking"
-"medal shop"
-"arena arena" !important;
-gap: .8rem !important;
-align-items: stretch !important;
-}
-#dashboard-student > div:first-child > div:first-child {
-display: contents !important;
-}
-#dashboard-student > div:first-child > div:first-child > div:first-child {
-display: contents !important;
-}
-/* Butang menu utama — setiap satu jadi kad touch yang konsisten */
-#dashboard-student button[onclick*="openSubjectModal"] { grid-area: play; }
-#dashboard-student button[onclick*="leaderboard-screen"] { grid-area: ranking; }
-#dashboard-student button[onclick*="showAchievementsScreen"] { grid-area: medal; }
-#dashboard-student button[onclick*="shop-screen"] { grid-area: shop; }
-#dashboard-student button[onclick*="checkChallengeEligibility"] { grid-area: arena; }
-#dashboard-student button[onclick*="openSubjectModal"],
-#dashboard-student button[onclick*="leaderboard-screen"],
-#dashboard-student button[onclick*="showAchievementsScreen"],
-#dashboard-student button[onclick*="shop-screen"],
-#dashboard-student button[onclick*="checkChallengeEligibility"] {
-width: 100% !important;
-height: 78px !important;
-min-width: 0 !important;
-border-radius: 20px !important;
-border-width: 3px !important;
-margin: 0 !important;
-position: relative !important;
-transform: none !important;
-display: flex !important;
-flex-direction: column !important;
-justify-content: center !important;
-align-items: center !important;
-}
-#dashboard-student button[onclick*="checkChallengeEligibility"] {
-height: 72px !important;
-}
-#dashboard-student button[onclick*="openSubjectModal"] i,
-#dashboard-student button[onclick*="leaderboard-screen"] i,
-#dashboard-student button[onclick*="showAchievementsScreen"] i,
-#dashboard-student button[onclick*="shop-screen"] i,
-#dashboard-student button[onclick*="checkChallengeEligibility"] i {
-font-size: 1.35rem !important;
-margin-bottom: .2rem !important;
-}
-#dashboard-student button span {
-font-size: .58rem !important;
-line-height: 1.15 !important;
-}
-#dashboard-student button[onclick*="checkChallengeEligibility"] span:last-child {
-position: absolute !important;
-right: .4rem !important;
-bottom: .35rem !important;
-font-size: .45rem !important;
-}
-/* Boss alert: masuk dalam flow, bukan fixed di tengah menu */
-#menu-screen #boss-challenge-btn-floating {
-position: relative !important;
-left: auto !important;
-bottom: auto !important;
-top: auto !important;
-transform: none !important;
-width: 100% !important;
-max-width: 100% !important;
-margin: .1rem 0 0 !important;
-grid-column: 1 / -1 !important;
-border-radius: 18px !important;
-z-index: 10 !important;
-}
-#boss-challenge-btn-floating .p-4 {
-padding: .7rem !important;
-}
-/* Letakkan boss card sebagai baris penuh selepas menu */
-#dashboard-student > div:first-child > div:last-child {
-grid-column: 1 / -1 !important;
-width: 100% !important;
-position: static !important;
-transform: none !important;
-margin: 0 !important;
-padding: 0 !important;
-pointer-events: none !important;
-}
-#dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
-pointer-events: auto !important;
-}
-/* Widget pemain online: desktop sahaja */
-#menu-screen > div.fixed.bottom-4.left-4.w-64 {
-display: none !important;
-}
-/* Chat: tidak boleh mengambil separuh skrin */
-#floating-chat-box {
-width: calc(100vw - 20px) !important;
-max-width: 360px !important;
-right: 10px !important;
-left: auto !important;
-bottom: calc(8px + env(safe-area-inset-bottom)) !important;
-border-radius: 18px 18px 0 0 !important;
-}
-/* Semua skrin overlay mesti benar-benar memenuhi viewport telefon */
-#game-arena,
-#pvp-arena,
-#challenge-lobby-screen,
-#arena-lobby-container,
-#boss-arena,
-#shop-screen,
-#leaderboard-screen,
-#achievements-screen {
-width: 100vw !important;
-max-width: 100vw !important;
-min-height: 100dvh !important;
-box-sizing: border-box !important;
-overflow-y: auto !important;
-overflow-x: hidden !important;
-}
-/* Kad overlay tidak boleh lebih lebar daripada telefon */
-#game-arena > div,
-#pvp-arena > div,
-#arena-lobby-container > div,
-#boss-arena > div,
-#shop-screen > div,
-#leaderboard-screen > div,
-#achievements-screen > div {
-width: calc(100vw - 20px) !important;
-max-width: 520px !important;
-max-height: calc(100dvh - 20px) !important;
-box-sizing: border-box !important;
-margin: 10px auto !important;
-}
-}
-@media (max-width: 380px) {
-#dashboard-student > div:first-child {
-gap: .55rem !important;
-}
-#dashboard-student button[onclick*="openSubjectModal"],
-#dashboard-student button[onclick*="leaderboard-screen"],
-#dashboard-student button[onclick*="showAchievementsScreen"],
-#dashboard-student button[onclick*="shop-screen"] {
-height: 70px !important;
-border-radius: 17px !important;
-}
-#dashboard-student button[onclick*="checkChallengeEligibility"] {
-height: 66px !important;
-}
-#dashboard-avatar-container {
-width: 43px !important;
-height: 43px !important;
-min-width: 43px !important;
-}
-#menu-player-name { font-size: .76rem !important; max-width: 38vw !important; }
-#menu-player-class, #header-active-title { display: none !important; }
-#lq-wallet { min-width: 70px !important; }
-.lq-wallet-pill { font-size: .66rem !important; min-height: 27px !important; }
-}
+  :root {
+    --lq-safe-bottom: max(16px, env(safe-area-inset-bottom));
+    --lq-safe-top: max(12px, env(safe-area-inset-top));
+  }
+
+  /* SweetAlert2 — satu gaya konsisten untuk Laptop + Telefon */
+  .swal2-popup.lq-reward-popup,
+  .swal2-popup {
+    border-radius: 24px !important;
+    padding: 1.25rem !important;
+    width: min(92vw, 480px) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .swal2-title {
+    font-family: Poppins, sans-serif !important;
+    font-weight: 900 !important;
+    line-height: 1.15 !important;
+    font-size: clamp(1.25rem, 4vw, 1.8rem) !important;
+  }
+
+  .swal2-html-container {
+    font-family: Poppins, sans-serif !important;
+    font-size: clamp(.82rem, 2.5vw, .98rem) !important;
+    line-height: 1.55 !important;
+    max-height: 58vh !important;
+    overflow-y: auto !important;
+    margin: .75rem 0 !important;
+  }
+
+  .swal2-actions {
+    gap: .6rem !important;
+    width: 100% !important;
+  }
+
+  .swal2-actions .swal2-confirm,
+  .swal2-actions .swal2-cancel {
+    min-height: 44px !important;
+    border-radius: 14px !important;
+    font-family: Poppins, sans-serif !important;
+    font-weight: 900 !important;
+    padding: .65rem 1rem !important;
+  }
+
+  /* Toast: jangan menutup header / butang pada telefon */
+  .swal2-container.swal2-top,
+  .swal2-container.swal2-top-start,
+  .swal2-container.swal2-top-end {
+    padding-top: max(12px, env(safe-area-inset-top)) !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .swal2-toast {
+    width: min(94vw, 430px) !important;
+    border-radius: 18px !important;
+    padding: .7rem .9rem !important;
+  }
+
+  /* Kad ganjaran yang menggunakan kelas ini daripada game.js */
+  .lq-reward-card {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .65rem;
+    margin: .9rem 0;
+  }
+
+  .lq-reward-item {
+    min-width: 0;
+    border-radius: 16px;
+    padding: .7rem .45rem;
+    background: linear-gradient(145deg, rgba(248,250,252,.98), rgba(226,232,240,.88));
+    border: 1px solid rgba(148,163,184,.35);
+    box-shadow: 0 5px 15px rgba(15,23,42,.08);
+    text-align: center;
+  }
+
+  .lq-reward-item .lq-reward-value {
+    display: block;
+    font-size: clamp(1.05rem, 4vw, 1.45rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: .2rem;
+  }
+
+  .lq-reward-item .lq-reward-label {
+    display: block;
+    font-size: .62rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  .lq-gem-highlight {
+    background: linear-gradient(145deg, #ecfeff, #cffafe) !important;
+    border: 2px solid #22d3ee !important;
+    box-shadow: 0 0 22px rgba(34,211,238,.25) !important;
+  }
+
+  .lq-gem-highlight .lq-reward-value { color: #0891b2 !important; }
+
+  /* Wallet desktop */
+  #lq-wallet {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .lq-wallet-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    min-height: 38px;
+    padding: .42rem .75rem;
+    border-radius: 14px;
+    font-weight: 900;
+    box-shadow: 0 3px 0 rgba(15,23,42,.18);
+    white-space: nowrap;
+  }
+
+  .lq-wallet-coins {
+    background: linear-gradient(180deg,#fde047,#facc15);
+    color: #713f12;
+    border: 1px solid #fef08a;
+  }
+
+  .lq-wallet-gems {
+    background: linear-gradient(180deg,#67e8f9,#22d3ee);
+    color: #164e63;
+    border: 1px solid #cffafe;
+  }
+
+  /* Overlay besar: jangan melebihi viewport */
+  #challenge-lobby-screen > div,
+  #pvp-arena > div,
+  #arena-lobby-container > div,
+  #boss-arena > div {
+    max-height: calc(100dvh - 24px);
+  }
+
+  /* Touch target minimum */
+  #menu-screen button,
+  #challenge-lobby-screen button,
+  #pvp-arena button,
+  #arena-lobby-container button,
+  #boss-arena button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (max-width: 767px) {
+    body {
+      background-attachment: scroll !important;
+      overflow-x: hidden !important;
+    }
+
+    #menu-screen {
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    /* Header mobile */
+    #menu-screen > div:first-child {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      align-items: center !important;
+      gap: .55rem !important;
+      padding: .55rem .65rem !important;
+      margin-bottom: .35rem !important;
+    }
+
+    #menu-screen > div:first-child #lte-active-widget {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      justify-self: center;
+      max-width: 100%;
+      transform: none !important;
+    }
+
+    #menu-screen > div:first-child > div.flex.items-center.gap-3 {
+      grid-column: 1;
+      grid-row: 2;
+      min-width: 0;
+      gap: .5rem !important;
+    }
+
+    #dashboard-avatar-container {
+      width: 50px !important;
+      height: 50px !important;
+      font-size: 1.8rem !important;
+    }
+
+    #menu-player-name {
+      max-width: 42vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: .9rem !important;
+    }
+
+    #menu-player-class,
+    #header-active-title {
+      max-width: 22vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #menu-screen > div:first-child .mt-1.w-40,
+    #menu-screen > div:first-child .mt-1.w-48 {
+      width: min(43vw, 180px) !important;
+    }
+
+    #lq-wallet {
+      grid-column: 2;
+      grid-row: 2;
+      align-self: center;
+      flex-direction: column;
+      align-items: stretch;
+      gap: .3rem;
+      min-width: 92px;
+    }
+
+    .lq-wallet-pill {
+      min-height: 32px;
+      padding: .3rem .5rem;
+      border-radius: 11px;
+      font-size: .8rem;
+    }
+
+    #user-coins,
+    #display-gems {
+      font-size: .82rem !important;
+    }
+
+    /* Main radial menu: elak bertindih pada skrin kecil */
+    #dashboard-student {
+      gap: .75rem !important;
+      margin-top: .35rem !important;
+      padding-bottom: 90px;
+    }
+
+    #dashboard-student .w-16 {
+      width: 58px !important;
+      height: 58px !important;
+    }
+
+    #dashboard-student .md\\:w-20 {
+      width: 58px !important;
+      height: 58px !important;
+    }
+
+    #dashboard-student .gap-6 {
+      gap: 1.1rem !important;
+    }
+
+    #dashboard-student .gap-10 {
+      gap: 1.1rem !important;
+    }
+
+    /* Challenge / PvP / 3v3 */
+    #challenge-lobby-screen,
+    #pvp-arena,
+    #arena-lobby-container,
+    #boss-arena {
+      padding: .55rem !important;
+      align-items: flex-start !important;
+      padding-top: calc(.55rem + var(--lq-safe-top)) !important;
+      padding-bottom: calc(.55rem + var(--lq-safe-bottom)) !important;
+    }
+
+    #challenge-lobby-screen > div,
+    #pvp-arena > div,
+    #arena-lobby-container > div {
+      width: 100% !important;
+      max-width: 100% !important;
+      border-radius: 20px !important;
+    }
+
+    #challenge-lobby-screen .flex.justify-between {
+      align-items: flex-start !important;
+    }
+
+    #challenge-lobby-screen h2 {
+      font-size: 1.15rem !important;
+    }
+
+    #challenge-lobby-screen .flex.flex-col.sm\\:flex-row {
+      flex-direction: column !important;
+    }
+
+    /* PvP header/players */
+    #pvp-arena .text-4xl,
+    #pvp-arena .md\\:text-5xl {
+      font-size: 2rem !important;
+    }
+
+    #pvp-arena .w-16.h-16 {
+      width: 48px !important;
+      height: 48px !important;
+    }
+
+    /* Reward popup mobile */
+    .swal2-popup.lq-reward-popup,
+    .swal2-popup {
+      width: calc(100vw - 24px) !important;
+      max-width: 430px !important;
+      border-radius: 20px !important;
+      padding: 1rem !important;
+    }
+
+    .swal2-html-container {
+      max-height: 55vh !important;
+    }
+
+    .lq-reward-card {
+      gap: .4rem;
+      margin: .65rem 0;
+    }
+
+    .lq-reward-item {
+      padding: .55rem .25rem;
+      border-radius: 13px;
+    }
+
+    .lq-reward-item .lq-reward-label {
+      font-size: .55rem;
+    }
+
+    .swal2-actions {
+      flex-direction: column !important;
+      align-items: stretch !important;
+    }
+
+    .swal2-actions .swal2-confirm,
+    .swal2-actions .swal2-cancel {
+      width: 100% !important;
+      margin: 0 !important;
+    }
+
+    /* Toast notification lebih kecil */
+    .swal2-toast {
+      width: calc(100vw - 20px) !important;
+      max-width: 400px !important;
+      font-size: .8rem !important;
+    }
+  }
+
+  @media (max-width: 360px) {
+    #menu-player-name { font-size: .78rem !important; max-width: 37vw; }
+    #menu-player-class, #header-active-title { display: none !important; }
+    #dashboard-avatar-container { width: 44px !important; height: 44px !important; }
+    #lq-wallet { min-width: 84px; }
+    .lq-wallet-pill { font-size: .72rem; min-height: 29px; }
+    #dashboard-student .w-16,
+    #dashboard-student .md\\:w-20 { width: 54px !important; height: 54px !important; }
+  }
+
+  @media (min-width: 768px) {
+    #menu-screen > div:first-child {
+      min-height: 92px;
+    }
+  }
+
+
+  /* =========================================================
+     LEXIQUEST MOBILE UI 3.0 — TRUE MOBILE RELAYOUT
+     Tujuan: elakkan elemen desktop dipaksa masuk ke telefon.
+     Tidak mengubah ID / fungsi JavaScript.
+     ========================================================= */
+  @media (max-width: 767px) {
+    html, body {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+    }
+
+    body {
+      min-height: 100dvh !important;
+      background-size: cover !important;
+      background-position: center top !important;
+      background-attachment: scroll !important;
+    }
+
+    /* ---- Main student dashboard ---- */
+    #menu-screen {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      min-height: 100dvh !important;
+      box-sizing: border-box !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      padding-bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+      position: relative !important;
+    }
+
+    /* Header: 2 kolum + LTE baris sendiri */
+    #menu-screen > div:first-child {
+      width: 100% !important;
+      box-sizing: border-box !important;
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      grid-template-areas:
+        "profile wallet"
+        "lte lte" !important;
+      align-items: center !important;
+      gap: .55rem .65rem !important;
+      padding: .65rem !important;
+      margin: 0 !important;
+      min-height: 0 !important;
+      background: rgba(255,255,255,.10) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+    }
+
+    #menu-screen > div:first-child > .flex.items-center.gap-3 {
+      grid-area: profile !important;
+      min-width: 0 !important;
+      width: 100% !important;
+      gap: .5rem !important;
+    }
+
+    #lte-active-widget {
+      grid-area: lte !important;
+      width: 100% !important;
+      max-width: none !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+      justify-content: center !important;
+      transform: none !important;
+      margin: 0 !important;
+      border-radius: 12px !important;
+      padding: .45rem .65rem !important;
+    }
+
+    #lte-active-widget > div:last-child {
+      min-width: 0 !important;
+      overflow: hidden !important;
+    }
+
+    #lte-widget-title {
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+      max-width: 72vw !important;
+    }
+
+    #dashboard-avatar-container {
+      width: 48px !important;
+      height: 48px !important;
+      min-width: 48px !important;
+      font-size: 1.7rem !important;
+    }
+
+    #menu-player-name {
+      max-width: 42vw !important;
+      font-size: .86rem !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+
+    #menu-player-class,
+    #header-active-title {
+      max-width: 21vw !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+
+    #menu-screen > div:first-child .mt-1.w-40,
+    #menu-screen > div:first-child .mt-1.w-48 {
+      width: min(43vw, 170px) !important;
+    }
+
+    #lq-wallet {
+      grid-area: wallet !important;
+      min-width: 78px !important;
+      width: auto !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: .25rem !important;
+    }
+
+    .lq-wallet-pill {
+      min-height: 29px !important;
+      padding: .27rem .5rem !important;
+      border-radius: 9px !important;
+      font-size: .72rem !important;
+      line-height: 1 !important;
+      box-shadow: 0 2px 0 rgba(15,23,42,.18) !important;
+    }
+
+    #lq-wallet + button {
+      font-size: .56rem !important;
+      line-height: 1 !important;
+      margin-top: -.05rem !important;
+    }
+
+    /* ---- Main game menu: grid, bukan radial/overlap ---- */
+    #dashboard-student {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      display: block !important;
+      margin: 0 !important;
+      padding: 1rem .8rem 1.5rem !important;
+      overflow: visible !important;
+    }
+
+    #dashboard-student > div:first-child {
+      width: 100% !important;
+      max-width: 520px !important;
+      margin: 0 auto !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      grid-template-areas:
+        "play ranking"
+        "medal shop"
+        "arena arena" !important;
+      gap: .8rem !important;
+      align-items: stretch !important;
+    }
+
+    #dashboard-student > div:first-child > div:first-child {
+      display: contents !important;
+    }
+
+    #dashboard-student > div:first-child > div:first-child > div:first-child {
+      display: contents !important;
+    }
+
+    /* Butang menu utama — setiap satu jadi kad touch yang konsisten */
+    #dashboard-student button[onclick*="openSubjectModal"] { grid-area: play; }
+    #dashboard-student button[onclick*="leaderboard-screen"] { grid-area: ranking; }
+    #dashboard-student button[onclick*="showAchievementsScreen"] { grid-area: medal; }
+    #dashboard-student button[onclick*="shop-screen"] { grid-area: shop; }
+    #dashboard-student button[onclick*="checkChallengeEligibility"] { grid-area: arena; }
+
+    #dashboard-student button[onclick*="openSubjectModal"],
+    #dashboard-student button[onclick*="leaderboard-screen"],
+    #dashboard-student button[onclick*="showAchievementsScreen"],
+    #dashboard-student button[onclick*="shop-screen"],
+    #dashboard-student button[onclick*="checkChallengeEligibility"] {
+      width: 100% !important;
+      height: 78px !important;
+      min-width: 0 !important;
+      border-radius: 20px !important;
+      border-width: 3px !important;
+      margin: 0 !important;
+      position: relative !important;
+      transform: none !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+
+    #dashboard-student button[onclick*="checkChallengeEligibility"] {
+      height: 72px !important;
+    }
+
+    #dashboard-student button[onclick*="openSubjectModal"] i,
+    #dashboard-student button[onclick*="leaderboard-screen"] i,
+    #dashboard-student button[onclick*="showAchievementsScreen"] i,
+    #dashboard-student button[onclick*="shop-screen"] i,
+    #dashboard-student button[onclick*="checkChallengeEligibility"] i {
+      font-size: 1.35rem !important;
+      margin-bottom: .2rem !important;
+    }
+
+    #dashboard-student button span {
+      font-size: .58rem !important;
+      line-height: 1.15 !important;
+    }
+
+    #dashboard-student button[onclick*="checkChallengeEligibility"] span:last-child {
+      position: absolute !important;
+      right: .4rem !important;
+      bottom: .35rem !important;
+      font-size: .45rem !important;
+    }
+
+    /* Widget pemain online: desktop sahaja */
+    #menu-screen > div.fixed.bottom-4.left-4.w-64 {
+      display: none !important;
+    }
+
+    /* Chat: tidak boleh mengambil separuh skrin */
+    #floating-chat-box {
+      width: calc(100vw - 20px) !important;
+      max-width: 360px !important;
+      right: 10px !important;
+      left: auto !important;
+      bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+      border-radius: 18px 18px 0 0 !important;
+    }
+
+    /* Semua skrin overlay mesti benar-benar memenuhi viewport telefon */
+    #game-arena,
+    #pvp-arena,
+    #challenge-lobby-screen,
+    #arena-lobby-container,
+    #boss-arena,
+    #shop-screen,
+    #leaderboard-screen,
+    #achievements-screen {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      min-height: 100dvh !important;
+      box-sizing: border-box !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+    }
+
+    /* Kad overlay tidak boleh lebih lebar daripada telefon */
+    #game-arena > div,
+    #pvp-arena > div,
+    #arena-lobby-container > div,
+    #boss-arena > div,
+    #shop-screen > div,
+    #leaderboard-screen > div,
+    #achievements-screen > div {
+      width: calc(100vw - 20px) !important;
+      max-width: 520px !important;
+      max-height: calc(100dvh - 20px) !important;
+      box-sizing: border-box !important;
+      margin: 10px auto !important;
+    }
+  }
+
+  @media (max-width: 380px) {
+    #dashboard-student > div:first-child {
+      gap: .55rem !important;
+    }
+    #dashboard-student button[onclick*="openSubjectModal"],
+    #dashboard-student button[onclick*="leaderboard-screen"],
+    #dashboard-student button[onclick*="showAchievementsScreen"],
+    #dashboard-student button[onclick*="shop-screen"] {
+      height: 70px !important;
+      border-radius: 17px !important;
+    }
+    #dashboard-student button[onclick*="checkChallengeEligibility"] {
+      height: 66px !important;
+    }
+    #dashboard-avatar-container {
+      width: 43px !important;
+      height: 43px !important;
+      min-width: 43px !important;
+    }
+    #menu-player-name { font-size: .76rem !important; max-width: 38vw !important; }
+    #menu-player-class, #header-active-title { display: none !important; }
+    #lq-wallet { min-width: 70px !important; }
+    .lq-wallet-pill { font-size: .66rem !important; min-height: 27px !important; }
+  }
+
 </style>
-<style id="lexiquest-mobile-landscape-boss-final-fix">
-/* FINAL STRUCTURAL FIX: dashboard mempunyai 2 anak terus:
-anak #1 = menu utama, anak #2 = Boss Challenge.
-Jadi Boss MESTI diposisikan pada kolum kanan. */
-@media (max-width: 767px) and (orientation: landscape) {
-#dashboard-student:not(.hidden) {
-display: grid !important;
-grid-template-columns: minmax(0, 1fr) minmax(210px, 30vw) !important;
-grid-template-areas: "menu boss" !important;
-align-items: start !important;
-column-gap: .8rem !important;
-row-gap: 0 !important;
-width: 100% !important;
-max-width: none !important;
-margin: 0 !important;
-padding: .35rem .7rem .7rem !important;
-box-sizing: border-box !important;
-}
-/* Anak pertama dashboard = menu utama */
-#dashboard-student:not(.hidden) > div:first-child {
-grid-area: menu !important;
-width: 100% !important;
-max-width: none !important;
-margin: 0 !important;
-padding: 0 !important;
-position: static !important;
-}
-/* RESET CSS LAMA: selector div:last-child di bawah menu pernah tersalah
-dianggap sebagai Boss. Ia sebenarnya wrapper butang Shop/Challenge. */
-#dashboard-student:not(.hidden) > div:first-child > div:last-child {
-display: contents !important;
-grid-area: auto !important;
-position: static !important;
-inset: auto !important;
-transform: none !important;
-width: auto !important;
-max-width: none !important;
-margin: 0 !important;
-padding: 0 !important;
-pointer-events: auto !important;
-}
-/* Anak kedua dashboard = wrapper Boss Challenge.
-INILAH elemen yang sebelum ini tersalah sasaran oleh CSS lama. */
-#dashboard-student:not(.hidden) > div:nth-child(2) {
-grid-area: boss !important;
-display: block !important;
-width: 100% !important;
-max-width: none !important;
-height: auto !important;
-margin: 0 !important;
-padding: 0 !important;
-position: static !important;
-inset: auto !important;
-transform: none !important;
-align-self: start !important;
-justify-self: stretch !important;
-pointer-events: none !important;
-z-index: 100 !important;
-}
-/* Kad Boss sendiri juga tidak boleh fixed/absolute */
-#dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating {
-position: relative !important;
-display: flex !important;
-inset: auto !important;
-left: auto !important;
-right: auto !important;
-top: auto !important;
-bottom: auto !important;
-transform: none !important;
-width: 100% !important;
-max-width: none !important;
-min-width: 0 !important;
-margin: 0 !important;
-pointer-events: auto !important;
-max-height: calc(100dvh - 115px) !important;
-overflow: hidden auto !important;
-box-sizing: border-box !important;
-}
-/* Kurangkan saiz kad supaya muat kemas dalam kolum kanan */
-#dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating .p-4 {
-padding: .55rem !important;
-}
-#dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating .text-3xl {
-font-size: 1.45rem !important;
-margin-bottom: .15rem !important;
-}
-#dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating h3 {
-font-size: .72rem !important;
-}
-#dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating p {
-font-size: .58rem !important;
-}
-}
-/* Portrait kekal dikunci oleh mobile-landscape-lock. */
-</style>
-<style id="lexiquest-mobile-boss-structural-final">
-/* =========================================================
-LEXIQUEST — FINAL BOSS STRUCTURAL REBUILD
-Source: latest index.html supplied by user.
-Boss is physically located immediately after LTE in the DOM.
-Desktop keeps the original fixed presentation.
-Mobile uses normal document flow: LTE -> BOSS -> PROFILE/WALLET.
-========================================================= */
-/* Desktop: preserve the original floating Boss presentation. */
-@media (min-width: 768px) {
-.lq-boss-structural-wrapper {
-position: fixed !important;
-left: 50% !important;
-bottom: 1rem !important;
-transform: translateX(-50%) !important;
-z-index: 50 !important;
-width: 92% !important;
-max-width: 24rem !important;
-pointer-events: none !important;
-}
-.lq-boss-structural-wrapper #boss-challenge-btn-floating {
-pointer-events: auto !important;
-}
-}
-@media (max-width: 767px) {
-/* Header becomes a real vertical flow. No absolute/fixed Boss positioning. */
-#menu-screen > div:first-child {
-display: grid !important;
-grid-template-columns: minmax(0, 1fr) auto !important;
-grid-template-areas:
-"lte lte"
-"boss boss"
-"profile wallet" !important;
-align-items: center !important;
-gap: .45rem .65rem !important;
-padding: .55rem .65rem !important;
-}
-#menu-screen > div:first-child #lte-active-widget {
-grid-area: lte !important;
-width: 100% !important;
-min-width: 0 !important;
-max-width: none !important;
-margin: 0 !important;
-transform: none !important;
-justify-self: stretch !important;
-}
-/* This is now the actual Boss container. It is in normal flow. */
-#menu-screen > div:first-child .lq-boss-structural-wrapper {
-grid-area: boss !important;
-position: static !important;
-inset: auto !important;
-left: auto !important;
-right: auto !important;
-top: auto !important;
-bottom: auto !important;
-transform: none !important;
-width: 100% !important;
-max-width: none !important;
-min-width: 0 !important;
-margin: 0 !important;
-padding: 0 !important;
-display: block !important;
-justify-self: stretch !important;
-align-self: stretch !important;
-pointer-events: none !important;
-z-index: 30 !important;
-box-sizing: border-box !important;
-}
-/* Boss card is a compact bar directly under LTE. */
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating {
-position: relative !important;
-inset: auto !important;
-left: auto !important;
-right: auto !important;
-top: auto !important;
-bottom: auto !important;
-transform: none !important;
-width: 100% !important;
-max-width: none !important;
-min-width: 0 !important;
-height: auto !important;
-max-height: 31dvh !important;
-margin: 0 !important;
-padding: 0 !important;
-border-radius: 14px !important;
-overflow: hidden auto !important;
-pointer-events: auto !important;
-box-sizing: border-box !important;
-display: flex !important;
-flex-direction: row !important;
-align-items: stretch !important;
-justify-content: space-between !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating > .p-4 {
-flex: 1 1 auto !important;
-min-width: 0 !important;
-padding: .5rem .65rem !important;
-display: flex !important;
-flex-direction: row !important;
-align-items: center !important;
-justify-content: flex-start !important;
-gap: .5rem !important;
-text-align: left !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating > .p-4 > .text-3xl {
-flex: 0 0 auto !important;
-margin: 0 !important;
-font-size: 1.35rem !important;
-line-height: 1 !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating h3 {
-margin: 0 !important;
-font-size: .67rem !important;
-line-height: 1.1 !important;
-white-space: nowrap !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating p {
-margin: .12rem 0 0 !important;
-padding: 0 !important;
-font-size: .55rem !important;
-line-height: 1.15 !important;
-display: -webkit-box !important;
--webkit-line-clamp: 1 !important;
--webkit-box-orient: vertical !important;
-overflow: hidden !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-radar {
-flex: 0 0 min(34%, 145px) !important;
-width: auto !important;
-padding: .45rem .5rem !important;
-border-top: 0 !important;
-border-left: 1px solid rgba(49,46,129,.75) !important;
-align-self: stretch !important;
-box-sizing: border-box !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating > .absolute {
-top: 3px !important;
-right: 4px !important;
-font-size: 5px !important;
-padding: 1px 4px !important;
-}
-/* Profile and wallet are explicitly the row AFTER Boss. */
-#menu-screen > div:first-child > div.flex.items-center.gap-3 {
-grid-area: profile !important;
-min-width: 0 !important;
-width: 100% !important;
-}
-#menu-screen > div:first-child > div.flex.flex-col.items-end.gap-2.flex-shrink-0 {
-grid-area: wallet !important;
-min-width: 0 !important;
-width: auto !important;
-align-self: center !important;
-}
-/* Prevent old dashboard-based Boss CSS from creating an empty visual area. */
-#dashboard-student .lq-boss-structural-wrapper {
-display: none !important;
-}
-}
-@media (max-width: 767px) and (orientation: landscape) {
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating {
-max-height: 30dvh !important;
-}
-}
-@media (max-width: 380px) {
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating > .p-4 {
-padding: .4rem .5rem !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating h3 {
-font-size: .6rem !important;
-}
-#menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating p {
-font-size: .5rem !important;
-}
-}
-</style></head>
+</head>
 <body class="bg-cover bg-center bg-fixed bg-no-repeat min-h-screen font-['Poppins']" style="background-image: url('assets/bg.webp');">
 <div class="mt-16 p-2 md:p-6 text-center animate-fade-in max-w-md mx-auto relative flex flex-col justify-center items-center overflow-hidden bg-transparent" id="auth-screen">
 <div class="relative z-10 bg-transparent p-4 w-full">
@@ -1034,18 +719,18 @@ font-size: .5rem !important;
 <input class="w-full px-4 py-2 text-sm rounded-xl border-2 border-white/20 focus:border-yellow-400 focus:ring-0 transition-all font-bold text-white bg-black/40 backdrop-blur-sm" id="login-pin" placeholder="••••" type="password"/>
 </div>
 <button class="w-full bg-gradient-to-b from-yellow-400 to-yellow-600 hover:from-yellow-300 hover:to-yellow-500 text-black font-black py-3 rounded-xl shadow-[0_5px_15px_rgba(0,0,0,0.4)] transform hover:scale-[1.03] active:scale-95 transition-all mt-4 text-lg border-b-4 border-yellow-800 tracking-wider" onclick="loginStudent()">
-ENTER WORLD
-</button>
+                    ENTER WORLD
+                </button>
 <div class="mt-4 flex flex-wrap justify-center gap-2 w-full border-t border-white/10 pt-4">
 <button class="flex items-center px-2.5 py-1.5 bg-black/50 border border-purple-600 text-purple-400 hover:bg-purple-900/50 hover:text-purple-300 text-[10px] font-bold rounded shadow-[0_0_10px_rgba(147,51,234,0.3)] transition-all" onclick="window.location.href='langganan.html'">
 <i class="fas fa-gem mr-1.5"></i> LANGGANAN BARU
-</button>
+                    </button>
 <button class="flex items-center px-2.5 py-1.5 bg-black/50 border border-cyan-600 text-cyan-500 hover:bg-cyan-900/50 hover:text-cyan-300 text-[10px] font-bold rounded shadow-[0_0_10px_rgba(8,145,178,0.3)] transition-all" onclick="window.location.href='school-admin.html'">
 <i class="fas fa-chalkboard-teacher mr-1.5"></i> PORTAL GURU
-</button>
+                    </button>
 <button class="flex items-center px-2.5 py-1.5 bg-black/50 border border-amber-600 text-amber-500 hover:bg-amber-900/50 hover:text-amber-300 text-[10px] font-bold rounded shadow-[0_0_10px_rgba(217,119,6,0.3)] transition-all" onclick="window.location.href='admin.html'">
 <i class="fas fa-user-shield mr-1.5"></i> SUPER ADMIN
-</button>
+                    </button>
 </div>
 </div>
 </div>
@@ -1067,52 +752,15 @@ ENTER WORLD
 <!-- Nota: Buang class 'hidden' pada div di bawah melalui JS apabila ada event aktif -->
 <div class="hidden flex items-center bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-900 border border-amber-400/40 rounded-xl px-3 py-1.5 shadow-[0_0_15px_rgba(147,51,234,0.3)] transform hover:scale-105 transition-all cursor-pointer backdrop-blur-sm" id="lte-active-widget" onclick="handleWidgetClick()">
 <div class="mr-2 text-lg md:text-xl animate-pulse drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]" id="lte-widget-icon">
-🔥
-</div>
+        🔥
+    </div>
 <div class="flex flex-col">
 <span class="text-[9px] md:text-[10px] font-black text-yellow-300 uppercase tracking-widest drop-shadow-md leading-none mb-1" id="lte-widget-title">
-Sistem Memuatkan...
-</span>
+            Sistem Memuatkan...
+        </span>
 <span class="text-[8px] md:text-[9px] font-mono font-bold text-white bg-black/40 px-1.5 py-0.5 rounded-md inline-block w-max border border-white/10" id="lte-widget-timer">
-⏳ 00j 00m
-</span>
-</div>
-</div>
-<!-- ========================================== -->
-<!-- BOSS CHALLENGE - DILETAKKAN DI BAWAH LTE   -->
-<!-- ========================================== -->
-<div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-[92%] max-w-sm pointer-events-none lq-boss-structural-wrapper">
-<!-- KAD UTAMA: Menggabungkan Amaran & Butang Lawan -->
-<div class="hidden pointer-events-auto bg-white/95 backdrop-blur-md rounded-3xl border-2 border-red-500 shadow-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-all flex flex-col relative" id="boss-challenge-btn-floating" onclick="attemptJoinBoss();">
-<!-- Lencana Hari Ini (Bouncing Badge) -->
-<div class="absolute top-3 right-3 bg-yellow-400 text-black text-[9px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md border border-white animate-bounce">
-HARI INI!
-</div>
-<!-- Bahagian 1: Notifikasi Amaran (Atas) -->
-<div class="p-4 flex flex-col items-center text-center">
-<div class="text-3xl mb-1 animate-pulse">🐉</div>
-<h3 class="font-black text-red-600 text-sm md:text-base uppercase tracking-wider">
-WARNING: BOSS APPEARED!
-</h3>
-<p class="text-[11px] text-gray-600 font-semibold mt-1 px-2 leading-relaxed" id="floating-boss-name">
-Mummy Mufrodat sedang menyerang! Klik untuk menyertai pertempuran!
-</p>
-</div>
-<!-- Bahagian 2: Status HP & Tombol Aksi Ungu (Bawah) -->
-<div class="hidden bg-purple-800 text-white px-4 py-3 border-t border-purple-950 flex flex-col items-center w-full" id="boss-challenge-btn-radar">
-<div class="text-xs font-black flex items-center gap-1.5 uppercase tracking-wider text-purple-100">
-<i class="fas fa-swords text-yellow-400 animate-pulse"></i> ⚔️ MASUK PERTEMPURAN ⚔️
-</div>
-<!-- Progress Bar HP Boss -->
-<div class="w-full mt-2">
-<div class="w-full bg-gray-950 rounded-full h-2.5 shadow-inner overflow-hidden p-[1px] border border-purple-600">
-<div class="bg-gradient-to-r from-red-600 via-orange-500 to-red-400 h-full rounded-full transition-all duration-300" id="radar-boss-hp-bar" style="width: 100%;"></div>
-</div>
-<div class="text-[10px] mt-1 text-purple-200 font-mono tracking-widest text-center font-bold" id="radar-boss-hp-text">
-HP: - / -
-</div>
-</div>
-</div>
+            ⏳ 00j 00m
+        </span>
 </div>
 </div>
 <!-- ========================================== -->
@@ -1120,24 +768,24 @@ HP: - / -
 <div class="bg-gradient-to-b from-indigo-950 via-slate-900 to-black border-2 border-amber-400/50 rounded-2xl shadow-[0_0_25px_rgba(147,51,234,0.4)] w-full max-w-sm relative overflow-hidden">
 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-50"></div>
 <button class="absolute top-3 right-3 text-slate-400 hover:text-red-500 hover:scale-110 transition-all font-black text-xl drop-shadow-md z-10" onclick="closeLteModal()">
-✖
-</button>
+            ✖
+        </button>
 <div class="p-5 flex flex-col items-center text-center mt-2">
 <div class="text-5xl md:text-6xl mb-3 drop-shadow-[0_0_15px_rgba(250,204,21,0.6)] animate-bounce-slow" id="modal-lte-icon">
-🔥
-</div>
+                🔥
+            </div>
 <h3 class="text-base md:text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-500 uppercase tracking-wider mb-1 drop-shadow-sm" id="modal-lte-title">
-Nama Acara
-</h3>
+                Nama Acara
+            </h3>
 <p class="text-[10px] md:text-xs text-slate-300 font-medium mb-4 px-2 leading-relaxed" id="modal-lte-desc">
-Penerangan tentang acara akan dipaparkan di sini.
-</p>
+                Penerangan tentang acara akan dipaparkan di sini.
+            </p>
 <div class="w-full bg-black/40 border border-white/10 rounded-xl p-3 hidden" id="modal-lte-progress-section">
 <div class="flex justify-between items-center mb-1.5 px-1">
 <span class="text-[9px] md:text-[10px] font-bold text-indigo-300 uppercase tracking-widest">Progres Anda:</span>
 <span class="text-[10px] md:text-xs font-black text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]" id="modal-lte-progress-text">
-0 / 15 Hari
-</span>
+                        0 / 15 Hari
+                    </span>
 </div>
 <div class="w-full h-2.5 bg-slate-800 rounded-full border border-slate-700 overflow-hidden shadow-inner">
 <div class="h-full bg-gradient-to-r from-emerald-500 to-green-400 rounded-full transition-all duration-1000 w-0 relative" id="modal-lte-progress-bar">
@@ -1145,8 +793,8 @@ Penerangan tentang acara akan dipaparkan di sini.
 </div>
 </div>
 <p class="text-[8px] md:text-[9px] text-slate-400 mt-2 font-mono italic">
-*Log masuk dan main setiap hari untuk menambah progres.
-</p>
+                    *Log masuk dan main setiap hari untuk menambah progres.
+                </p>
 </div>
 </div>
 </div>
@@ -1185,8 +833,8 @@ Penerangan tentang acara akan dipaparkan di sini.
 </div>
 </div>
 <button class="text-[9px] md:text-[10px] font-black text-red-500 hover:text-red-700 uppercase tracking-widest transition-colors drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]" onclick="logout()">
-Logout ➔
-</button>
+                Logout ➔
+            </button>
 </div>
 </div>
 </div>
@@ -1259,10 +907,6 @@ Logout ➔
 <span class="absolute -bottom-1 bg-yellow-400 text-yellow-900 text-[7px] md:text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-md border border-white/50">Lvl 15+</span>
 </button>
 </div>
-<!-- ========================================================= -->
-<!-- 🔥 SISTEM AMARAN BOSS GABUNGAN (SINGLE SEAMLESS CARD) 🔥  -->
-<!-- ========================================================= -->
-<!-- 🔥 TAMAT SISTEM AMARAN BOSS GABUNGAN 🔥 -->
 </div>
 </div> <!-- PENUTUP DASHBOARD STUDENT -->
 <!-- ========================================================= -->
@@ -1291,7 +935,7 @@ Logout ➔
 <div class="flex flex-col sm:flex-row justify-between items-center mb-5 gap-4 border-b-2 border-indigo-100 pb-4 flex-shrink-0">
 <button class="text-gray-600 hover:text-red-600 font-bold bg-white px-4 py-2 rounded-xl shadow-sm transition-colors" onclick="showScreen('menu-screen')">
 <i class="fas fa-arrow-left"></i> Run Away
-</button>
+            </button>
 <h2 class="text-2xl md:text-3xl font-black text-indigo-800 uppercase tracking-wider text-center" id="game-title">ARENA</h2>
 <div class="bg-red-100 border-2 border-red-300 px-5 py-2 rounded-2xl shadow-inner flex items-center gap-2">
 <i class="fas fa-hourglass-half text-red-500 animate-pulse"></i>
@@ -1302,8 +946,8 @@ Logout ➔
 <div class="space-y-4 mb-5 flex-1 overflow-y-auto pr-2 pb-2 min-h-[40vh] md:min-h-[50vh]" id="question-container"></div>
 <!-- Butang Hantar (Kekal di bawah) -->
 <button class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-xl shadow-lg transition-transform hover:scale-[1.01] text-lg md:text-xl flex-shrink-0" id="check-btn" onclick="endGame()">
-CHECK ANSWERS &amp; SEE SCORE
-</button>
+            CHECK ANSWERS &amp; SEE SCORE
+        </button>
 <!-- Kotak Keputusan (Akan muncul selepas hantar) -->
 <div class="hidden mt-6 bg-indigo-50 border-2 border-indigo-200 p-6 md:p-8 rounded-2xl text-center shadow-inner flex-shrink-0" id="final-score"></div>
 </div> <!-- Penutup kotak game arena -->
@@ -1317,15 +961,15 @@ CHECK ANSWERS &amp; SEE SCORE
 </div>
 <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3.5 py-1.5 md:px-4 md:py-2 rounded-xl font-bold text-sm md:text-base transition-colors flex-shrink-0" onclick="showScreen('menu-screen')">
 <i class="fas fa-arrow-left mr-1 md:mr-2"></i> Back
-</button>
+            </button>
 </div>
 <div class="flex flex-col sm:flex-row gap-3 mb-5">
 <div class="flex-1 bg-gradient-to-r from-amber-500 to-red-600 text-white py-3 px-4 rounded-xl font-black shadow-md border-b-4 border-red-800 text-center text-sm md:text-base flex items-center justify-center gap-2">
 <i class="fas fa-user-shield"></i> 1 VS 1 SOLO (LV 15+)
-</div>
+            </div>
 <button class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-black shadow-md border-b-4 border-purple-800 transform transition hover:scale-105 active:scale-95 text-sm md:text-base flex items-center justify-center gap-2" onclick="prosesMasukLobi3v3()" type="button">
 <i class="fas fa-users"></i> 3 VS 3 TEAM (LV 35+)
-</button>
+            </button>
 </div>
 <div class="bg-white p-4 rounded-2xl shadow-inner min-h-[300px]">
 <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">List of Potential Challengers</h3>
@@ -1356,8 +1000,8 @@ CHECK ANSWERS &amp; SEE SCORE
 <div class="text-center mb-6">
 <h3 class="text-gray-500 font-bold uppercase tracking-widest text-sm mb-2">Current Question</h3>
 <div class="text-3xl md:text-5xl font-black text-gray-800 drop-shadow-sm min-h-[80px] flex items-center justify-center" dir="auto" id="pvp-question-display">
-GET READY...
-</div>
+                    GET READY...
+                </div>
 </div>
 <div class="max-w-md mx-auto hidden w-full" id="pvp-input-container">
 <input autocomplete="off" class="w-full text-center text-2xl p-4 rounded-2xl border-4 border-gray-200 focus:border-indigo-500 focus:ring-0 transition-colors uppercase font-bold shadow-inner text-gray-800" disabled="" id="pvp-answer-input" placeholder="TYPE ANSWER..." type="text"/>
@@ -1429,10 +1073,10 @@ GET READY...
 <div class="flex flex-col items-center justify-center mb-8 text-center">
 <h2 class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-500 uppercase tracking-wider">
 <i class="fas fa-medal mr-2 text-yellow-500"></i> Achievements Badge
-</h2>
+                    </h2>
 <p class="text-gray-500 mt-2 max-w-2xl">
-Show your skills! Fulfill all challenges to unlock all achievements and collect all badges.
-</p>
+                        Show your skills! Fulfill all challenges to unlock all achievements and collect all badges.
+                    </p>
 </div>
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="medal-shop-container">
 <div class="col-span-full text-center py-10 text-gray-400">
@@ -1442,16 +1086,17 @@ Show your skills! Fulfill all challenges to unlock all achievements and collect 
 </div>
 </div>
 </div>
-</div> </div>
+</div> </div> ```
+
 <div class="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-[95%] max-w-3xl max-h-[85vh] flex flex-col animate-fade-in glass rounded-3xl p-5 md:p-6 shadow-2xl" id="achievements-screen">
 <div class="flex justify-between items-center mb-3 border-b-2 border-pink-100 pb-3 shrink-0">
 <div>
 <h2 class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-500 uppercase tracking-wider">
 <i class="fas fa-medal mr-2 text-yellow-500"></i> Achievements Badge
-</h2>
+            </h2>
 <p class="text-gray-500 mt-1 text-xs md:text-sm max-w-xl">
-Show your skills! Fulfill all challenges to unlock all achievements and collect all badges.
-</p>
+                Show your skills! Fulfill all challenges to unlock all achievements and collect all badges.
+            </p>
 </div>
 <button class="text-gray-400 hover:text-red-500 transition-colors ml-4" onclick="closeAchievementsScreen()">
 <i class="fas fa-times-circle text-2xl md:text-3xl"></i>
@@ -1566,8 +1211,8 @@ Show your skills! Fulfill all challenges to unlock all achievements and collect 
 </table>
 </div>
 <button class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-all" onclick="loadGameRecords()">
-🔄 Muat Turun Data Terkini
-</button>
+            🔄 Muat Turun Data Terkini
+        </button>
 </div>
 </div>
 <div class="hidden animate-fade-in glass rounded-3xl p-8 max-w-4xl mx-auto shadow-2xl" id="sch-manage-shop-screen">
@@ -1578,10 +1223,10 @@ Show your skills! Fulfill all challenges to unlock all achievements and collect 
 <div class="flex flex-wrap gap-3 mb-6 border-b-2 border-indigo-100 pb-4">
 <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md transition-all flex items-center gap-2 text-sm" onclick="loadAdminOrders()">
 <i class="fas fa-shopping-cart"></i> Senarai Pesanan Baru
-</button>
+        </button>
 <button class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md transition-all flex items-center gap-2 text-sm" onclick="loadAdminInventory()">
 <i class="fas fa-boxes"></i> Urus Stok &amp; Harga
-</button>
+        </button>
 </div>
 <div class="bg-white rounded-2xl p-4 min-h-[300px] shadow-inner border border-gray-200" id="admin-content">
 <div class="h-full flex flex-col items-center justify-center text-gray-400 py-10">
@@ -1646,61 +1291,65 @@ Show your skills! Fulfill all challenges to unlock all achievements and collect 
 <script src="achievements.js"></script>
 <script src="shop.js"></script>
 <script src="game.js?v=4"></script>
-<script src="boss.js?v=2"></script>
 <script src="ui.js"></script>
 <script>
 window.showScreen = function(screenId) {
-// Senarai semua ID div untuk dipadamkan paparannya
-const screens = [
-'auth-screen', 'menu-screen', 'game-arena', 'leaderboard-screen',
-'shop-screen', 'achievements-screen', 'boss-arena', 'admin-screen',
-'sa-schools-screen', 'sa-students-screen', 'sa-boss-setup-screen',
-'sa-analysis-screen', 'sch-manage-shop-screen',
-'challenge-lobby-screen', // <--- 1. TAMBAH INI SUPAYA LOBI PVP BOLEH TUTUP
-'pvp-arena'
-];
-screens.forEach(id => {
-const el = document.getElementById(id);
-if (el) el.classList.add('hidden');
-});
-// Paparkan hanya skrin yang diminta
-const targetEl = document.getElementById(screenId);
-if (targetEl) targetEl.classList.remove('hidden');
-// ---> 2. PENYELESAIAN MASALAH "SOALAN KOSONG" <---
-// Pastikan pop-up subjek ditutup secara paksa apabila masuk ke Arena
-if (typeof closeSubjectModal === 'function') {
-closeSubjectModal();
-}
-// ---> 3. CECAIR PENCUCI "RUN AWAY" (PEMBUNUH PALANG []) <---
-// Jika murid tekan Run Away dan kembali ke menu, kita cuci semua saki-baki!
-if (screenId === 'menu-screen') {
-// Cuci bekas soalan supaya tiada array [] yang tersangkut
-const container = document.getElementById('question-container');
-if (container) container.innerHTML = '';
-// Reset butang 'Check Answer'
-const checkBtn = document.getElementById('check-btn');
-if (checkBtn) checkBtn.classList.add('hidden');
-// Sembunyikan result / final score yang mungkin tergantung
-const finalScore = document.getElementById('final-score');
-if (finalScore) finalScore.classList.add('hidden');
-// Cekik palang hantu kalau dia berani keluar masa Run Away
-const palangHantu = document.getElementById('debug-chat');
-if (palangHantu) palangHantu.remove();
-}
-// ==========================================
-// Panggilan fungsi auto load (TRIGGER DATA PANGKALAN)
-// ==========================================
-if (screenId === 'leaderboard-screen' && typeof loadLeaderboard === 'function') loadLeaderboard();
-if (screenId === 'sa-schools-screen' && typeof loadAdminSchools === 'function') loadAdminSchools();
-if (screenId === 'sa-analysis-screen') {
-if (typeof applyAnalysisFilters === 'function') applyAnalysisFilters();
-if (typeof loadSystemAnalysis === 'function') loadSystemAnalysis();
-if (typeof loadGameRecords === 'function') loadGameRecords();
-}
-if (screenId === 'sa-students-screen' && typeof loadGlobalStudents === 'function') loadGlobalStudents();
-if (screenId === 'sch-manage-shop-screen' && typeof loadAdminOrders === 'function') loadAdminOrders();
+    // Senarai semua ID div untuk dipadamkan paparannya
+    const screens = [
+        'auth-screen', 'menu-screen', 'game-arena', 'leaderboard-screen', 
+        'shop-screen', 'achievements-screen', 'boss-arena', 'admin-screen',
+        'sa-schools-screen', 'sa-students-screen', 'sa-boss-setup-screen', 
+        'sa-analysis-screen', 'sch-manage-shop-screen',
+        'challenge-lobby-screen',
+        'pvp-arena'
+    ];
+    
+    screens.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+    
+    // Paparkan hanya skrin yang diminta
+    const targetEl = document.getElementById(screenId);
+    if (targetEl) targetEl.classList.remove('hidden');
+
+    // ---> 2. PENYELESAIAN MASALAH "SOALAN KOSONG" <---
+    if (typeof closeSubjectModal === 'function') {
+        closeSubjectModal();
+    }
+
+    // ---> 3. CECAIR PENCUCI "RUN AWAY" (PEMBUNUH PALANG []) <---
+    if (screenId === 'menu-screen') {
+        const container = document.getElementById('question-container');
+        if (container) container.innerHTML = ''; 
+        
+        const checkBtn = document.getElementById('check-btn');
+        if (checkBtn) checkBtn.classList.add('hidden');
+
+        const finalScore = document.getElementById('final-score');
+        if (finalScore) finalScore.classList.add('hidden');
+        
+        const palangHantu = document.getElementById('debug-chat');
+        if (palangHantu) palangHantu.remove();
+    }
+
+    // ==========================================
+    // Panggilan fungsi auto load (TRIGGER DATA PANGKALAN)
+    // ==========================================
+    if (screenId === 'leaderboard-screen' && typeof loadLeaderboard === 'function') loadLeaderboard();
+    if (screenId === 'sa-schools-screen' && typeof loadAdminSchools === 'function') loadAdminSchools();
+    
+    if (screenId === 'sa-analysis-screen') {
+        if (typeof applyAnalysisFilters === 'function') applyAnalysisFilters(); 
+        if (typeof loadSystemAnalysis === 'function') loadSystemAnalysis();     
+        if (typeof loadGameRecords === 'function') loadGameRecords();           
+    }
+    
+    if (screenId === 'sa-students-screen' && typeof loadGlobalStudents === 'function') loadGlobalStudents();
+    if (screenId === 'sch-manage-shop-screen' && typeof loadAdminOrders === 'function') loadAdminOrders();
+
 };
-</script>
+    </script>
 <!-- ========================================== -->
 <!-- 1. OVERLAY LOBI ARENA 3V3                  -->
 <!-- ========================================== -->
@@ -1709,7 +1358,7 @@ if (screenId === 'sch-manage-shop-screen' && typeof loadAdminOrders === 'functio
 <div class="w-full max-w-5xl mx-auto my-auto p-6 md:p-8 bg-slate-900 rounded-3xl border border-slate-700 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative max-h-[95vh] overflow-y-auto">
 <button class="absolute top-6 left-6 text-slate-400 hover:text-white font-bold flex items-center gap-2 transition-colors z-20" id="btn-back-lobby" onclick="keluarLobi3v3()">
 <i class="fas fa-arrow-left"></i> KEMBALI
-</button>
+        </button>
 <div class="text-center mb-8 mt-8 md:mt-0">
 <h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-600 uppercase tracking-widest">Arena 3 vs 3</h2>
 </div>
@@ -1725,14 +1374,14 @@ if (screenId === 'sch-manage-shop-screen' && typeof loadAdminOrders === 'functio
 </div>
 <div class="mt-8 flex flex-wrap justify-center gap-4" id="action-buttons-container">
 <button class="px-8 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all transform hover:scale-105" id="btn-create-lobby" onclick="ciptaLobiBaharu()">
-CREATE NEW LOBBY
-</button>
+                    CREATE NEW LOBBY
+                </button>
 <button class="hidden px-8 py-3 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-white font-bold rounded-full shadow-[0_0_15px_rgba(234,179,8,0.4)] transition-all transform hover:scale-105" id="btn-join-lobby">
-JOIN ARENA
-</button>
+                    JOIN ARENA
+                </button>
 <button class="hidden px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-bold rounded-full shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all transform hover:scale-105" id="btn-watch-battle" onclick="tontonLobi()">
-WATCH BATTLE
-</button>
+                    WATCH BATTLE
+                </button>
 </div>
 </div>
 <!-- VIEW: DALAM BILIK LOBI -->
@@ -1842,7 +1491,7 @@ WATCH BATTLE
 <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-md mb-6 overflow-x-auto">
 <h3 class="text-xs font-black text-slate-400 border-b border-slate-700 pb-2 mb-3 uppercase tracking-widest flex items-center justify-center gap-2">
 <i class="fas fa-bolt text-yellow-500"></i> PANEL STATUS BOOSTER
-</h3>
+                </h3>
 <div class="flex md:grid md:grid-cols-6 gap-3 min-w-[600px] md:min-w-0">
 <div class="opacity-40 bg-slate-900 border border-slate-800 rounded-xl p-2 flex items-center gap-2 transition-all cursor-pointer" id="booster-card-x2" onclick="pilihBooster('x2')">
 <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-black shrink-0">x2</div>
@@ -1957,7 +1606,7 @@ WATCH BATTLE
 <div class="col-span-1 lg:col-span-2 flex flex-col gap-4">
 <div class="hidden bg-purple-950/40 border border-purple-500/50 rounded-xl p-3 text-center text-purple-400 font-bold animate-pulse" id="battle-debuff-alert">
 <i class="fas fa-smog mr-2"></i> PANDANGAN ANDA KABUR! KESAN MIST AKTIF.
-</div>
+                    </div>
 <div class="bg-slate-800 border-2 border-slate-700 rounded-3xl p-6 shadow-xl relative min-h-[340px] flex flex-col justify-between">
 <div class="flex justify-between items-center mb-4">
 <span class="text-xs font-black px-3 py-1 rounded-full bg-slate-700 text-slate-300 uppercase tracking-widest border border-slate-600" id="quiz-question-level">ARAS: RANDOM</span>
@@ -1967,15 +1616,15 @@ WATCH BATTLE
 </div>
 <div class="my-auto py-4">
 <p class="text-xl font-semibold text-white text-center leading-relaxed" id="quiz-question-text">
-Sila tunggu sebentar, sistem sedang memuatkan soalan dari subjek terpilih...
-</p>
+                                Sila tunggu sebentar, sistem sedang memuatkan soalan dari subjek terpilih...
+                            </p>
 </div>
 <div class="mt-6 w-full" id="kuiz-input-container">
 <div class="flex flex-col sm:flex-row gap-3 justify-center items-center w-full" id="container-input-taip">
 <input autocomplete="off" class="w-full sm:w-3/4 p-4 bg-slate-900 border-2 border-slate-600 rounded-xl text-white font-bold text-center uppercase tracking-wider focus:border-yellow-400 focus:outline-none transition-colors" id="input-jawapan-taip" onkeypress="semakTekanEnter(event)" placeholder="TAIP JAWAPAN ANDA DI SINI..." type="text"/>
 <button class="w-full sm:w-1/4 py-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all transform hover:-translate-y-1" id="btn-hantar-jawapan" onclick="hantarJawapanTaip()">
-HANTAR
-</button>
+                                    HANTAR
+                                </button>
 </div>
 <div class="w-full hidden" id="container-input-objektif">
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
@@ -2000,8 +1649,8 @@ HANTAR
 <div class="w-full max-w-6xl bg-slate-950 border-2 border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl relative flex flex-col items-center max-h-[95vh] overflow-y-auto text-white">
 <div class="text-center mb-6 max-w-2xl w-full">
 <h1 class="text-3xl md:text-5xl font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 drop-shadow-[0_4px_12px_rgba(245,158,11,0.5)] animate-pulse" id="analysis-victory-title">
-PASUKAN A JUARA ARENA!
-</h1>
+                PASUKAN A JUARA ARENA!
+            </h1>
 <div class="mt-6 inline-flex items-center gap-6 bg-slate-900/80 border border-slate-800 px-8 py-3 rounded-3xl shadow-2xl">
 <span class="text-4xl font-black text-emerald-400" id="analysis-score-teamA">420</span>
 <i class="fas fa-trophy text-3xl text-amber-400 animate-bounce"></i>
@@ -2013,8 +1662,8 @@ PASUKAN A JUARA ARENA!
 <div class="space-y-4 w-full">
 <h2 class="text-xl font-extrabold text-emerald-400 uppercase tracking-wider flex items-center justify-center lg:justify-start gap-2 px-2" id="analysis-label-teamA">
 <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></span>
-Pasukan A (Green Faction)
-</h2>
+                    Pasukan A (Green Faction)
+                </h2>
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4" id="container-cards-teamA">
 <!-- Kad Contoh MVP A1 -->
 <div class="flex flex-col bg-slate-950 border-2 border-emerald-500/80 shadow-[0_0_20px_rgba(16,185,129,0.2)] rounded-3xl p-4 text-center items-center relative overflow-hidden">
@@ -2025,7 +1674,7 @@ Pasukan A (Green Faction)
 <h3 class="text-sm font-bold text-white mt-2 truncate w-full">Alia Maisarah</h3>
 <div class="w-full bg-gradient-to-r from-amber-500/20 via-amber-500/40 to-amber-500/20 border-y border-amber-500/50 py-1.5 my-3 text-amber-400 font-black text-xs uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-[0_0_10px_rgba(245,158,11,0.1)]">
 <i class="fas fa-crown text-amber-400"></i> MVP 🥇
-</div>
+                        </div>
 <div class="w-full text-left bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl text-[11px] space-y-1 text-slate-300">
 <div class="flex justify-between"><span>🎯 Mata</span> <span class="font-bold text-emerald-400">150 Pts</span></div>
 <div class="flex justify-between"><span>🔥 Streak Max</span> <span class="font-bold text-orange-400">45</span></div>
@@ -2035,10 +1684,10 @@ Pasukan A (Green Faction)
 <div class="w-full mt-3 border-t border-dashed border-slate-800 pt-2.5 flex justify-around text-[11px] font-bold">
 <div class="flex items-center gap-1 text-yellow-400">
 <i class="fas fa-coins animate-spin" style="animation-duration: 3s"></i> +500
-</div>
+                            </div>
 <div class="flex items-center gap-1 text-cyan-400">
 <i class="fas fa-sparkles"></i> +2,500 XP
-</div>
+                            </div>
 </div>
 </div>
 <!-- Akhir Kad Contoh -->
@@ -2048,8 +1697,8 @@ Pasukan A (Green Faction)
 <div class="space-y-4 w-full">
 <h2 class="text-xl font-extrabold text-purple-400 uppercase tracking-wider flex items-center justify-center lg:justify-start gap-2 px-2" id="analysis-label-teamB">
 <span class="w-3 h-3 rounded-full bg-purple-500 shadow-[0_0_10px_#a855f7]"></span>
-Pasukan B (Purple Shadows)
-</h2>
+                    Pasukan B (Purple Shadows)
+                </h2>
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4" id="container-cards-teamB">
 <!-- Javascript akan masukkan kad B di sini -->
 </div>
@@ -2058,7 +1707,7 @@ Pasukan B (Purple Shadows)
 <div class="mt-10 mb-4 flex justify-center w-full">
 <button class="w-full max-w-md px-6 py-3 font-black text-sm uppercase tracking-wider rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-[0_4px_15px_rgba(124,58,237,0.3)] transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex justify-center items-center" id="btn-analysis-exit" onclick="kembaliKeLobiUtama()">
 <i class="fas fa-door-open mr-2"></i> Kembali Ke Lobi Utama
-</button>
+            </button>
 </div>
 </div> </div>
 <div class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4 animate-fade-in" id="subject-modal">
@@ -2133,7 +1782,7 @@ Pasukan B (Purple Shadows)
 <div class="flex items-center justify-between mb-6 border-b-2 border-indigo-100 pb-4">
 <button class="text-indigo-600 font-bold flex items-center gap-2 hover:bg-indigo-50 px-4 py-2 rounded-xl transition-colors" onclick="backToSubjects()">
 <i class="fas fa-arrow-left"></i> Kembali
-</button>
+                </button>
 <h2 class="text-3xl font-black text-indigo-800 text-center flex-1 mr-20">English Arena 🇬🇧</h2>
 </div>
 <div class="space-y-8">
@@ -2155,7 +1804,7 @@ Pasukan B (Purple Shadows)
 <div class="flex items-center justify-between mb-6 border-b-2 border-teal-100 pb-4">
 <button class="text-teal-600 font-bold flex items-center gap-2 hover:bg-teal-50 px-4 py-2 rounded-xl transition-colors" onclick="backToSubjects()">
 <i class="fas fa-arrow-left"></i> Kembali
-</button>
+        </button>
 <h2 class="text-3xl font-black text-teal-800 text-center flex-1 mr-20">Science Arena 🔬</h2>
 </div>
 <div class="space-y-8">
@@ -2244,7 +1893,7 @@ Pasukan B (Purple Shadows)
 <div class="flex items-center justify-between mb-6 border-b-2 border-orange-100 pb-4">
 <button class="text-orange-600 font-bold flex items-center gap-2 hover:bg-orange-50 px-4 py-2 rounded-xl transition-colors" onclick="backToSubjects()">
 <i class="fas fa-arrow-left"></i> Kembali
-</button>
+        </button>
 <h2 class="text-3xl font-black text-orange-800 text-center flex-1 mr-20">Math Arena 🔢</h2>
 </div>
 <div class="space-y-8">
@@ -2333,7 +1982,7 @@ Pasukan B (Purple Shadows)
 <div class="flex items-center justify-between mb-6 border-b-2 border-red-100 pb-4">
 <button class="text-red-600 font-bold flex items-center gap-2 hover:bg-red-50 px-4 py-2 rounded-xl transition-colors" onclick="closeSubject()">
 <i class="fas fa-arrow-left"></i> Kembali
-</button>
+        </button>
 <h2 class="text-3xl font-black text-red-800 text-center flex-1 mr-20">BM Arena 🇲🇾</h2>
 </div>
 <div class="space-y-8">
@@ -2406,7 +2055,7 @@ Pasukan B (Purple Shadows)
 <div class="flex items-center justify-between mb-6 border-b-2 border-fuchsia-100 pb-4">
 <button class="text-fuchsia-600 font-bold flex items-center gap-2 hover:bg-fuchsia-50 px-4 py-2 rounded-xl transition-colors" onclick="closeSubject()">
 <i class="fas fa-arrow-left"></i> Kembali
-</button>
+        </button>
 <h2 class="text-3xl font-black text-fuchsia-800 text-center flex-1 mr-20">Muzik Arena 🎵</h2>
 </div>
 <div class="space-y-8">
@@ -2467,7 +2116,7 @@ Pasukan B (Purple Shadows)
 <div class="flex items-center justify-between mb-6 border-b-2 border-rose-100 pb-4">
 <button class="text-rose-600 font-bold flex items-center gap-2 hover:bg-rose-50 px-4 py-2 rounded-xl transition-colors" onclick="closeSubject()">
 <i class="fas fa-arrow-left"></i> Kembali
-</button>
+        </button>
 <h2 class="text-3xl font-black text-rose-800 text-center flex-1 mr-20">Kesihatan Arena 🩺</h2>
 </div>
 <div class="space-y-8">
@@ -2524,7 +2173,7 @@ Pasukan B (Purple Shadows)
 <div class="flex items-center justify-between mb-6 border-b-2 border-emerald-100 pb-4">
 <button class="text-emerald-600 font-bold flex items-center gap-2 hover:bg-emerald-50 px-4 py-2 rounded-xl transition-colors" onclick="closeSubject()">
 <i class="fas fa-arrow-left"></i> Kembali
-</button>
+        </button>
 <h2 class="text-3xl font-black text-emerald-800 text-center flex-1 mr-20">Moral Arena 🤝</h2>
 </div>
 <div class="space-y-8">
@@ -2605,7 +2254,7 @@ Pasukan B (Purple Shadows)
 <div class="flex items-center justify-between mb-6 border-b-2 border-amber-100 pb-4">
 <button class="text-amber-600 font-bold flex items-center gap-2 hover:bg-amber-50 px-4 py-2 rounded-xl transition-colors" onclick="closeSubject()">
 <i class="fas fa-arrow-left"></i> Kembali
-</button>
+        </button>
 <h2 class="text-3xl font-black text-amber-800 text-center flex-1 mr-20">Sejarah Arena ⏳</h2>
 </div>
 <div class="space-y-8">
@@ -2678,7 +2327,7 @@ Pasukan B (Purple Shadows)
 <div class="flex items-center justify-between mb-6 border-b-2 border-purple-100 pb-4">
 <button class="text-purple-600 font-bold flex items-center gap-2 hover:bg-purple-50 px-4 py-2 rounded-xl transition-colors" onclick="closeSubject()">
 <i class="fas fa-arrow-left"></i> Kembali
-</button>
+        </button>
 <h2 class="text-3xl font-black text-purple-800 text-center flex-1 mr-20">Seni Visual Arena 🎨</h2>
 </div>
 <div class="space-y-8">
@@ -2691,7 +2340,7 @@ Pasukan B (Purple Shadows)
 </button>
 <button class="bg-white p-4 rounded-xl shadow-sm border border-purple-100 hover:shadow-md hover:border-purple-400 hover:-translate-y-1 transition-all text-left group" onclick="initGame('prinsip_rekaan')">
 <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">🌀</div>
-<div class="font-bold text-slate-700">Prinsip Reakaan</div>
+<div class="font-bold text-slate-700">Prinsip Rekaan</div>
 </button>
 <button class="bg-white p-4 rounded-xl shadow-sm border border-purple-100 hover:shadow-md hover:border-purple-400 hover:-translate-y-1 transition-all text-left group" onclick="initGame('media_bahan')">
 <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">🖌️</div>
@@ -2739,7 +2388,7 @@ Pasukan B (Purple Shadows)
 <div class="flex items-center justify-between mb-6 border-b-2 border-cyan-100 pb-4">
 <button class="text-cyan-600 font-bold flex items-center gap-2 hover:bg-cyan-50 px-4 py-2 rounded-xl transition-colors" onclick="closeSubject()">
 <i class="fas fa-arrow-left"></i> Kembali
-</button>
+        </button>
 <h2 class="text-3xl font-black text-cyan-800 text-center flex-1 mr-20">RBT Arena ⚙️</h2>
 </div>
 <div class="space-y-8">
@@ -2812,7 +2461,7 @@ Pasukan B (Purple Shadows)
 <div class="flex items-center justify-between mb-6 border-b-2 border-purple-100 pb-4">
 <button class="text-purple-600 font-bold flex items-center gap-2 hover:bg-purple-50 px-4 py-2 rounded-xl transition-colors" onclick="closeSubject()">
 <i class="fas fa-arrow-left"></i> Kembali
-</button>
+        </button>
 <h2 class="text-3xl font-black text-purple-800 text-center flex-1 mr-20">PAI Arena 🕌</h2>
 </div>
 <div class="space-y-6">
@@ -2866,7 +2515,7 @@ Pasukan B (Purple Shadows)
 <div class="flex items-center justify-between mb-6 border-b-2 border-emerald-100 pb-4">
 <button class="text-emerald-600 font-bold flex items-center gap-2 hover:bg-emerald-50 px-4 py-2 rounded-xl transition-colors" onclick="closeSubject()">
 <i class="fas fa-arrow-left"></i> Kembali
-</button>
+        </button>
 <h2 class="text-3xl font-black text-emerald-800 text-center flex-1 mr-20">BA Arena 🇸🇦</h2>
 </div>
 <div class="space-y-6">
@@ -2917,43 +2566,46 @@ Pasukan B (Purple Shadows)
 </div>
 </div>
 <script>
-// --- Fungsi Kawalan Modal Subjek ---
-function openSubjectModal() {
-document.getElementById('subject-modal').classList.remove('hidden');
-}
-function closeSubjectModal() {
-document.getElementById('subject-modal').classList.add('hidden');
-}
-function selectSubject(subjectName) {
-if (subjectName === 'English') {
-closeSubjectModal();
-showScreen('game-arena'); // Buka skrin game English sedia ada
-}
-}
-function lockedSubject(subjectName) {
-Swal.fire({
-icon: 'info',
-title: 'Masih Dikunci 🔒',
-html: `Subjek <b>${subjectName}</b> sedang dalam pembinaan.<br>Nantikan kemunculannya!`,
-confirmButtonColor: '#4f46e5',
-confirmButtonText: 'Baiklah!'
-});
-}
-</script>
+            // --- Fungsi Kawalan Modal Subjek ---
+            function openSubjectModal() {
+                document.getElementById('subject-modal').classList.remove('hidden');
+            }
+
+            function closeSubjectModal() {
+                document.getElementById('subject-modal').classList.add('hidden');
+            }
+
+            function selectSubject(subjectName) {
+                if (subjectName === 'English') {
+                    closeSubjectModal();
+                    showScreen('game-arena'); // Buka skrin game English sedia ada
+                }
+            }
+
+            function lockedSubject(subjectName) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Masih Dikunci 🔒',
+                    html: `Subjek <b>${subjectName}</b> sedang dalam pembinaan.<br>Nantikan kemunculannya!`,
+                    confirmButtonColor: '#4f46e5',
+                    confirmButtonText: 'Baiklah!'
+                });
+            }
+        </script>
 <div class="hidden fixed inset-0 bg-indigo-900/90 backdrop-blur-md z-[99999] flex flex-col items-center justify-center p-4 sm:p-6" id="profile-screen">
 <div class="bg-white w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row rounded-3xl shadow-2xl overflow-hidden relative border-4 border-white">
 <button class="absolute top-4 right-4 w-10 h-10 bg-gray-100 hover:bg-red-500 text-gray-500 hover:text-white rounded-xl flex items-center justify-center transition-all z-20 shadow-sm" onclick="closeProfile()">
-✕
-</button>
+            ✕
+        </button>
 <div class="w-full md:w-2/5 bg-indigo-600 p-8 flex flex-col justify-between shrink-0 h-auto md:h-full">
 <div class="text-center mt-2">
 <div class="w-32 h-32 mx-auto flex items-center justify-center text-5xl mb-2 overflow-visible relative drop-shadow-2xl" id="profile-avatar-container">
-👤
+    👤
 </div>
 <h2 class="text-white text-2xl font-black uppercase tracking-tight line-clamp-1" id="profile-name">Student Name</h2>
 <div class="inline-block mt-2 px-4 py-1 bg-indigo-800/60 rounded-full text-indigo-100 text-[10px] font-bold tracking-widest uppercase shadow-inner" id="profile-active-title">
-Novice
-</div>
+                    Novice
+                </div>
 </div>
 <div class="mt-4 bg-white/10 p-3 rounded-xl border border-white/20 backdrop-blur-sm">
 <label class="block text-indigo-100 text-[9px] font-black uppercase mb-1.5 tracking-widest text-center">Select Your Title</label>
@@ -2966,8 +2618,8 @@ Novice
 </div>
 </div>
 <button class="w-full bg-white hover:bg-indigo-50 text-indigo-700 text-sm font-black py-2.5 rounded-lg shadow-md transition-all active:scale-95 border-b-2 border-indigo-200" onclick="saveEquippedTitle()">
-EQUIP TITLE
-</button>
+                    EQUIP TITLE
+                </button>
 </div>
 <div class="mt-3 bg-white/10 p-3 rounded-xl border border-white/20 backdrop-blur-sm">
 <label class="block text-indigo-100 text-[9px] font-black uppercase mb-1.5 tracking-widest text-center">Limited Time Event Avatar</label>
@@ -3002,8 +2654,8 @@ EQUIP TITLE
 </div>
 </div>
 <button class="mt-8 text-indigo-200 font-bold hover:text-white transition-colors shrink-0 tracking-widest text-sm" onclick="closeProfile()">
-← BACK TO DASHBOARD
-</button>
+        ← BACK TO DASHBOARD
+    </button>
 </div>
 <div class="hidden fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm" id="student-detail-modal">
 <div class="bg-white w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
@@ -3059,15 +2711,15 @@ EQUIP TITLE
 </div>
 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm text-yellow-800">
 <i class="fas fa-info-circle mr-1"></i> Pesanan anda akan dihantar kepada guru untuk pengesahan.
-</div>
+            </div>
 </div>
 <div class="p-4 bg-gray-50 flex gap-3">
 <button class="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-400 transition-all" onclick="closeEduCheckout()">
-Batal
-</button>
+                Batal
+            </button>
 <button class="flex-[2] px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all" id="eduConfirmBtn" onclick="submitEduCheckout()">
-Sahkan Pesanan
-</button>
+                Sahkan Pesanan
+            </button>
 </div>
 </div>
 </div>
@@ -3119,126 +2771,33 @@ Sahkan Pesanan
 </div>
 </div>
 </div>
-<div class="hidden animate-fade-in fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" id="boss-arena">
-<div class="glass rounded-3xl p-4 max-w-5xl w-full mx-auto relative flex flex-col md:flex-row gap-4 shadow-[0_0_40px_rgba(0,0,0,0.3)] max-h-[98vh] overflow-y-auto">
-<div class="absolute inset-0 z-40 pointer-events-none opacity-0 transition-opacity duration-200 rounded-3xl" id="arena-flash-overlay"></div>
-<div class="flex-1 relative z-10 flex flex-col">
-<div class="hidden absolute top-1/3 left-1/2 transform -translate-x-1/2 text-red-600 font-black text-6xl drop-shadow-[0_0_10px_rgba(255,255,255,1)] z-50 pointer-events-none" id="damage-indicator">
--15
-</div>
-<div class="flex justify-between items-center mb-3 border-b-2 border-gray-200/50 pb-2">
-<button class="text-gray-600 hover:text-red-600 font-bold bg-white/30 px-3 py-1.5 rounded-xl transition-all text-sm" onclick="leaveBossFight()">
-<i class="fas fa-arrow-left"></i> Lari
-</button>
-<div class="flex flex-col items-center">
-<h2 class="text-xl font-black text-red-700 animate-pulse hidden md:block leading-none">BOSS BATTLE</h2>
-<div class="text-sm font-bold text-red-600 bg-red-100 px-4 py-0.5 rounded-full mt-1 border border-red-200 shadow-sm flex items-center gap-1">
-<i class="fas fa-clock"></i> <span id="global-battle-timer">05:00</span>
-</div>
-</div>
-<div class="text-green-700 font-bold text-sm bg-white/50 px-3 py-1.5 rounded-xl shadow-sm border border-green-200">
-<i class="fas fa-heart text-red-500 animate-pulse mr-1"></i> HP Anda: <span id="player-hp-text">100</span>
-</div>
-</div>
-<div class="bg-black/5 p-4 rounded-3xl border border-red-200/50 flex flex-col items-center mb-3 shadow-inner relative">
-<div class="absolute top-2 left-0 w-full h-8 flex items-center justify-center z-50 pointer-events-none" id="streak-indicator"></div>
-<h3 class="text-xl font-black text-red-700 mb-1 uppercase tracking-widest drop-shadow-md text-center mt-2" id="boss-name-ui">
-Mencari Boss...
-</h3>
-<div class="relative w-full max-w-sm h-32 md:h-40 mb-3 flex justify-center items-center">
-<img alt="Boss" class="w-full h-full object-contain drop-shadow-[0_10px_10px_rgba(220,38,38,0.3)] animate-bounce-slow transform scale-105" id="battle-boss-avatar" src=""/>
-</div>
-<div class="w-full bg-white h-6 rounded-full overflow-hidden border-2 border-gray-300 relative shadow-md mb-2">
-<div class="bg-gradient-to-r from-red-600 to-red-400 h-full transition-all duration-300 w-full" id="arena-boss-hp-bar"></div>
-<div class="absolute inset-0 flex items-center justify-center text-gray-900 font-black text-xs" id="arena-boss-hp-text">
-Memuatkan HP...
-</div>
-</div>
-<div class="flex flex-wrap justify-center gap-2 w-full min-h-[24px]" id="active-boosters-container">
-</div>
-</div>
-<div class="bg-white/70 backdrop-blur-md p-4 rounded-3xl shadow-xl border border-white flex flex-col items-center text-center flex-1 justify-center min-h-[150px]">
-<div class="w-full bg-gray-200 h-2 rounded-full mb-2 overflow-hidden shadow-inner">
-<div class="bg-blue-500 h-full w-full" id="boss-timer-bar"></div>
-</div>
-<div class="text-gray-600 font-bold mb-3 text-xs">
-</div>
-<h2 class="text-lg md:text-2xl font-black text-gray-800 mb-4 leading-tight" id="boss-question-text">
-Menjana serangan...
-</h2>
-<div class="w-full max-w-lg" id="boss-answer-zone">
-</div>
-</div>
-</div>
-<div class="w-full md:w-72 bg-white/80 backdrop-blur-md rounded-3xl p-4 border-2 border-orange-300 shadow-[0_0_15px_rgba(251,146,60,0.3)] flex flex-col z-10">
-<h3 class="text-base font-black text-orange-600 mb-3 text-center border-b-2 border-orange-200 pb-2 flex items-center justify-center gap-2">
-<i class="fas fa-fire animate-pulse"></i> LIVE TOP 10
-</h3>
-<div class="flex-1 overflow-y-auto flex flex-col gap-2 pr-1 max-h-[200px] md:max-h-[400px]" id="live-ranking-list">
-<div class="text-center text-sm text-gray-500 mt-10 animate-pulse" id="boss-radar-text">Memuatkan radar pertarungan...</div>
-</div>
-</div>
-</div> </div>
-<!-- =========================================================
-LEXIQUEST MOBILE UI 3.1 HOTFIX
-1) Jangan paparkan dashboard student semasa LOGIN.
-2) Naikkan menu utama dan asingkan Boss Challenge.
-3) LTE modal mempunyai close button yang sentiasa kelihatan.
-========================================================= -->
 <style id="lexiquest-mobile-landscape-32">
 /* Telefon: LexiQuest direka untuk landscape. Pada portrait, aplikasi dikunci sementara. */
 #mobile-landscape-lock { display:none; }
 @media (max-width: 767px) and (orientation: portrait) {
-#mobile-landscape-lock {
-position: fixed;
-inset: 0;
-z-index: 2147483647;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:24px;
-background: radial-gradient(circle at 50% 30%, rgba(30,64,175,.96), rgba(2,6,23,.99) 72%);
-text-align:center;
-}
-.mobile-landscape-card {
-width:min(88vw,360px);
-padding:24px 20px;
-border:1px solid rgba(255,255,255,.15);
-border-radius:24px;
-background:rgba(15,23,42,.88);
-box-shadow:0 20px 60px rgba(0,0,0,.5);
-backdrop-filter:blur(14px);
-}
+  #mobile-landscape-lock {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background: radial-gradient(circle at 50% 30%, rgba(30,64,175,.96), rgba(2,6,23,.99) 72%);
+    text-align:center;
+  }
+  .mobile-landscape-card {
+    width:min(88vw,360px);
+    padding:24px 20px;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:24px;
+    background:rgba(15,23,42,.88);
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+    backdrop-filter:blur(14px);
+  }
 }
 @media (max-width: 767px) and (orientation: landscape) {
-#mobile-landscape-lock { display:none !important; }
-}
-@media (max-width: 767px) {
-/* LTE kekal di header. Boss dipindahkan secara visual tepat di bawah LTE. */
-#dashboard-student > div:first-child {
-display:grid !important;
-grid-template-columns:1fr !important;
-grid-template-areas:
-"boss"
-"menu" !important;
-gap:.55rem !important;
-align-items:start !important;
-}
-#dashboard-student > div:first-child > div:first-child {
-grid-area:menu !important;
-order:2 !important;
-}
-#dashboard-student > div:first-child > div:last-child {
-grid-area:boss !important;
-order:1 !important;
-margin:.1rem 0 .35rem !important;
-padding:0 .7rem !important;
-}
-#dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
-width:100% !important;
-max-width:100% !important;
-margin:0 !important;
-}
+  #mobile-landscape-lock { display:none !important; }
 }
 </style>
 <style id="lexiquest-mobile-hotfix-31">
@@ -3247,420 +2806,174 @@ margin:0 !important;
 #dashboard-super-admin.hidden,
 #dashboard-school-admin.hidden,
 #menu-screen.hidden,
-#boss-challenge-btn-floating.hidden,
 #lte-info-modal.hidden {
-display: none !important;
+    display: none !important;
 }
+
 @media (max-width: 767px) {
-/* LOGIN: pastikan menu dashboard tidak bocor ke skrin login */
-#auth-screen:not(.hidden) ~ #menu-screen,
-#auth-screen:not(.hidden) ~ #dashboard-student {
-display: none !important;
-}
-/* Menu hanya muncul apabila JS sudah membuang .hidden */
-#menu-screen:not(.hidden) {
-display: block !important;
-}
-/* Menu utama lebih dekat ke header, bukan menolak butang ke bawah */
-#dashboard-student:not(.hidden) {
-display: block !important;
-margin-top: 0 !important;
-padding-top: .35rem !important;
-padding-bottom: 1rem !important;
-min-height: 0 !important;
-}
-#dashboard-student > div:first-child {
-display: block !important;
-width: 100% !important;
-max-width: 520px !important;
-margin: 0 auto !important;
-}
-/* Menu 5 butang: kekalkan grid tetapi berada di bahagian atas */
-#dashboard-student > div:first-child > div:first-child {
-display: grid !important;
-grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-grid-template-areas:
-"play ranking"
-"medal shop"
-"arena arena" !important;
-gap: .65rem !important;
-width: 100% !important;
-margin: 0 !important;
-padding: 0 .7rem !important;
-box-sizing: border-box !important;
-}
-#dashboard-student > div:first-child > div:first-child > div:first-child {
-display: contents !important;
-}
-#dashboard-student button[onclick*="openSubjectModal"] { grid-area: play; }
-#dashboard-student button[onclick*="leaderboard-screen"] { grid-area: ranking; }
-#dashboard-student button[onclick*="showAchievementsScreen"] { grid-area: medal; }
-#dashboard-student button[onclick*="shop-screen"] { grid-area: shop; }
-#dashboard-student button[onclick*="checkChallengeEligibility"] { grid-area: arena; }
-#dashboard-student button[onclick*="openSubjectModal"],
-#dashboard-student button[onclick*="leaderboard-screen"],
-#dashboard-student button[onclick*="showAchievementsScreen"],
-#dashboard-student button[onclick*="shop-screen"],
-#dashboard-student button[onclick*="checkChallengeEligibility"] {
-width: 100% !important;
-height: 72px !important;
-margin: 0 !important;
-}
-#dashboard-student button[onclick*="checkChallengeEligibility"] {
-height: 68px !important;
-}
-/* Boss Challenge: jelas berasingan daripada menu */
-#dashboard-student > div:first-child > div:last-child {
-display: block !important;
-width: 100% !important;
-margin: 1.35rem 0 0 !important;
-padding: 0 .7rem !important;
-box-sizing: border-box !important;
-position: static !important;
-}
-#dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
-position: relative !important;
-left: auto !important;
-bottom: auto !important;
-transform: none !important;
-width: 100% !important;
-max-width: 100% !important;
-margin: 0 !important;
-}
-/* LTE modal: butang X besar, kontras dan sentiasa di dalam viewport */
-#lte-info-modal {
-position: fixed !important;
-inset: 0 !important;
-z-index: 99999 !important;
-width: 100vw !important;
-height: 100dvh !important;
-padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)) !important;
-box-sizing: border-box !important;
-align-items: center !important;
-justify-content: center !important;
-overflow-y: auto !important;
-}
-#lte-info-modal > div {
-width: min(92vw, 390px) !important;
-max-width: 390px !important;
-max-height: calc(100dvh - 32px) !important;
-overflow: hidden !important;
-position: relative !important;
-padding-top: 3.25rem !important;
-box-sizing: border-box !important;
-}
-#lte-info-modal button[onclick="closeLteModal()"] {
-position: absolute !important;
-top: 10px !important;
-right: 10px !important;
-z-index: 100000 !important;
-width: 44px !important;
-height: 44px !important;
-min-width: 44px !important;
-min-height: 44px !important;
-display: flex !important;
-align-items: center !important;
-justify-content: center !important;
-padding: 0 !important;
-margin: 0 !important;
-border-radius: 50% !important;
-background: rgba(15,23,42,.92) !important;
-border: 2px solid rgba(250,204,21,.8) !important;
-color: #fff !important;
-font-size: 20px !important;
-line-height: 1 !important;
-box-shadow: 0 4px 16px rgba(0,0,0,.45) !important;
-}
-#lte-info-modal button[onclick="closeLteModal()"]:active {
-transform: scale(.92) !important;
-}
+    /* LOGIN: pastikan menu dashboard tidak bocor ke skrin login */
+    #auth-screen:not(.hidden) ~ #menu-screen,
+    #auth-screen:not(.hidden) ~ #dashboard-student {
+        display: none !important;
+    }
+
+    /* Menu hanya muncul apabila JS sudah membuang .hidden */
+    #menu-screen:not(.hidden) {
+        display: block !important;
+    }
+
+    /* Menu utama lebih dekat ke header, bukan menolak butang ke bawah */
+    #dashboard-student:not(.hidden) {
+        display: block !important;
+        margin-top: 0 !important;
+        padding-top: .35rem !important;
+        padding-bottom: 1rem !important;
+        min-height: 0 !important;
+    }
+
+    #dashboard-student > div:first-child {
+        display: block !important;
+        width: 100% !important;
+        max-width: 520px !important;
+        margin: 0 auto !important;
+    }
+
+    /* Menu 5 butang: kekalkan grid tetapi berada di bahagian atas */
+    #dashboard-student > div:first-child > div:first-child {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-areas:
+            "play ranking"
+            "medal shop"
+            "arena arena" !important;
+        gap: .65rem !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 .7rem !important;
+        box-sizing: border-box !important;
+    }
+
+    #dashboard-student > div:first-child > div:first-child > div:first-child {
+        display: contents !important;
+    }
+
+    #dashboard-student button[onclick*="openSubjectModal"] { grid-area: play; }
+    #dashboard-student button[onclick*="leaderboard-screen"] { grid-area: ranking; }
+    #dashboard-student button[onclick*="showAchievementsScreen"] { grid-area: medal; }
+    #dashboard-student button[onclick*="shop-screen"] { grid-area: shop; }
+    #dashboard-student button[onclick*="checkChallengeEligibility"] { grid-area: arena; }
+
+    #dashboard-student button[onclick*="openSubjectModal"],
+    #dashboard-student button[onclick*="leaderboard-screen"],
+    #dashboard-student button[onclick*="showAchievementsScreen"],
+    #dashboard-student button[onclick*="shop-screen"],
+    #dashboard-student button[onclick*="checkChallengeEligibility"] {
+        width: 100% !important;
+        height: 72px !important;
+        margin: 0 !important;
+    }
+
+    #dashboard-student button[onclick*="checkChallengeEligibility"] {
+        height: 68px !important;
+    }
+
+    /* LTE modal: butang X besar, kontras dan sentiasa di dalam viewport */
+    #lte-info-modal {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 99999 !important;
+        width: 100vw !important;
+        height: 100dvh !important;
+        padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)) !important;
+        box-sizing: border-box !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow-y: auto !important;
+    }
+
+    #lte-info-modal > div {
+        width: min(92vw, 390px) !important;
+        max-width: 390px !important;
+        max-height: calc(100dvh - 32px) !important;
+        overflow: hidden !important;
+        position: relative !important;
+        padding-top: 3.25rem !important;
+        box-sizing: border-box !important;
+    }
+
+    #lte-info-modal button[onclick="closeLteModal()"] {
+        position: absolute !important;
+        top: 10px !important;
+        right: 10px !important;
+        z-index: 100000 !important;
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 50% !important;
+        background: rgba(15,23,42,.92) !important;
+        border: 2px solid rgba(250,204,21,.8) !important;
+        color: #fff !important;
+        font-size: 20px !important;
+        line-height: 1 !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,.45) !important;
+    }
+
+    #lte-info-modal button[onclick="closeLteModal()"]:active {
+        transform: scale(.92) !important;
+    }
 }
 </style>
 <script>
 /* Mobile landscape: cuba kunci orientasi selepas interaksi pengguna.
-Sesetengah browser hanya membenarkan orientation.lock dalam fullscreen/PWA.
-Jika browser menolak, portrait-block akan kekal sebagai fallback. */
+   Sesetengah browser hanya membenarkan orientation.lock dalam fullscreen/PWA.
+   Jika browser menolak, portrait-block akan kekal sebagai fallback. */
 (function () {
-async function requestLandscape() {
-try {
-if (screen.orientation && screen.orientation.lock) {
-await screen.orientation.lock('landscape');
-}
-} catch (err) {
-// Browser biasa mungkin menolak lock tanpa fullscreen/PWA. CSS fallback akan digunakan.
-}
-}
-window.requestLexiQuestLandscape = requestLandscape;
-document.addEventListener('DOMContentLoaded', function () {
-requestLandscape();
-const btn = document.getElementById('btn-lock-landscape');
-if (btn) btn.addEventListener('click', requestLandscape);
-});
-document.addEventListener('click', function () {
-// Percubaan semula selepas gesture pengguna, yang dibenarkan oleh sesetengah browser.
-if (window.matchMedia && window.matchMedia('(max-width: 767px)').matches) requestLandscape();
-}, { passive: true });
+    async function requestLandscape() {
+        try {
+            if (screen.orientation && screen.orientation.lock) {
+                await screen.orientation.lock('landscape');
+            }
+        } catch (err) {
+            // Browser biasa mungkin menolak lock tanpa fullscreen/PWA. CSS fallback akan digunakan.
+        }
+    }
+
+    window.requestLexiQuestLandscape = requestLandscape;
+    document.addEventListener('DOMContentLoaded', function () {
+        requestLandscape();
+        const btn = document.getElementById('btn-lock-landscape');
+        if (btn) btn.addEventListener('click', requestLandscape);
+    });
+
+    document.addEventListener('click', function () {
+        // Percubaan semula selepas gesture pengguna, yang dibenarkan oleh sesetengah browser.
+        if (window.matchMedia && window.matchMedia('(max-width: 767px)').matches) requestLandscape();
+    }, { passive: true });
 })();
 </script>
 <script>
 /* LTE safety: tutup modal dengan ESC atau tap backdrop */
 (function () {
-document.addEventListener('keydown', function (e) {
-if (e.key === 'Escape' && typeof closeLteModal === 'function') {
-closeLteModal();
-}
-});
-document.addEventListener('click', function (e) {
-const modal = document.getElementById('lte-info-modal');
-if (!modal || modal.classList.contains('hidden')) return;
-if (e.target === modal && typeof closeLteModal === 'function') {
-closeLteModal();
-}
-});
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && typeof closeLteModal === 'function') {
+            closeLteModal();
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        const modal = document.getElementById('lte-info-modal');
+        if (!modal || modal.classList.contains('hidden')) return;
+        if (e.target === modal && typeof closeLteModal === 'function') {
+            closeLteModal();
+        }
+    });
 })();
 </script>
-<style id="lexiquest-mobile-landscape-final-32">
-/* FINAL MOBILE LANDSCAPE LAYOUT */
-@media (max-width: 767px) {
-/* Boss Challenge sentiasa muncul dahulu dalam kandungan dashboard, tepat selepas header/LTE. */
-#dashboard-student > div:first-child {
-display: grid !important;
-grid-template-columns: 1fr !important;
-grid-template-areas: "boss" "menu" !important;
-gap: .5rem !important;
-align-items: start !important;
-}
-#dashboard-student > div:first-child > div:first-child {
-grid-area: menu !important;
-order: 2 !important;
-}
-#dashboard-student > div:first-child > div:last-child {
-grid-area: boss !important;
-order: 1 !important;
-margin: 0 0 .25rem !important;
-padding: 0 .7rem !important;
-}
-#dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
-position: relative !important;
-inset: auto !important;
-transform: none !important;
-width: 100% !important;
-max-width: 100% !important;
-margin: 0 !important;
-}
-/* Speaker button telah dibuang; jika ada baki markup lama, paksa sembunyi. */
-body > button[onclick="toggleBgMusic()"] { display: none !important; }
-}
-/* Pada landscape telefon, gunakan ruang mendatar dengan lebih baik. */
-@media (max-width: 767px) and (orientation: landscape) {
-#menu-screen {
-min-height: 100dvh !important;
-}
-#menu-screen > div:first-child {
-grid-template-columns: minmax(0, 1fr) auto !important;
-grid-template-areas: "profile wallet" "lte lte" !important;
-}
-#dashboard-student {
-padding: .35rem .7rem .7rem !important;
-}
-#dashboard-student > div:first-child > div:first-child {
-grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-grid-template-areas: "play ranking medal shop arena" !important;
-gap: .55rem !important;
-}
-#dashboard-student button[onclick*="openSubjectModal"],
-#dashboard-student button[onclick*="leaderboard-screen"],
-#dashboard-student button[onclick*="showAchievementsScreen"],
-#dashboard-student button[onclick*="shop-screen"],
-#dashboard-student button[onclick*="checkChallengeEligibility"] {
-height: 68px !important;
-}
-#dashboard-student button[onclick*="checkChallengeEligibility"] {
-height: 68px !important;
-}
-}
-/* =========================================================
-MOBILE LANDSCAPE 3.3 — BOSS DI PINDAHKAN KE SEBELAH KANAN
-========================================================= */
-@media (max-width: 767px) and (orientation: landscape) {
-/* Kawasan dashboard menjadi 2 zon: MENU | BOSS */
-#dashboard-student {
-width: 100% !important;
-max-width: 100% !important;
-padding: .35rem .7rem .7rem !important;
-box-sizing: border-box !important;
-}
-#dashboard-student > div:first-child {
-width: 100% !important;
-max-width: none !important;
-margin: 0 !important;
-display: grid !important;
-grid-template-columns: minmax(0, 1fr) minmax(220px, 30vw) !important;
-grid-template-areas: "menu boss" !important;
-gap: .75rem !important;
-align-items: start !important;
-}
-/* Semua butang utama duduk di zon kiri */
-#dashboard-student > div:first-child > div:first-child {
-grid-area: menu !important;
-width: 100% !important;
-max-width: none !important;
-display: grid !important;
-grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-grid-template-areas: "play ranking medal shop" "arena arena arena arena" !important;
-gap: .55rem !important;
-align-items: center !important;
-}
-/* Matikan kesan display:contents daripada CSS lama */
-#dashboard-student > div:first-child > div:first-child > div:first-child,
-#dashboard-student > div:first-child > div:first-child > div:nth-child(2),
-#dashboard-student > div:first-child > div:first-child > div:nth-child(3) {
-display: contents !important;
-}
-/* Pemetaan button ke grid */
-#dashboard-student button[onclick*="openSubjectModal"] { grid-area: play !important; }
-#dashboard-student button[onclick*="leaderboard-screen"] { grid-area: ranking !important; }
-#dashboard-student button[onclick*="showAchievementsScreen"] { grid-area: medal !important; }
-#dashboard-student button[onclick*="shop-screen"] { grid-area: shop !important; }
-#dashboard-student button[onclick*="checkChallengeEligibility"] { grid-area: arena !important; }
-#dashboard-student button[onclick*="openSubjectModal"],
-#dashboard-student button[onclick*="leaderboard-screen"],
-#dashboard-student button[onclick*="showAchievementsScreen"],
-#dashboard-student button[onclick*="shop-screen"],
-#dashboard-student button[onclick*="checkChallengeEligibility"] {
-width: 100% !important;
-height: 66px !important;
-min-width: 0 !important;
-margin: 0 !important;
-transform: none !important;
-}
-/* Boss wrapper menjadi kolum kanan — BUKAN fixed di tengah */
-#dashboard-student > div:first-child > div:last-child {
-grid-area: boss !important;
-position: relative !important;
-left: auto !important;
-right: auto !important;
-top: auto !important;
-bottom: auto !important;
-inset: auto !important;
-transform: none !important;
-width: 100% !important;
-max-width: none !important;
-margin: 0 !important;
-padding: 0 !important;
-align-self: start !important;
-pointer-events: none !important;
-z-index: 30 !important;
-}
-#dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
-position: relative !important;
-left: auto !important;
-right: auto !important;
-top: auto !important;
-bottom: auto !important;
-inset: auto !important;
-transform: none !important;
-width: 100% !important;
-max-width: none !important;
-margin: 0 !important;
-pointer-events: auto !important;
-max-height: calc(100dvh - 120px) !important;
-overflow-y: auto !important;
-}
-#dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating .p-4 {
-padding: .55rem !important;
-}
-#dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating .text-3xl {
-font-size: 1.5rem !important;
-}
-}
-/* =========================================================
-MOBILE LANDSCAPE 3.3 — FINAL POSITION FIX
-Dashboard kiri | Boss kanan
-========================================================= */
-@media (max-width: 767px) and (orientation: landscape) {
-#dashboard-student {
-width: 100% !important;
-max-width: 100% !important;
-display: grid !important;
-grid-template-columns: minmax(0, 1fr) minmax(220px, 30vw) !important;
-grid-template-areas: "menu boss" !important;
-gap: .75rem !important;
-align-items: start !important;
-padding: .35rem .7rem .7rem !important;
-margin: 0 !important;
-box-sizing: border-box !important;
-}
-/* Kumpulan 5 butang di sebelah kiri */
-#dashboard-student > div:first-child {
-grid-area: menu !important;
-width: 100% !important;
-max-width: none !important;
-margin: 0 !important;
-padding: 0 !important;
-display: grid !important;
-grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-grid-template-areas: "play ranking medal shop" "arena arena arena arena" !important;
-gap: .55rem !important;
-align-items: center !important;
-}
-/* Wrapper asal butang menjadi transparent kepada grid */
-#dashboard-student > div:first-child > div:first-child,
-#dashboard-student > div:first-child > div:nth-child(2),
-#dashboard-student > div:first-child > div:nth-child(3) {
-display: contents !important;
-}
-#dashboard-student button[onclick*="openSubjectModal"] { grid-area: play !important; }
-#dashboard-student button[onclick*="leaderboard-screen"] { grid-area: ranking !important; }
-#dashboard-student button[onclick*="showAchievementsScreen"] { grid-area: medal !important; }
-#dashboard-student button[onclick*="shop-screen"] { grid-area: shop !important; }
-#dashboard-student button[onclick*="checkChallengeEligibility"] { grid-area: arena !important; }
-#dashboard-student button[onclick*="openSubjectModal"],
-#dashboard-student button[onclick*="leaderboard-screen"],
-#dashboard-student button[onclick*="showAchievementsScreen"],
-#dashboard-student button[onclick*="shop-screen"],
-#dashboard-student button[onclick*="checkChallengeEligibility"] {
-width: 100% !important;
-height: 66px !important;
-min-width: 0 !important;
-margin: 0 !important;
-position: relative !important;
-transform: none !important;
-}
-/* Boss ialah direct child kedua dashboard — sebelah kanan */
-#dashboard-student > div:nth-child(2) {
-grid-area: boss !important;
-position: relative !important;
-left: auto !important;
-right: auto !important;
-top: auto !important;
-bottom: auto !important;
-inset: auto !important;
-transform: none !important;
-width: 100% !important;
-max-width: none !important;
-margin: 0 !important;
-padding: 0 !important;
-align-self: start !important;
-pointer-events: none !important;
-z-index: 30 !important;
-}
-#dashboard-student > div:nth-child(2) #boss-challenge-btn-floating {
-position: relative !important;
-left: auto !important;
-right: auto !important;
-top: auto !important;
-bottom: auto !important;
-inset: auto !important;
-transform: none !important;
-width: 100% !important;
-max-width: none !important;
-margin: 0 !important;
-pointer-events: auto !important;
-max-height: calc(100dvh - 120px) !important;
-overflow-y: auto !important;
-}
-}
-</style>
 </body>
 </html>
