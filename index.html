@@ -167,17 +167,6 @@
     border: 1px solid #cffafe;
   }
 
-  /* Boss floating notification */
-  #boss-challenge-btn-floating {
-    max-height: min(42vh, 360px);
-    overflow: hidden auto !important;
-  }
-
-  /* Elakkan overlay berlaga dengan music button */
-  #menu-screen #boss-challenge-btn-floating {
-    margin-bottom: 62px;
-  }
-
   /* Overlay besar: jangan melebihi viewport */
   #challenge-lobby-screen > div,
   #pvp-arena > div,
@@ -305,18 +294,6 @@
       gap: 1.1rem !important;
     }
 
-    /* Boss card */
-    #menu-screen #boss-challenge-btn-floating {
-      width: min(92vw, 360px) !important;
-      bottom: calc(62px + var(--lq-safe-bottom)) !important;
-      margin-bottom: 0 !important;
-      border-radius: 20px !important;
-    }
-
-    #boss-challenge-btn-floating .p-4 {
-      padding: .75rem !important;
-    }
-
     /* Challenge / PvP / 3v3 */
     #challenge-lobby-screen,
     #pvp-arena,
@@ -413,7 +390,6 @@
     .lq-wallet-pill { font-size: .72rem; min-height: 29px; }
     #dashboard-student .w-16,
     #dashboard-student .md\\:w-20 { width: 54px !important; height: 54px !important; }
-    #boss-challenge-btn-floating { width: calc(100vw - 20px) !important; }
   }
 
   @media (min-width: 768px) {
@@ -463,8 +439,7 @@
       grid-template-columns: minmax(0, 1fr) auto !important;
       grid-template-areas:
         "profile wallet"
-        "lte lte"
-        "boss boss" !important;
+        "lte lte" !important;
       align-items: center !important;
       gap: .55rem .65rem !important;
       padding: .65rem !important;
@@ -643,40 +618,6 @@
       font-size: .45rem !important;
     }
 
-    /* Boss alert: masuk dalam flow, bukan fixed di tengah menu */
-    #menu-screen #boss-challenge-btn-floating {
-      position: relative !important;
-      left: auto !important;
-      bottom: auto !important;
-      top: auto !important;
-      transform: none !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      margin: .1rem 0 0 !important;
-      grid-column: 1 / -1 !important;
-      border-radius: 18px !important;
-      z-index: 10 !important;
-    }
-
-    #boss-challenge-btn-floating .p-4 {
-      padding: .7rem !important;
-    }
-
-    /* Letakkan boss card sebagai baris penuh selepas menu */
-    #dashboard-student > div:first-child > div:last-child {
-      grid-column: 1 / -1 !important;
-      width: 100% !important;
-      position: static !important;
-      transform: none !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      pointer-events: none !important;
-    }
-
-    #dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
-      pointer-events: auto !important;
-    }
-
     /* Widget pemain online: desktop sahaja */
     #menu-screen > div.fixed.bottom-4.left-4.w-64 {
       display: none !important;
@@ -751,301 +692,7 @@
   }
 
 </style>
-<style id="lexiquest-mobile-landscape-boss-final-fix">
-/* FINAL STRUCTURAL FIX: dashboard mempunyai 2 anak terus:
-   anak #1 = menu utama, anak #2 = Boss Challenge.
-   Jadi Boss MESTI diposisikan pada kolum kanan. */
-@media (max-width: 767px) and (orientation: landscape) {
-  #dashboard-student:not(.hidden) {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(210px, 30vw) !important;
-    grid-template-areas: "menu boss" !important;
-    align-items: start !important;
-    column-gap: .8rem !important;
-    row-gap: 0 !important;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: .35rem .7rem .7rem !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Anak pertama dashboard = menu utama */
-  #dashboard-student:not(.hidden) > div:first-child {
-    grid-area: menu !important;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    position: static !important;
-  }
-
-  /* RESET CSS LAMA: selector div:last-child di bawah menu pernah tersalah
-     dianggap sebagai Boss. Ia sebenarnya wrapper butang Shop/Challenge. */
-  #dashboard-student:not(.hidden) > div:first-child > div:last-child {
-    display: contents !important;
-    grid-area: auto !important;
-    position: static !important;
-    inset: auto !important;
-    transform: none !important;
-    width: auto !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    pointer-events: auto !important;
-  }
-
-  /* Anak kedua dashboard = wrapper Boss Challenge.
-     INILAH elemen yang sebelum ini tersalah sasaran oleh CSS lama. */
-  #dashboard-student:not(.hidden) > div:nth-child(2) {
-    grid-area: boss !important;
-    display: block !important;
-    width: 100% !important;
-    max-width: none !important;
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    position: static !important;
-    inset: auto !important;
-    transform: none !important;
-    align-self: start !important;
-    justify-self: stretch !important;
-    pointer-events: none !important;
-    z-index: 100 !important;
-  }
-
-  /* Kad Boss sendiri juga tidak boleh fixed/absolute */
-  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating {
-    position: relative !important;
-    display: flex !important;
-    inset: auto !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    transform: none !important;
-    width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    pointer-events: auto !important;
-    max-height: calc(100dvh - 115px) !important;
-    overflow: hidden auto !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Kurangkan saiz kad supaya muat kemas dalam kolum kanan */
-  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating .p-4 {
-    padding: .55rem !important;
-  }
-
-  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating .text-3xl {
-    font-size: 1.45rem !important;
-    margin-bottom: .15rem !important;
-  }
-
-  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating h3 {
-    font-size: .72rem !important;
-  }
-
-  #dashboard-student:not(.hidden) > div:nth-child(2) #boss-challenge-btn-floating p {
-    font-size: .58rem !important;
-  }
-}
-
-/* Portrait kekal dikunci oleh mobile-landscape-lock. */
-</style>
-<style id="lexiquest-mobile-boss-structural-final">
-/* =========================================================
-   LEXIQUEST — FINAL BOSS STRUCTURAL REBUILD
-   Source: latest index.html supplied by user.
-   Boss is physically located immediately after LTE in the DOM.
-   Desktop keeps the original fixed presentation.
-   Mobile uses normal document flow: LTE -> BOSS -> PROFILE/WALLET.
-   ========================================================= */
-
-/* Desktop: preserve the original floating Boss presentation. */
-@media (min-width: 768px) {
-  .lq-boss-structural-wrapper {
-    position: fixed !important;
-    left: 50% !important;
-    bottom: 1rem !important;
-    transform: translateX(-50%) !important;
-    z-index: 50 !important;
-    width: 92% !important;
-    max-width: 24rem !important;
-    pointer-events: none !important;
-  }
-  .lq-boss-structural-wrapper #boss-challenge-btn-floating {
-    pointer-events: auto !important;
-  }
-}
-
-@media (max-width: 767px) {
-  /* Header becomes a real vertical flow. No absolute/fixed Boss positioning. */
-  #menu-screen > div:first-child {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto !important;
-    grid-template-areas:
-      "lte lte"
-      "boss boss"
-      "profile wallet" !important;
-    align-items: center !important;
-    gap: .45rem .65rem !important;
-    padding: .55rem .65rem !important;
-  }
-
-  #menu-screen > div:first-child #lte-active-widget {
-    grid-area: lte !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    margin: 0 !important;
-    transform: none !important;
-    justify-self: stretch !important;
-  }
-
-  /* This is now the actual Boss container. It is in normal flow. */
-  #menu-screen > div:first-child .lq-boss-structural-wrapper {
-    grid-area: boss !important;
-    position: static !important;
-    inset: auto !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    transform: none !important;
-    width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    display: block !important;
-    justify-self: stretch !important;
-    align-self: stretch !important;
-    pointer-events: none !important;
-    z-index: 30 !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Boss card is a compact bar directly under LTE. */
-  #menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating {
-    position: relative !important;
-    inset: auto !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    transform: none !important;
-    width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    height: auto !important;
-    max-height: 31dvh !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border-radius: 14px !important;
-    overflow: hidden auto !important;
-    pointer-events: auto !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: stretch !important;
-    justify-content: space-between !important;
-  }
-
-  #menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating > .p-4 {
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-    padding: .5rem .65rem !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: .5rem !important;
-    text-align: left !important;
-  }
-
-  #menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating > .p-4 > .text-3xl {
-    flex: 0 0 auto !important;
-    margin: 0 !important;
-    font-size: 1.35rem !important;
-    line-height: 1 !important;
-  }
-
-  #menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating h3 {
-    margin: 0 !important;
-    font-size: .67rem !important;
-    line-height: 1.1 !important;
-    white-space: nowrap !important;
-  }
-
-  #menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating p {
-    margin: .12rem 0 0 !important;
-    padding: 0 !important;
-    font-size: .55rem !important;
-    line-height: 1.15 !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 1 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-  }
-
-  #menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-radar {
-    flex: 0 0 min(34%, 145px) !important;
-    width: auto !important;
-    padding: .45rem .5rem !important;
-    border-top: 0 !important;
-    border-left: 1px solid rgba(49,46,129,.75) !important;
-    align-self: stretch !important;
-    box-sizing: border-box !important;
-  }
-
-  #menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating > .absolute {
-    top: 3px !important;
-    right: 4px !important;
-    font-size: 5px !important;
-    padding: 1px 4px !important;
-  }
-
-  /* Profile and wallet are explicitly the row AFTER Boss. */
-  #menu-screen > div:first-child > div.flex.items-center.gap-3 {
-    grid-area: profile !important;
-    min-width: 0 !important;
-    width: 100% !important;
-  }
-
-  #menu-screen > div:first-child > div.flex.flex-col.items-end.gap-2.flex-shrink-0 {
-    grid-area: wallet !important;
-    min-width: 0 !important;
-    width: auto !important;
-    align-self: center !important;
-  }
-
-  /* Prevent old dashboard-based Boss CSS from creating an empty visual area. */
-  #dashboard-student .lq-boss-structural-wrapper {
-    display: none !important;
-  }
-}
-
-@media (max-width: 767px) and (orientation: landscape) {
-  #menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating {
-    max-height: 30dvh !important;
-  }
-}
-
-@media (max-width: 380px) {
-  #menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating > .p-4 {
-    padding: .4rem .5rem !important;
-  }
-  #menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating h3 {
-    font-size: .6rem !important;
-  }
-  #menu-screen > div:first-child .lq-boss-structural-wrapper #boss-challenge-btn-floating p {
-    font-size: .5rem !important;
-  }
-}
-</style></head>
+</head>
 <body class="bg-cover bg-center bg-fixed bg-no-repeat min-h-screen font-['Poppins']" style="background-image: url('assets/bg.webp');">
 <div class="mt-16 p-2 md:p-6 text-center animate-fade-in max-w-md mx-auto relative flex flex-col justify-center items-center overflow-hidden bg-transparent" id="auth-screen">
 <div class="relative z-10 bg-transparent p-4 w-full">
@@ -1117,43 +764,41 @@
 </div>
 </div>
 <!-- ========================================== -->
-<!-- BOSS CHALLENGE CONTAINER DIPINDAHKAN KE SINI -->
-<!-- ========================================== -->
-<div class="lq-boss-structural-wrapper">
-<!-- KAD UTAMA: Menggabungkan Amaran & Butang Lawan -->
-<div class="hidden pointer-events-auto bg-white/95 backdrop-blur-md rounded-3xl border-2 border-red-500 shadow-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-all flex flex-col relative" id="boss-challenge-btn-floating" onclick="attemptJoinBoss();">
-<!-- Lencana Hari Ini (Bouncing Badge) -->
-<div class="absolute top-3 right-3 bg-yellow-400 text-black text-[9px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md border border-white animate-bounce">
-                        HARI INI!
-                    </div>
-<!-- Bahagian 1: Notifikasi Amaran (Atas) -->
-<div class="p-4 flex flex-col items-center text-center">
-<div class="text-3xl mb-1 animate-pulse">🐉</div>
-<h3 class="font-black text-red-600 text-sm md:text-base uppercase tracking-wider">
-                            WARNING: BOSS APPEARED!
-                        </h3>
-<p class="text-[11px] text-gray-600 font-semibold mt-1 px-2 leading-relaxed" id="floating-boss-name">
-                            Mummy Mufrodat sedang menyerang! Klik untuk menyertai pertempuran!
-                        </p>
+<div class="hidden fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center animate-fade-in px-4" id="lte-info-modal">
+<div class="bg-gradient-to-b from-indigo-950 via-slate-900 to-black border-2 border-amber-400/50 rounded-2xl shadow-[0_0_25px_rgba(147,51,234,0.4)] w-full max-w-sm relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-50"></div>
+<button class="absolute top-3 right-3 text-slate-400 hover:text-red-500 hover:scale-110 transition-all font-black text-xl drop-shadow-md z-10" onclick="closeLteModal()">
+            ✖
+        </button>
+<div class="p-5 flex flex-col items-center text-center mt-2">
+<div class="text-5xl md:text-6xl mb-3 drop-shadow-[0_0_15px_rgba(250,204,21,0.6)] animate-bounce-slow" id="modal-lte-icon">
+                🔥
+            </div>
+<h3 class="text-base md:text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-500 uppercase tracking-wider mb-1 drop-shadow-sm" id="modal-lte-title">
+                Nama Acara
+            </h3>
+<p class="text-[10px] md:text-xs text-slate-300 font-medium mb-4 px-2 leading-relaxed" id="modal-lte-desc">
+                Penerangan tentang acara akan dipaparkan di sini.
+            </p>
+<div class="w-full bg-black/40 border border-white/10 rounded-xl p-3 hidden" id="modal-lte-progress-section">
+<div class="flex justify-between items-center mb-1.5 px-1">
+<span class="text-[9px] md:text-[10px] font-bold text-indigo-300 uppercase tracking-widest">Progres Anda:</span>
+<span class="text-[10px] md:text-xs font-black text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]" id="modal-lte-progress-text">
+                        0 / 15 Hari
+                    </span>
 </div>
-<!-- Bahagian 2: Status HP & Tombol Aksi Ungu (Bawah) -->
-<div class="hidden bg-purple-800 text-white px-4 py-3 border-t border-purple-950 flex flex-col items-center w-full" id="boss-challenge-btn-radar">
-<div class="text-xs font-black flex items-center gap-1.5 uppercase tracking-wider text-purple-100">
-<i class="fas fa-swords text-yellow-400 animate-pulse"></i> ⚔️ MASUK PERTEMPURAN ⚔️
-                        </div>
-<!-- Progress Bar HP Boss -->
-<div class="w-full mt-2">
-<div class="w-full bg-gray-950 rounded-full h-2.5 shadow-inner overflow-hidden p-[1px] border border-purple-600">
-<div class="bg-gradient-to-r from-red-600 via-orange-500 to-red-400 h-full rounded-full transition-all duration-300" id="radar-boss-hp-bar" style="width: 100%;"></div>
+<div class="w-full h-2.5 bg-slate-800 rounded-full border border-slate-700 overflow-hidden shadow-inner">
+<div class="h-full bg-gradient-to-r from-emerald-500 to-green-400 rounded-full transition-all duration-1000 w-0 relative" id="modal-lte-progress-bar">
+<div class="absolute top-0 right-0 bottom-0 left-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
 </div>
-<div class="text-[10px] mt-1 text-purple-200 font-mono tracking-widest text-center font-bold" id="radar-boss-hp-text">
-                                HP: - / -
-                            </div>
 </div>
+<p class="text-[8px] md:text-[9px] text-slate-400 mt-2 font-mono italic">
+                    *Log masuk dan main setiap hari untuk menambah progres.
+                </p>
 </div>
 </div>
 </div>
-<!-- ========================================== -->
+</div>
 <!-- BLOK PROFIL ASAL -->
 <div class="flex items-center gap-3">
 <div class="w-16 h-16 md:w-20 md:h-20 flex flex-shrink-0 items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-300 drop-shadow-[0_8px_8px_rgba(0,0,0,0.3)] text-4xl md:text-5xl" id="dashboard-avatar-container" onclick="openProfile()"></div>
@@ -1646,7 +1291,6 @@
 <script src="achievements.js"></script>
 <script src="shop.js"></script>
 <script src="game.js?v=4"></script>
-<script src="boss.js?v=2"></script>
 <script src="ui.js"></script>
 <script>
 window.showScreen = function(screenId) {
@@ -1656,7 +1300,7 @@ window.showScreen = function(screenId) {
         'shop-screen', 'achievements-screen', 'boss-arena', 'admin-screen',
         'sa-schools-screen', 'sa-students-screen', 'sa-boss-setup-screen', 
         'sa-analysis-screen', 'sch-manage-shop-screen',
-        'challenge-lobby-screen', // <--- 1. TAMBAH INI SUPAYA LOBI PVP BOLEH TUTUP
+        'challenge-lobby-screen',
         'pvp-arena'
     ];
     
@@ -1670,27 +1314,21 @@ window.showScreen = function(screenId) {
     if (targetEl) targetEl.classList.remove('hidden');
 
     // ---> 2. PENYELESAIAN MASALAH "SOALAN KOSONG" <---
-    // Pastikan pop-up subjek ditutup secara paksa apabila masuk ke Arena
     if (typeof closeSubjectModal === 'function') {
         closeSubjectModal();
     }
 
     // ---> 3. CECAIR PENCUCI "RUN AWAY" (PEMBUNUH PALANG []) <---
-    // Jika murid tekan Run Away dan kembali ke menu, kita cuci semua saki-baki!
     if (screenId === 'menu-screen') {
-        // Cuci bekas soalan supaya tiada array [] yang tersangkut
         const container = document.getElementById('question-container');
         if (container) container.innerHTML = ''; 
         
-        // Reset butang 'Check Answer'
         const checkBtn = document.getElementById('check-btn');
         if (checkBtn) checkBtn.classList.add('hidden');
 
-        // Sembunyikan result / final score yang mungkin tergantung
         const finalScore = document.getElementById('final-score');
         if (finalScore) finalScore.classList.add('hidden');
         
-        // Cekik palang hantu kalau dia berani keluar masa Run Away
         const palangHantu = document.getElementById('debug-chat');
         if (palangHantu) palangHantu.remove();
     }
@@ -3133,72 +2771,6 @@ window.showScreen = function(screenId) {
 </div>
 </div>
 </div>
-<div class="hidden animate-fade-in fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" id="boss-arena">
-<div class="glass rounded-3xl p-4 max-w-5xl w-full mx-auto relative flex flex-col md:flex-row gap-4 shadow-[0_0_40px_rgba(0,0,0,0.3)] max-h-[98vh] overflow-y-auto">
-<div class="absolute inset-0 z-40 pointer-events-none opacity-0 transition-opacity duration-200 rounded-3xl" id="arena-flash-overlay"></div>
-<div class="flex-1 relative z-10 flex flex-col">
-<div class="hidden absolute top-1/3 left-1/2 transform -translate-x-1/2 text-red-600 font-black text-6xl drop-shadow-[0_0_10px_rgba(255,255,255,1)] z-50 pointer-events-none" id="damage-indicator">
-                -15
-            </div>
-<div class="flex justify-between items-center mb-3 border-b-2 border-gray-200/50 pb-2">
-<button class="text-gray-600 hover:text-red-600 font-bold bg-white/30 px-3 py-1.5 rounded-xl transition-all text-sm" onclick="leaveBossFight()">
-<i class="fas fa-arrow-left"></i> Lari
-                </button>
-<div class="flex flex-col items-center">
-<h2 class="text-xl font-black text-red-700 animate-pulse hidden md:block leading-none">BOSS BATTLE</h2>
-<div class="text-sm font-bold text-red-600 bg-red-100 px-4 py-0.5 rounded-full mt-1 border border-red-200 shadow-sm flex items-center gap-1">
-<i class="fas fa-clock"></i> <span id="global-battle-timer">05:00</span>
-</div>
-</div>
-<div class="text-green-700 font-bold text-sm bg-white/50 px-3 py-1.5 rounded-xl shadow-sm border border-green-200">
-<i class="fas fa-heart text-red-500 animate-pulse mr-1"></i> HP Anda: <span id="player-hp-text">100</span>
-</div>
-</div>
-<div class="bg-black/5 p-4 rounded-3xl border border-red-200/50 flex flex-col items-center mb-3 shadow-inner relative">
-<div class="absolute top-2 left-0 w-full h-8 flex items-center justify-center z-50 pointer-events-none" id="streak-indicator"></div>
-<h3 class="text-xl font-black text-red-700 mb-1 uppercase tracking-widest drop-shadow-md text-center mt-2" id="boss-name-ui">
-                    Mencari Boss...
-                </h3>
-<div class="relative w-full max-w-sm h-32 md:h-40 mb-3 flex justify-center items-center">
-<img alt="Boss" class="w-full h-full object-contain drop-shadow-[0_10px_10px_rgba(220,38,38,0.3)] animate-bounce-slow transform scale-105" id="battle-boss-avatar" src=""/>
-</div>
-<div class="w-full bg-white h-6 rounded-full overflow-hidden border-2 border-gray-300 relative shadow-md mb-2">
-<div class="bg-gradient-to-r from-red-600 to-red-400 h-full transition-all duration-300 w-full" id="arena-boss-hp-bar"></div>
-<div class="absolute inset-0 flex items-center justify-center text-gray-900 font-black text-xs" id="arena-boss-hp-text">
-                        Memuatkan HP...
-                    </div>
-</div>
-<div class="flex flex-wrap justify-center gap-2 w-full min-h-[24px]" id="active-boosters-container">
-</div>
-</div>
-<div class="bg-white/70 backdrop-blur-md p-4 rounded-3xl shadow-xl border border-white flex flex-col items-center text-center flex-1 justify-center min-h-[150px]">
-<div class="w-full bg-gray-200 h-2 rounded-full mb-2 overflow-hidden shadow-inner">
-<div class="bg-blue-500 h-full w-full" id="boss-timer-bar"></div>
-</div>
-<div class="text-gray-600 font-bold mb-3 text-xs">
-</div>
-<h2 class="text-lg md:text-2xl font-black text-gray-800 mb-4 leading-tight" id="boss-question-text">
-                    Menjana serangan...
-                </h2>
-<div class="w-full max-w-lg" id="boss-answer-zone">
-</div>
-</div>
-</div>
-<div class="w-full md:w-72 bg-white/80 backdrop-blur-md rounded-3xl p-4 border-2 border-orange-300 shadow-[0_0_15px_rgba(251,146,60,0.3)] flex flex-col z-10">
-<h3 class="text-base font-black text-orange-600 mb-3 text-center border-b-2 border-orange-200 pb-2 flex items-center justify-center gap-2">
-<i class="fas fa-fire animate-pulse"></i> LIVE TOP 10 
-            </h3>
-<div class="flex-1 overflow-y-auto flex flex-col gap-2 pr-1 max-h-[200px] md:max-h-[400px]" id="live-ranking-list">
-<div class="text-center text-sm text-gray-500 mt-10 animate-pulse" id="boss-radar-text">Memuatkan radar pertarungan...</div>
-</div>
-</div>
-</div> </div>
-<!-- =========================================================
-     LEXIQUEST MOBILE UI 3.1 HOTFIX
-     1) Jangan paparkan dashboard student semasa LOGIN.
-     2) Naikkan menu utama dan asingkan Boss Challenge.
-     3) LTE modal mempunyai close button yang sentiasa kelihatan.
-     ========================================================= -->
 <style id="lexiquest-mobile-landscape-32">
 /* Telefon: LexiQuest direka untuk landscape. Pada portrait, aplikasi dikunci sementara. */
 #mobile-landscape-lock { display:none; }
@@ -3227,34 +2799,6 @@ window.showScreen = function(screenId) {
 @media (max-width: 767px) and (orientation: landscape) {
   #mobile-landscape-lock { display:none !important; }
 }
-
-@media (max-width: 767px) {
-  /* LTE kekal di header. Boss dipindahkan secara visual tepat di bawah LTE. */
-  #dashboard-student > div:first-child {
-    display:grid !important;
-    grid-template-columns:1fr !important;
-    grid-template-areas:
-      "boss"
-      "menu" !important;
-    gap:.55rem !important;
-    align-items:start !important;
-  }
-  #dashboard-student > div:first-child > div:first-child {
-    grid-area:menu !important;
-    order:2 !important;
-  }
-  #dashboard-student > div:first-child > div:last-child {
-    grid-area:boss !important;
-    order:1 !important;
-    margin:.1rem 0 .35rem !important;
-    padding:0 .7rem !important;
-  }
-  #dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
-    width:100% !important;
-    max-width:100% !important;
-    margin:0 !important;
-  }
-}
 </style>
 <style id="lexiquest-mobile-hotfix-31">
 /* Tailwind .hidden mesti menang terhadap custom responsive display */
@@ -3262,7 +2806,6 @@ window.showScreen = function(screenId) {
 #dashboard-super-admin.hidden,
 #dashboard-school-admin.hidden,
 #menu-screen.hidden,
-#boss-challenge-btn-floating.hidden,
 #lte-info-modal.hidden {
     display: none !important;
 }
@@ -3332,26 +2875,6 @@ window.showScreen = function(screenId) {
 
     #dashboard-student button[onclick*="checkChallengeEligibility"] {
         height: 68px !important;
-    }
-
-    /* Boss Challenge: jelas berasingan daripada menu */
-    #dashboard-student > div:first-child > div:last-child {
-        display: block !important;
-        width: 100% !important;
-        margin: 1.35rem 0 0 !important;
-        padding: 0 .7rem !important;
-        box-sizing: border-box !important;
-        position: static !important;
-    }
-
-    #dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
-        position: relative !important;
-        left: auto !important;
-        bottom: auto !important;
-        transform: none !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
     }
 
     /* LTE modal: butang X besar, kontras dan sentiasa di dalam viewport */
@@ -3452,267 +2975,5 @@ window.showScreen = function(screenId) {
     });
 })();
 </script>
-<style id="lexiquest-mobile-landscape-final-32">
-/* FINAL MOBILE LANDSCAPE LAYOUT */
-@media (max-width: 767px) {
-  /* Boss Challenge sentiasa muncul dahulu dalam kandungan dashboard, tepat selepas header/LTE. */
-  #dashboard-student > div:first-child {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    grid-template-areas: "boss" "menu" !important;
-    gap: .5rem !important;
-    align-items: start !important;
-  }
-  #dashboard-student > div:first-child > div:first-child {
-    grid-area: menu !important;
-    order: 2 !important;
-  }
-  #dashboard-student > div:first-child > div:last-child {
-    grid-area: boss !important;
-    order: 1 !important;
-    margin: 0 0 .25rem !important;
-    padding: 0 .7rem !important;
-  }
-  #dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-  }
-
-  /* Speaker button telah dibuang; jika ada baki markup lama, paksa sembunyi. */
-  body > button[onclick="toggleBgMusic()"] { display: none !important; }
-}
-
-/* Pada landscape telefon, gunakan ruang mendatar dengan lebih baik. */
-@media (max-width: 767px) and (orientation: landscape) {
-  #menu-screen {
-    min-height: 100dvh !important;
-  }
-  #menu-screen > div:first-child {
-    grid-template-columns: minmax(0, 1fr) auto !important;
-    grid-template-areas: "profile wallet" "lte lte" "boss boss" !important;
-  }
-  #dashboard-student {
-    padding: .35rem .7rem .7rem !important;
-  }
-  #dashboard-student > div:first-child > div:first-child {
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-    grid-template-areas: "play ranking medal shop arena" !important;
-    gap: .55rem !important;
-  }
-  #dashboard-student button[onclick*="openSubjectModal"],
-  #dashboard-student button[onclick*="leaderboard-screen"],
-  #dashboard-student button[onclick*="showAchievementsScreen"],
-  #dashboard-student button[onclick*="shop-screen"],
-  #dashboard-student button[onclick*="checkChallengeEligibility"] {
-    height: 68px !important;
-  }
-  #dashboard-student button[onclick*="checkChallengeEligibility"] {
-    height: 68px !important;
-  }
-}
-
-/* =========================================================
-   MOBILE LANDSCAPE 3.3 — BOSS DI PINDAHKAN KE SEBELAH KANAN
-   ========================================================= */
-@media (max-width: 767px) and (orientation: landscape) {
-  /* Kawasan dashboard menjadi 2 zon: MENU | BOSS */
-  #dashboard-student {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: .35rem .7rem .7rem !important;
-    box-sizing: border-box !important;
-  }
-
-  #dashboard-student > div:first-child {
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(220px, 30vw) !important;
-    grid-template-areas: "menu boss" !important;
-    gap: .75rem !important;
-    align-items: start !important;
-  }
-
-  /* Semua butang utama duduk di zon kiri */
-  #dashboard-student > div:first-child > div:first-child {
-    grid-area: menu !important;
-    width: 100% !important;
-    max-width: none !important;
-    display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    grid-template-areas: "play ranking medal shop" "arena arena arena arena" !important;
-    gap: .55rem !important;
-    align-items: center !important;
-  }
-
-  /* Matikan kesan display:contents daripada CSS lama */
-  #dashboard-student > div:first-child > div:first-child > div:first-child,
-  #dashboard-student > div:first-child > div:first-child > div:nth-child(2),
-  #dashboard-student > div:first-child > div:first-child > div:nth-child(3) {
-    display: contents !important;
-  }
-
-  /* Pemetaan button ke grid */
-  #dashboard-student button[onclick*="openSubjectModal"] { grid-area: play !important; }
-  #dashboard-student button[onclick*="leaderboard-screen"] { grid-area: ranking !important; }
-  #dashboard-student button[onclick*="showAchievementsScreen"] { grid-area: medal !important; }
-  #dashboard-student button[onclick*="shop-screen"] { grid-area: shop !important; }
-  #dashboard-student button[onclick*="checkChallengeEligibility"] { grid-area: arena !important; }
-
-  #dashboard-student button[onclick*="openSubjectModal"],
-  #dashboard-student button[onclick*="leaderboard-screen"],
-  #dashboard-student button[onclick*="showAchievementsScreen"],
-  #dashboard-student button[onclick*="shop-screen"],
-  #dashboard-student button[onclick*="checkChallengeEligibility"] {
-    width: 100% !important;
-    height: 66px !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    transform: none !important;
-  }
-
-  /* Boss wrapper menjadi kolum kanan — BUKAN fixed di tengah */
-  #dashboard-student > div:first-child > div:last-child {
-    grid-area: boss !important;
-    position: relative !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    inset: auto !important;
-    transform: none !important;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    align-self: start !important;
-    pointer-events: none !important;
-    z-index: 30 !important;
-  }
-
-  #dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating {
-    position: relative !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    inset: auto !important;
-    transform: none !important;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    pointer-events: auto !important;
-    max-height: calc(100dvh - 120px) !important;
-    overflow-y: auto !important;
-  }
-
-  #dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating .p-4 {
-    padding: .55rem !important;
-  }
-
-  #dashboard-student > div:first-child > div:last-child #boss-challenge-btn-floating .text-3xl {
-    font-size: 1.5rem !important;
-  }
-}
-
-/* =========================================================
-   MOBILE LANDSCAPE 3.3 — FINAL POSITION FIX
-   Dashboard kiri | Boss kanan
-   ========================================================= */
-@media (max-width: 767px) and (orientation: landscape) {
-  #dashboard-student {
-    width: 100% !important;
-    max-width: 100% !important;
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(220px, 30vw) !important;
-    grid-template-areas: "menu boss" !important;
-    gap: .75rem !important;
-    align-items: start !important;
-    padding: .35rem .7rem .7rem !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Kumpulan 5 butang di sebelah kiri */
-  #dashboard-student > div:first-child {
-    grid-area: menu !important;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    grid-template-areas: "play ranking medal shop" "arena arena arena arena" !important;
-    gap: .55rem !important;
-    align-items: center !important;
-  }
-
-  /* Wrapper asal butang menjadi transparent kepada grid */
-  #dashboard-student > div:first-child > div:first-child,
-  #dashboard-student > div:first-child > div:nth-child(2),
-  #dashboard-student > div:first-child > div:nth-child(3) {
-    display: contents !important;
-  }
-
-  #dashboard-student button[onclick*="openSubjectModal"] { grid-area: play !important; }
-  #dashboard-student button[onclick*="leaderboard-screen"] { grid-area: ranking !important; }
-  #dashboard-student button[onclick*="showAchievementsScreen"] { grid-area: medal !important; }
-  #dashboard-student button[onclick*="shop-screen"] { grid-area: shop !important; }
-  #dashboard-student button[onclick*="checkChallengeEligibility"] { grid-area: arena !important; }
-
-  #dashboard-student button[onclick*="openSubjectModal"],
-  #dashboard-student button[onclick*="leaderboard-screen"],
-  #dashboard-student button[onclick*="showAchievementsScreen"],
-  #dashboard-student button[onclick*="shop-screen"],
-  #dashboard-student button[onclick*="checkChallengeEligibility"] {
-    width: 100% !important;
-    height: 66px !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    position: relative !important;
-    transform: none !important;
-  }
-
-  /* Boss ialah direct child kedua dashboard — sebelah kanan */
-  #dashboard-student > div:nth-child(2) {
-    grid-area: boss !important;
-    position: relative !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    inset: auto !important;
-    transform: none !important;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    align-self: start !important;
-    pointer-events: none !important;
-    z-index: 30 !important;
-  }
-
-  #dashboard-student > div:nth-child(2) #boss-challenge-btn-floating {
-    position: relative !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    inset: auto !important;
-    transform: none !important;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    pointer-events: auto !important;
-    max-height: calc(100dvh - 120px) !important;
-    overflow-y: auto !important;
-  }
-}
-</style>
 </body>
 </html>
